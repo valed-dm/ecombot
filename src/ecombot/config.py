@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     PGPORT: int = 5432
 
     LOG_LEVEL: str = "DEBUG"
-    LOG_FILE: Path = OUTPUT_DIR / "authsys.log"
+    LOG_FILE: Path = OUTPUT_DIR / "ecombot.log"
 
 
 settings = Settings()
