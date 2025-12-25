@@ -252,7 +252,22 @@ async def add_category_name(message: Message, state: FSMContext):
     """
     Step 2: Receives the category name and asks for the description.
     """
-    await state.update_data(name=message.text)
+    if not message.text or not message.text.strip():
+        await message.answer(
+            "Please enter a valid category name (cannot be empty).",
+            reply_markup=keyboards.get_cancel_keyboard(),
+        )
+        return
+    
+    category_name = message.text.strip()
+    if len(category_name) > 255:
+        await message.answer(
+            "Category name is too long (maximum 255 characters).",
+            reply_markup=keyboards.get_cancel_keyboard(),
+        )
+        return
+    
+    await state.update_data(name=category_name)
     await message.answer(
         "Great. Now enter a description for the category (or send /skip):",
         reply_markup=keyboards.get_cancel_keyboard(),
