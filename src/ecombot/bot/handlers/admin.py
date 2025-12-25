@@ -454,6 +454,7 @@ async def add_product_stock_step(message: Message, state: FSMContext):
     Step 6: Receives the stock, validates it, and asks for the product image.
     """
     if not message.text:
+        await message.answer("Please send the stock quantity as text, not a photo or sticker.")
         return
 
     try:
