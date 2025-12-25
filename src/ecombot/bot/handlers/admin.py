@@ -1057,16 +1057,20 @@ async def delete_product_final(
     state_data = await state.get_data()
     product_name = state_data.get("product_name", "the product")
 
-    success = await catalog_service.delete_product_by_id(session, callback_data.item_id)
-    if success:
-        await callback_message.edit_text(
-            f"✅ Product '{product_name}' has been deleted."
-        )
-    else:
-        await callback_message.edit_text(
-            f"❌ Error: Could not delete '{product_name}'."
-            f" It may have already been removed."
-        )
+    try:
+        success = await catalog_service.delete_product_by_id(session, callback_data.item_id)
+        if success:
+            await callback_message.edit_text(
+                f"✅ Product '{product_name}' has been deleted."
+            )
+        else:
+            await callback_message.edit_text(
+                f"❌ Error: Could not delete '{product_name}'."
+                f" It may have already been removed."
+            )
+    except Exception as e:
+        log.error(f"Error deleting product {callback_data.item_id}: {e}", exc_info=True)
+        await callback_message.edit_text("❌ An unexpected error occurred while deleting the product.")
 
     await state.clear()
     await query.answer()
