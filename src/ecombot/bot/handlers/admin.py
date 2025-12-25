@@ -710,7 +710,8 @@ async def edit_product_get_new_value(
             parsed_price = Decimal(new_value)
             if parsed_price <= 0:
                 await message.answer(
-                    "Price must be a positive number. Please try again."
+                    "Price must be a positive number. Please try again.",
+                    reply_markup=keyboards.get_cancel_keyboard(),
                 )
                 return
             update_data["price"] = parsed_price
@@ -718,7 +719,10 @@ async def edit_product_get_new_value(
         elif field_to_edit == "stock":
             parsed_stock = int(new_value)
             if parsed_stock < 0:
-                await message.answer("Stock cannot be negative. Please try again.")
+                await message.answer(
+                    "Stock cannot be negative. Please try again.",
+                    reply_markup=keyboards.get_cancel_keyboard(),
+                )
                 return
             update_data["stock"] = parsed_stock
 
@@ -734,7 +738,8 @@ async def edit_product_get_new_value(
 
     except (ValueError, decimal.InvalidOperation):
         await message.answer(
-            f"Invalid format for {field_to_edit}. Please enter a valid number."
+            f"Invalid format for {field_to_edit}. Please enter a valid number.",
+            reply_markup=keyboards.get_cancel_keyboard(),
         )
         return
 
