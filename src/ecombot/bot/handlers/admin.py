@@ -1130,8 +1130,7 @@ async def delete_category_confirm(
         action="delete_category", item_id=category_id
     )
     await callback_message.edit_text(
-        f"⚠️ Are you sure you want to permanently delete"
-        f" the category '{category.name}'?",
+        f"⚠️ Are you sure you want to permanently delete the category '{category.name}'?",
         reply_markup=keyboard,
     )
     await state.set_state(DeleteCategory.confirm_deletion)
