@@ -545,14 +545,20 @@ async def edit_product_start(
     callback_message: Message,
 ):
     """Step 1: Starts the "Edit Product" FSM. Asks for a category."""
-    categories = await catalog_service.get_all_categories(session)
-    keyboard = keyboards.get_catalog_categories_keyboard(categories)
-    await callback_message.edit_text(
-        "Please choose a category to find the product you want to edit:",
-        reply_markup=keyboard,
-    )
-    await state.set_state(EditProduct.choose_category)
-    await query.answer()
+    try:
+        categories = await catalog_service.get_all_categories(session)
+        keyboard = keyboards.get_catalog_categories_keyboard(categories)
+        await callback_message.edit_text(
+            "Please choose a category to find the product you want to edit:",
+            reply_markup=keyboard,
+        )
+        await state.set_state(EditProduct.choose_category)
+        await query.answer()
+    except Exception as e:
+        log.error(f"Failed to load categories for edit product: {e}", exc_info=True)
+        await callback_message.edit_text("❌ An unexpected error occurred while loading categories.")
+        await state.clear()
+        await query.answer()
 
 
 @router.callback_query(
@@ -569,13 +575,19 @@ async def edit_product_choose_category(
     """Step 2: Receives the category, asks for a product."""
     category_id = callback_data.item_id
     await state.update_data(category_id=category_id)
-    products = await catalog_service.get_products_in_category(session, category_id)
-    keyboard = keyboards.get_catalog_products_keyboard(products)
-    await callback_message.edit_text(
-        "Please choose the product you want to edit:", reply_markup=keyboard
-    )
-    await state.set_state(EditProduct.choose_product)
-    await query.answer()
+    try:
+        products = await catalog_service.get_products_in_category(session, category_id)
+        keyboard = keyboards.get_catalog_products_keyboard(products)
+        await callback_message.edit_text(
+            "Please choose the product you want to edit:", reply_markup=keyboard
+        )
+        await state.set_state(EditProduct.choose_product)
+        await query.answer()
+    except Exception as e:
+        log.error(f"Failed to load products for category {category_id}: {e}", exc_info=True)
+        await callback_message.edit_text("❌ An unexpected error occurred while loading products.")
+        await state.clear()
+        await query.answer()
 
 
 @router.callback_query(
@@ -888,23 +900,29 @@ async def smart_back_to_products_handler(
     target_message_id = callback_data.target_message_id
     category_id = callback_data.category_id
 
-    products = await catalog_service.get_products_in_category(session, category_id)
-    keyboard = keyboards.get_catalog_products_keyboard(products)
-    text = "Please choose the product you want to edit:"
-
     try:
-        await bot.edit_message_text(
-            chat_id=callback_message.chat.id,
-            message_id=target_message_id,
-            text=text,
-            reply_markup=keyboard,
-        )
+        products = await catalog_service.get_products_in_category(session, category_id)
+        keyboard = keyboards.get_catalog_products_keyboard(products)
+        text = "Please choose the product you want to edit:"
 
-    except TelegramBadRequest:
-        await callback_message.answer(text, reply_markup=keyboard)
+        try:
+            await bot.edit_message_text(
+                chat_id=callback_message.chat.id,
+                message_id=target_message_id,
+                text=text,
+                reply_markup=keyboard,
+            )
 
-    await state.set_state(EditProduct.choose_product)
-    await query.answer()
+        except TelegramBadRequest:
+            await callback_message.answer(text, reply_markup=keyboard)
+
+        await state.set_state(EditProduct.choose_product)
+        await query.answer()
+    except Exception as e:
+        log.error(f"Failed to load products for back navigation: {e}", exc_info=True)
+        await callback_message.answer("❌ An unexpected error occurred while loading products.")
+        await state.clear()
+        await query.answer()
 
 
 # =============================================================================
@@ -920,13 +938,19 @@ async def delete_product_start(
     callback_message: Message,
 ):
     """Step 1 (Delete): Starts FSM. Asks for a category."""
-    categories = await catalog_service.get_all_categories(session)
-    keyboard = keyboards.get_catalog_categories_keyboard(categories)
-    await callback_message.edit_text(
-        "Choose a category to find the product to delete:", reply_markup=keyboard
-    )
-    await state.set_state(DeleteProduct.choose_category)
-    await query.answer()
+    try:
+        categories = await catalog_service.get_all_categories(session)
+        keyboard = keyboards.get_catalog_categories_keyboard(categories)
+        await callback_message.edit_text(
+            "Choose a category to find the product to delete:", reply_markup=keyboard
+        )
+        await state.set_state(DeleteProduct.choose_category)
+        await query.answer()
+    except Exception as e:
+        log.error(f"Failed to load categories for delete product: {e}", exc_info=True)
+        await callback_message.edit_text("❌ An unexpected error occurred while loading categories.")
+        await state.clear()
+        await query.answer()
 
 
 @router.callback_query(
@@ -941,15 +965,21 @@ async def delete_product_choose_category(
     callback_message: Message,
 ):
     """Step 2 (Delete): Receives category, asks for a product."""
-    products = await catalog_service.get_products_in_category(
-        session, callback_data.item_id
-    )
-    keyboard = keyboards.get_catalog_products_keyboard(products)
-    await callback_message.edit_text(
-        "Choose the product you want to delete:", reply_markup=keyboard
-    )
-    await state.set_state(DeleteProduct.choose_product)
-    await query.answer()
+    try:
+        products = await catalog_service.get_products_in_category(
+            session, callback_data.item_id
+        )
+        keyboard = keyboards.get_catalog_products_keyboard(products)
+        await callback_message.edit_text(
+            "Choose the product you want to delete:", reply_markup=keyboard
+        )
+        await state.set_state(DeleteProduct.choose_product)
+        await query.answer()
+    except Exception as e:
+        log.error(f"Failed to load products for delete: {e}", exc_info=True)
+        await callback_message.edit_text("❌ An unexpected error occurred while loading products.")
+        await state.clear()
+        await query.answer()
 
 
 @router.callback_query(
@@ -1032,13 +1062,19 @@ async def delete_category_start(
     callback_message: Message,
 ):
     """Step 1 (Delete Cat): Starts FSM. Asks for a category."""
-    categories = await catalog_service.get_all_categories(session)
-    keyboard = keyboards.get_catalog_categories_keyboard(categories)
-    await callback_message.edit_text(
-        "Choose the category you want to delete:", reply_markup=keyboard
-    )
-    await state.set_state(DeleteCategory.choose_category)
-    await query.answer()
+    try:
+        categories = await catalog_service.get_all_categories(session)
+        keyboard = keyboards.get_catalog_categories_keyboard(categories)
+        await callback_message.edit_text(
+            "Choose the category you want to delete:", reply_markup=keyboard
+        )
+        await state.set_state(DeleteCategory.choose_category)
+        await query.answer()
+    except Exception as e:
+        log.error(f"Failed to load categories for delete: {e}", exc_info=True)
+        await callback_message.edit_text("❌ An unexpected error occurred while loading categories.")
+        await state.clear()
+        await query.answer()
 
 
 @router.callback_query(
