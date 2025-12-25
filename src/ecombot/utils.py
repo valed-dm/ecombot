@@ -3,7 +3,7 @@ General utility functions for the application.
 """
 
 import datetime
-import random
+import secrets
 import string
 
 
@@ -21,7 +21,7 @@ def generate_order_number() -> str:
         chars = string.ascii_uppercase.replace("O", "").replace(
             "I", ""
         ) + string.digits.replace("0", "").replace("1", "")
-        random_part = "".join(random.choices(chars, k=4))
+        random_part = "".join(secrets.choice(chars) for _ in range(4))
 
         return f"ECO-{date_part}-{random_part}"
     except Exception as e:
