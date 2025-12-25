@@ -71,7 +71,7 @@ def upgrade() -> None:
         op.create_table(
             "users",
             sa.Column("id", sa.Integer(), nullable=False),
-            sa.Column("telegram_id", sa.Integer(), nullable=False),
+            sa.Column("telegram_id", sa.BigInteger(), nullable=False),
             sa.Column("username", sa.String(length=255), nullable=True),
             sa.Column("first_name", sa.String(length=255), nullable=False),
             sa.Column("last_name", sa.String(length=255), nullable=True),
