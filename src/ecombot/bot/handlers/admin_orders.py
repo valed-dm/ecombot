@@ -52,23 +52,26 @@ async def send_order_details_view(message: Message, order: OrderDTO):
     """
     Generates and sends the detailed view for a single order for an admin.
     """
-    text = (
-        f"<b>Order Details: {order.order_number}</b>\n\n"
-        f"<b>Status:</b> <i>{order.status.capitalize()}</i>\n"
-        f"<b>Placed on:</b> {order.created_at.strftime('%Y-%m-%d %H:%M')}\n\n"
-        f"<b>Customer:</b> {order.contact_name}\n"
-        f"<b>Phone:</b> <code>{order.phone}</code>\n"
-        f"<b>Address:</b> <code>{order.address}</code>\n\n"
+    text_parts = [
+        f"<b>Order Details: {order.order_number}</b>\n\n",
+        f"<b>Status:</b> <i>{order.status.capitalize()}</i>\n",
+        f"<b>Placed on:</b> {order.created_at.strftime('%Y-%m-%d %H:%M')}\n\n",
+        f"<b>Customer:</b> {order.contact_name}\n",
+        f"<b>Phone:</b> <code>{order.phone}</code>\n",
+        f"<b>Address:</b> <code>{order.address}</code>\n\n",
         "<b>Items:</b>\n"
-    )
+    ]
+    
     for item in order.items:
         item_total = item.price * item.quantity
-        text += (
-            f"  - <b>{item.product.name}</b>\n"
-            f"    <code>{item.quantity} x ${item.price:.2f}"
+        text_parts.extend([
+            f"  - <b>{item.product.name}</b>\n",
+            f"    <code>{item.quantity} x ${item.price:.2f}",
             f" = ${item_total:.2f}</code>\n"
-        )
-    text += f"\n<b>Total: ${order.total_price:.2f}</b>"
+        ])
+    
+    text_parts.append(f"\n<b>Total: ${order.total_price:.2f}</b>")
+    text = "".join(text_parts)
 
     keyboard = keyboards.get_admin_order_details_keyboard(order)
     await message.edit_text(text, reply_markup=keyboard)
