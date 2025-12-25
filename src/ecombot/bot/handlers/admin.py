@@ -197,8 +197,13 @@ async def send_main_admin_panel(message: Message):
     text = "Welcome to the Admin Panel! Please choose an action:"
     try:
         await message.edit_text(text, reply_markup=keyboard)
-    except TelegramBadRequest:
-        await message.answer(text, reply_markup=keyboard)
+    except TelegramBadRequest as e:
+        log.warning(f"Failed to edit admin panel message: {e}")
+        try:
+            await message.answer(text, reply_markup=keyboard)
+        except Exception as fallback_e:
+            log.error(f"Failed to send fallback admin panel message: {fallback_e}")
+            raise
 
 
 # =============================================================================
