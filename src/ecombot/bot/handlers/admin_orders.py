@@ -160,7 +160,7 @@ async def admin_view_order_details_handler(
     """
     order = None
     order_id = callback_data.item_id
-    if order_id:
+    if order_id is not None:
         order = await crud.get_order(session, order_id)
 
     if not order:
@@ -187,7 +187,13 @@ async def change_order_status_handler(
         raise InvalidQueryDataError("Query data cannot be None")
 
     _, order_id_str, new_status_value = query.data.split(":")
-    order_id = int(order_id_str)
+    
+    try:
+        order_id = int(order_id_str)
+    except ValueError:
+        await query.answer("Invalid order ID format.", show_alert=True)
+        return
+        
     new_status = OrderStatus(new_status_value)
 
     try:
@@ -209,3 +215,11 @@ async def change_order_status_handler(
         await query.answer(
             "An error occurred while updating the status.", show_alert=True
         )
+        try:
+            # Attempt to refresh the view even if status update failed
+            order = await crud.get_order(session, order_id)
+            if order:
+                order_dto = OrderDTO.model_validate(order)
+                await send_order_details_view(callback_message, order_dto)
+        except Exception as refresh_e:
+            logger.error(f"Failed to refresh order view for order {order_id}: {refresh_e}")
