@@ -111,6 +111,8 @@ async def cancel_fsm_handler(
     if current_state is None:
         if isinstance(event, CallbackQuery):
             await event.answer("You are not in an active process.", show_alert=True)
+        elif isinstance(event, Message):
+            await event.answer("You are not in an active process.")
         return
 
     await state.clear()
