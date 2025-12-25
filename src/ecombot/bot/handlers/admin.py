@@ -373,7 +373,22 @@ async def add_product_name(message: Message, state: FSMContext):
     """
     Step 3: Receives the product name and asks for the description.
     """
-    await state.update_data(name=message.text)
+    if not message.text or not message.text.strip():
+        await message.answer(
+            "Please enter a valid product name (cannot be empty).",
+            reply_markup=keyboards.get_cancel_keyboard(),
+        )
+        return
+    
+    product_name = message.text.strip()
+    if len(product_name) > 255:
+        await message.answer(
+            "Product name is too long (maximum 255 characters).",
+            reply_markup=keyboards.get_cancel_keyboard(),
+        )
+        return
+    
+    await state.update_data(name=product_name)
     await message.answer(
         "Got it. Now, please provide a description for the product.",
         reply_markup=keyboards.get_cancel_keyboard(),
@@ -386,7 +401,22 @@ async def add_product_description_step(message: Message, state: FSMContext):
     """
     Step 4: Receives the product description and asks for the price.
     """
-    await state.update_data(description=message.text)
+    if not message.text or not message.text.strip():
+        await message.answer(
+            "Please enter a valid product description (cannot be empty).",
+            reply_markup=keyboards.get_cancel_keyboard(),
+        )
+        return
+    
+    product_description = message.text.strip()
+    if len(product_description) > 1000:
+        await message.answer(
+            "Product description is too long (maximum 1000 characters).",
+            reply_markup=keyboards.get_cancel_keyboard(),
+        )
+        return
+    
+    await state.update_data(description=product_description)
     await message.answer(
         "Excellent. What is the price? (e.g., 25.99)",
         reply_markup=keyboards.get_cancel_keyboard(),
