@@ -1012,22 +1012,28 @@ async def delete_product_confirm(
 ):
     """Step 3 (Delete): Receives product, asks for confirmation."""
     product_id = callback_data.item_id
-    product = await catalog_service.get_single_product_details(session, product_id)
-    if not product:
-        await callback_message.edit_text("Error: Product not found.")
-        await state.clear()
-        return
+    try:
+        product = await catalog_service.get_single_product_details(session, product_id)
+        if not product:
+            await callback_message.edit_text("Error: Product not found.")
+            await state.clear()
+            return
 
-    await state.update_data(product_id=product_id, product_name=product.name)
-    keyboard = keyboards.get_delete_confirmation_keyboard(
-        action="delete_product", item_id=product_id
-    )
-    await callback_message.edit_text(
-        f"⚠️ Are you sure you want to permanently delete '{product.name}'?",
-        reply_markup=keyboard,
-    )
-    await state.set_state(DeleteProduct.confirm_deletion)
-    await query.answer()
+        await state.update_data(product_id=product_id, product_name=product.name)
+        keyboard = keyboards.get_delete_confirmation_keyboard(
+            action="delete_product", item_id=product_id
+        )
+        await callback_message.edit_text(
+            f"⚠️ Are you sure you want to permanently delete '{product.name}'?",
+            reply_markup=keyboard,
+        )
+        await state.set_state(DeleteProduct.confirm_deletion)
+        await query.answer()
+    except Exception as e:
+        log.error(f"Failed to load product details for deletion: {e}", exc_info=True)
+        await callback_message.edit_text("❌ An unexpected error occurred while loading product details.")
+        await state.clear()
+        await query.answer()
 
 
 @router.callback_query(
