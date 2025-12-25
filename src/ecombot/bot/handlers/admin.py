@@ -294,7 +294,8 @@ async def add_category_description(
     except CategoryAlreadyExistsError as e:
         await message.answer(f"⚠️ Error: {e}")
     except Exception as e:
-        await message.answer(f"❌ An unexpected error occurred: {e}")
+        log.error(f"Failed to create category: {e}", exc_info=True)
+        await message.answer("❌ An unexpected error occurred while creating the category.")
     finally:
         await state.clear()
 
