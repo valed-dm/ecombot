@@ -429,9 +429,6 @@ async def add_product_price_step(message: Message, state: FSMContext):
     """
     Step 5: Receives the price, validates it, and asks for the stock quantity.
     """
-    if not message.text:
-        return
-
     try:
         price = Decimal(message.text)
         if price <= 0:
