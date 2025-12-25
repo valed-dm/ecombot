@@ -313,6 +313,19 @@ async def add_product_start(
     Step 1: Starts the "Add Product" FSM. Asks the admin to choose a category.
     """
     categories = await catalog_service.get_all_categories(session)
+    
+    if not categories:
+        text = (
+            "❌ No categories found. You need to create at least one category "
+            "before adding products. Please use 'Add Category' first."
+        )
+        if isinstance(event, Message):
+            await event.answer(text)
+        elif isinstance(event, CallbackQuery) and isinstance(event.message, Message):
+            await event.message.edit_text(text)
+            await event.answer()
+        return
+    
     keyboard = keyboards.get_catalog_categories_keyboard(categories)
     text = "Please choose the category for the new product:"
 
