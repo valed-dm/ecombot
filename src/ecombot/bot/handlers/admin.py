@@ -764,12 +764,19 @@ async def edit_product_get_new_photo(
             category_id=category_id,
         )
 
-        await bot.edit_message_text(
-            chat_id=message.chat.id,
-            message_id=menu_message_id,
-            text=get_product_edit_menu_text(updated_product),
-            reply_markup=updated_keyboard,
-        )
+        try:
+            await bot.edit_message_text(
+                chat_id=message.chat.id,
+                message_id=menu_message_id,
+                text=get_product_edit_menu_text(updated_product),
+                reply_markup=updated_keyboard,
+            )
+        except TelegramBadRequest as e:
+            log.warning(f"Failed to edit message {menu_message_id}: {e}")
+            await message.answer(
+                get_product_edit_menu_text(updated_product),
+                reply_markup=updated_keyboard
+            )
 
         await state.set_state(EditProduct.choose_field)
 
