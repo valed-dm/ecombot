@@ -798,6 +798,47 @@ async def edit_product_change_photo_start(
     await query.answer()
 
 
+async def _process_photo_upload(bot: Bot, photo: PhotoSize, product_id: int) -> str | None:
+    """
+    Helper function to process photo upload for product editing.
+    Returns the path to the saved image or None if processing fails.
+    """
+    try:
+        settings.PRODUCT_IMAGE_DIR.mkdir(parents=True, exist_ok=True)
+        unique_filename = f"{uuid.uuid4()}.jpg"
+        destination = settings.PRODUCT_IMAGE_DIR / unique_filename
+        await bot.download(file=photo.file_id, destination=destination)
+        log.info(f"Successfully downloaded new photo to {destination}")
+        return str(destination)
+    except Exception as e:
+        log.error(f"Failed to download photo for product {product_id}: {e}", exc_info=True)
+        return None
+
+
+async def _update_product_menu(bot: Bot, message: Message, updated_product: AdminProductDTO, menu_message_id: int) -> None:
+    """
+    Helper function to update the product edit menu after successful changes.
+    """
+    updated_keyboard = keyboards.get_edit_product_menu_keyboard(
+        product_id=updated_product.id,
+        product_list_message_id=menu_message_id,
+        category_id=updated_product.category.id,
+    )
+    try:
+        await bot.edit_message_text(
+            chat_id=message.chat.id,
+            message_id=menu_message_id,
+            text=get_product_edit_menu_text(updated_product),
+            reply_markup=updated_keyboard,
+        )
+    except TelegramBadRequest as e:
+        log.warning(f"Failed to edit message {menu_message_id}: {e}")
+        await message.answer(
+            get_product_edit_menu_text(updated_product),
+            reply_markup=updated_keyboard
+        )
+
+
 @router.message(EditProduct.get_new_image, or_f(F.photo, Command("remove")))
 async def edit_product_get_new_photo(
     message: Message, state: FSMContext, session: AsyncSession, bot: Bot
@@ -822,23 +863,8 @@ async def edit_product_get_new_photo(
     new_image_path: str | None = None
 
     if message.photo:
-        try:
-            photo: PhotoSize = message.photo[-1]
-            settings.PRODUCT_IMAGE_DIR.mkdir(parents=True, exist_ok=True)
-
-            unique_filename = f"{uuid.uuid4()}.jpg"
-            destination = settings.PRODUCT_IMAGE_DIR / unique_filename
-
-            # This is the most likely point of failure.
-            await bot.download(file=photo.file_id, destination=destination)
-
-            new_image_path = str(destination)
-            log.info(f"Successfully downloaded new photo to {new_image_path}")
-
-        except Exception as e:
-            log.error(
-                f"Failed to download photo for product {product_id}: {e}", exc_info=True
-            )
+        new_image_path = await _process_photo_upload(bot, message.photo[-1], product_id)
+        if not new_image_path:
             await message.answer(
                 "❌ Sorry, there was an error downloading the photo."
                 " Please try a different image or check the logs."
@@ -864,36 +890,11 @@ async def edit_product_get_new_photo(
                 log.error(f"Error deleting old image file {old_image_path}: {e}")
 
         await message.answer("✅ Product photo updated successfully!")
-
-        category_id = updated_product.category.id
-
-        updated_keyboard = keyboards.get_edit_product_menu_keyboard(
-            product_id=updated_product.id,
-            product_list_message_id=menu_message_id,
-            category_id=category_id,
-        )
-
-        try:
-            await bot.edit_message_text(
-                chat_id=message.chat.id,
-                message_id=menu_message_id,
-                text=get_product_edit_menu_text(updated_product),
-                reply_markup=updated_keyboard,
-            )
-        except TelegramBadRequest as e:
-            log.warning(f"Failed to edit message {menu_message_id}: {e}")
-            await message.answer(
-                get_product_edit_menu_text(updated_product),
-                reply_markup=updated_keyboard
-            )
-
+        await _update_product_menu(bot, message, updated_product, menu_message_id)
         await state.set_state(EditProduct.choose_field)
 
     except Exception as e:
-        log.error(
-            f"Failed to process new photo for product {product_id}: {e}",
-            exc_info=True,
-        )
+        log.error(f"Failed to process new photo for product {product_id}: {e}", exc_info=True)
         await message.answer("❌ An unexpected error occurred. Please check the logs.")
         await state.clear()
 
