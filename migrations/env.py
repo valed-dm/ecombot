@@ -17,7 +17,10 @@ raw_db_url = config.get_main_option("sqlalchemy.url")
 if raw_db_url is None:
     raise ValueError("The 'sqlalchemy.url' option is not set in your alembic.ini file.")
 
-expanded_db_url = os.path.expandvars(raw_db_url)
+try:
+    expanded_db_url = os.path.expandvars(raw_db_url)
+except Exception as e:
+    raise ValueError(f"Failed to expand environment variables in database URL: {e}") from e
 config.set_main_option("sqlalchemy.url", expanded_db_url)
 
 
