@@ -511,6 +511,12 @@ async def add_product_get_image(
         await message.answer(f"✅ Product '{new_product.name}' created successfully!")
 
     except Exception as e:
+        if image_path:
+            try:
+                Path(image_path).unlink()
+                log.info(f"Cleaned up orphaned image file: {image_path}")
+            except OSError as cleanup_e:
+                log.error(f"Failed to cleanup image file {image_path}: {cleanup_e}")
         admin_id: str = "Unknown"
         if message.from_user:
             admin_id = str(message.from_user.id)
