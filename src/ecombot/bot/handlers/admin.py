@@ -666,16 +666,21 @@ async def edit_product_choose_field_text(
     with suppress(TelegramBadRequest):
         await callback_message.delete()
 
-    new_prompt_message = await bot.send_message(
-        chat_id=callback_message.chat.id,
-        text=prompt_text,
-        reply_markup=keyboards.get_cancel_keyboard(),
-    )
+    try:
+        new_prompt_message = await bot.send_message(
+            chat_id=callback_message.chat.id,
+            text=prompt_text,
+            reply_markup=keyboards.get_cancel_keyboard(),
+        )
 
-    await state.update_data(menu_message_id=new_prompt_message.message_id)
-
-    await state.set_state(EditProduct.get_new_value)
-    await query.answer()
+        await state.update_data(menu_message_id=new_prompt_message.message_id)
+        await state.set_state(EditProduct.get_new_value)
+        await query.answer()
+    except TelegramBadRequest as e:
+        log.error(f"Failed to send prompt message: {e}", exc_info=True)
+        await callback_message.answer("❌ Failed to send prompt message. Please try again.")
+        await state.clear()
+        await query.answer()
 
 
 @router.message(EditProduct.get_new_value, F.text)
