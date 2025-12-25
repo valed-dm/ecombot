@@ -622,18 +622,24 @@ async def edit_product_choose_product(
     product_list_message_id = callback_message.message_id
     await state.update_data(category_id=product.category.id)
 
-    new_menu_message = await send_product_edit_menu(
-        bot=bot,
-        chat_id=callback_message.chat.id,
-        message_to_replace=callback_message,
-        product=product,
-        product_list_message_id=product_list_message_id,
-        category_id=product.category.id,
-    )
+    try:
+        new_menu_message = await send_product_edit_menu(
+            bot=bot,
+            chat_id=callback_message.chat.id,
+            message_to_replace=callback_message,
+            product=product,
+            product_list_message_id=product_list_message_id,
+            category_id=product.category.id,
+        )
 
-    await state.update_data(menu_message_id=new_menu_message.message_id)
-    await state.set_state(EditProduct.choose_field)
-    await query.answer()
+        await state.update_data(menu_message_id=new_menu_message.message_id)
+        await state.set_state(EditProduct.choose_field)
+        await query.answer()
+    except Exception as e:
+        log.error(f"Failed to send product edit menu: {e}", exc_info=True)
+        await callback_message.answer("❌ An unexpected error occurred while loading the edit menu.")
+        await state.clear()
+        await query.answer()
 
 
 @router.callback_query(
