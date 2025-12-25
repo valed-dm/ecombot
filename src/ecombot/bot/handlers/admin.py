@@ -118,7 +118,11 @@ async def cancel_fsm_handler(
     if isinstance(event, Message):
         await event.answer("Action cancelled. You have exited the current process.")
     elif isinstance(event, CallbackQuery) and isinstance(event.message, Message):
-        await event.message.edit_text("Action cancelled.")
+        try:
+            await event.message.edit_text("Action cancelled.")
+        except TelegramBadRequest as e:
+            log.warning(f"Failed to edit cancellation message: {e}")
+            await event.message.answer("Action cancelled.")
         await event.answer()
 
 
