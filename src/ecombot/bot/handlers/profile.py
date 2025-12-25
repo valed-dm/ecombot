@@ -2,6 +2,8 @@
 Handlers for the user profile and address management.
 """
 
+from html import escape
+
 from aiogram import F
 from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest
@@ -51,13 +53,13 @@ async def profile_handler(message: Message, session: AsyncSession, db_user: User
 
     text = (
         "<b>Your Profile</b>\n\n"
-        f"<b>Name:</b> {user_profile.first_name}\n"
-        f"<b>Phone:</b> {user_profile.phone or 'Not set'}\n"
-        f"<b>Email:</b> {user_profile.email or 'Not set'}\n\n"
+        f"<b>Name:</b> {escape(user_profile.first_name)}\n"
+        f"<b>Phone:</b> {escape(user_profile.phone) if user_profile.phone else 'Not set'}\n"
+        f"<b>Email:</b> {escape(user_profile.email) if user_profile.email else 'Not set'}\n\n"
         "<b>Default Address:</b>\n"
     )
     if default_address:
-        text += f"<code>{default_address.full_address}</code>"
+        text += f"<code>{escape(default_address.full_address)}</code>"
     else:
         text += "<i>Not set. You can set one in 'Manage Addresses'.</i>"
 
@@ -203,21 +205,30 @@ async def send_address_management_view(
     """
     Sends or edits a message to show the address management view.
     """
-    addresses = await user_service.get_all_user_addresses(session, db_user.id)
-    keyboard = keyboards.get_address_management_keyboard(addresses)
-    text = "<b>Your Delivery Addresses</b>\n\n"
-    if not addresses:
-        text += "You have no saved addresses."
-    else:
-        for addr in addresses:
-            text += (
-                f"📍 <b>{addr.address_label}</b>:\n<code>{addr.full_address}</code>\n\n"
-            )
-
     try:
-        await message.edit_text(text, reply_markup=keyboard)
-    except TelegramBadRequest:
-        await message.answer(text, reply_markup=keyboard)
+        addresses = await user_service.get_all_user_addresses(session, db_user.id)
+        keyboard = keyboards.get_address_management_keyboard(addresses)
+        text = "<b>Your Delivery Addresses</b>\n\n"
+        if not addresses:
+            text += "You have no saved addresses."
+        else:
+            for addr in addresses:
+                text += (
+                    f"📍 <b>{escape(addr.address_label)}</b>:\n<code>{escape(addr.full_address)}</code>\n\n"
+                )
+
+        try:
+            await message.edit_text(text, reply_markup=keyboard)
+        except TelegramBadRequest as e:
+            log.warning(f"Failed to edit message for user {db_user.id}: {e}")
+            try:
+                await message.answer(text, reply_markup=keyboard)
+            except Exception as fallback_e:
+                log.error(f"Failed to send fallback message for user {db_user.id}: {fallback_e}")
+                raise
+    except Exception as e:
+        log.error(f"Failed to load addresses for user {db_user.id}: {e}", exc_info=True)
+        await message.answer("❌ An error occurred while loading your addresses.")
 
 
 # =============================================================================
