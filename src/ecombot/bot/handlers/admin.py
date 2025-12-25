@@ -353,10 +353,17 @@ async def add_product_choose_category(
     Step 2: Receives the category and asks for the product name.
     """
     await state.update_data(category_id=callback_data.item_id)
-    await callback_message.edit_text(
-        "Great. Now, what is the name of the product?",
-        reply_markup=keyboards.get_cancel_keyboard(),
-    )
+    try:
+        await callback_message.edit_text(
+            "Great. Now, what is the name of the product?",
+            reply_markup=keyboards.get_cancel_keyboard(),
+        )
+    except TelegramBadRequest as e:
+        log.warning(f"Failed to edit message: {e}")
+        await callback_message.answer(
+            "Great. Now, what is the name of the product?",
+            reply_markup=keyboards.get_cancel_keyboard(),
+        )
     await state.set_state(AddProduct.name)
     await query.answer()
 
