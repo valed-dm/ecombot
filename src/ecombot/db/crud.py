@@ -396,8 +396,11 @@ async def set_cart_item_quantity(
 
 async def clear_cart(session: AsyncSession, cart: Cart) -> None:
     """Removes all items from a user's cart."""
-    for item in cart.items:
-        await session.delete(item)
+    from sqlalchemy import delete
+    
+    stmt = delete(CartItem).where(CartItem.cart_id == cart.id)
+    await session.execute(stmt)
+    cart.items = []  # Keep object state in sync with database
     await session.flush()
 
 
