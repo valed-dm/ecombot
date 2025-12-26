@@ -526,11 +526,19 @@ async def update_order_status(
     new_status: OrderStatus,
 ) -> Optional[Order]:
     """Updates the status of a specific order."""
-    order = await get_order(session, order_id)
-    if order:
-        order.status = new_status
-        await session.flush()
-    return order
+    stmt = (
+        update(Order)
+        .where(Order.id == order_id)
+        .values(status=new_status)
+        .returning(Order.id)
+    )
+    result = await session.execute(stmt)
+    updated_id = result.scalar_one_or_none()
+    await session.flush()
+    
+    if updated_id:
+        return await get_order(session, updated_id)
+    return None
 
 
 async def increase_product_stock(
