@@ -90,9 +90,11 @@ class UserMiddleware(BaseMiddleware):
         if not telegram_user:
             return await handler(event, data)
 
-        session: AsyncSession = data[
-            "session"
-        ]  # Get session from the previous middleware
+        session: AsyncSession | None = data.get("session")
+        if not session:
+            # If session is not available, skip user middleware
+            return await handler(event, data)
+        
         db_user: User = await crud.get_or_create_user(session, telegram_user)
 
         # Inject the user object into the context
