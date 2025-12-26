@@ -170,12 +170,12 @@ async def get_order_details(
     return OrderDTO.model_validate(order)
 
 
-async def list_user_orders(session: AsyncSession, user_pk_id: int) -> List[OrderDTO]:
+async def list_user_orders(session: AsyncSession, user_id: int) -> List[OrderDTO]:
     """
     Fetches a list of all orders placed by a specific user.
     Note: This will require a new CRUD function.
     """
-    db_orders = await crud.get_orders_by_user_pk(session, user_pk_id)
+    db_orders = await crud.get_orders_by_user_pk(session, user_id)
     return [OrderDTO.model_validate(order) for order in db_orders]
 
 

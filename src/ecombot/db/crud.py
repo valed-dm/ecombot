@@ -479,7 +479,7 @@ async def get_order(session: AsyncSession, order_id: int) -> Optional[Order]:
 
 async def get_orders_by_user_pk(
     session: AsyncSession,
-    user_pk_id: int,
+    user_id: int,
 ) -> Sequence[Order]:
     """
     Fetches all of a user's orders by their user primary key,
@@ -487,7 +487,7 @@ async def get_orders_by_user_pk(
     """
     stmt = (
         select(Order)
-        .where(Order.user_id == user_pk_id)
+        .where(Order.user_id == user_id)
         .options(
             selectinload(Order.user),
             selectinload(Order.items)
