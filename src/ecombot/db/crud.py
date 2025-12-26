@@ -374,7 +374,7 @@ async def set_cart_item_quantity(
     session: AsyncSession,
     cart_item_id: int,
     new_quantity: int,
-) -> type[CartItem] | None:
+) -> CartItem | None:
     """
     Sets the quantity of a specific cart item.
     If the quantity is 0 or less, the item is deleted.
