@@ -133,7 +133,7 @@ async def delete_delivery_address(
     """
     address = await session.get(DeliveryAddress, address_id)
     if address and address.user_id == user_id:
-        await session.delete(address)
+        session.delete(address)
         await session.flush()
         return True
     return False
@@ -199,7 +199,7 @@ async def delete_category(session: AsyncSession, category_id: int) -> bool:
     """Deletes a category from the database by its ID."""
     category = await session.get(Category, category_id)
     if category:
-        await session.delete(category)
+        session.delete(category)
         await session.flush()
         return True
     return False
@@ -284,7 +284,7 @@ async def delete_product(session: AsyncSession, product_id: int) -> bool:
     """Deletes a product from the database by its ID."""
     product = await get_product(session, product_id)
     if product:
-        await session.delete(product)
+        session.delete(product)
         await session.flush()
         return True
     return False
