@@ -240,7 +240,11 @@ async def get_address_handler(
     message: Message, session: AsyncSession, state: FSMContext, db_user: User
 ):
     """Slow Path Step 3: Receives address, shows final confirmation."""
-    await state.update_data(address=message.text)
+    if not message.text or not message.text.strip():
+        await message.answer("Please enter a valid shipping address (cannot be empty).")
+        return
+    
+    await state.update_data(address=message.text.strip())
     user_data = await state.get_data()
     cart_data = await cart_service.get_user_cart(session, db_user.telegram_id)
 
