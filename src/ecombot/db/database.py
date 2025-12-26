@@ -5,6 +5,7 @@ This module sets up the asynchronous engine and session factory for the applicat
 following the standard SQLAlchemy 2.0 async pattern.
 """
 
+from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio.session import AsyncSession
@@ -13,9 +14,13 @@ from sqlalchemy.orm import declarative_base
 from ecombot.config import settings
 
 
-DATABASE_URL = (
-    f"postgresql+asyncpg://{settings.PGUSER}:{settings.PGPASSWORD}@"
-    f"{settings.PGHOST}:{settings.PGPORT}/{settings.PGDATABASE}"
+DATABASE_URL = URL.create(
+    drivername="postgresql+asyncpg",
+    username=settings.PGUSER,
+    password=settings.PGPASSWORD,
+    host=settings.PGHOST,
+    port=settings.PGPORT,
+    database=settings.PGDATABASE,
 )
 
 async_engine = create_async_engine(DATABASE_URL, echo=False)
