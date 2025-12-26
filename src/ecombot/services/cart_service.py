@@ -91,12 +91,10 @@ async def alter_item_quantity(
         new_quantity -= 1
     elif action == "remove":
         new_quantity = 0
-    try:
-        await crud.set_cart_item_quantity(session, cart_item_id, new_quantity)
-        fresh_cart = await crud.get_or_create_cart(session, user_id)
-        return CartDTO.model_validate(fresh_cart)
-    except Exception:
-        raise
+
+    await crud.set_cart_item_quantity(session, cart_item_id, new_quantity)
+    fresh_cart = await crud.get_or_create_cart(session, user_id)
+    return CartDTO.model_validate(fresh_cart)
 
 
 async def clear_user_cart(session: AsyncSession, user_id: int) -> None:
