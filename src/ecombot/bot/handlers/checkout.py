@@ -277,33 +277,35 @@ async def slow_path_confirm_handler(
     user_data = await state.get_data()
 
     try:
-        # --- Save user info for next time ---
-        # 1. Update their profile (e.g., phone)
-        await user_service.update_profile_details(
-            session, db_user.id, {"phone": user_data["phone"]}
-        )
-        # 2. Add the new address and set it as default
-        new_address_model = await user_service.add_new_address(
-            session, db_user.id, "Default", user_data["address"]
-        )
-        await user_service.set_user_default_address(
-            session,
-            db_user.id,
-            new_address_model.id,
-        )
-
-        refreshed_user_obj = await session.get(User, db_user.id)
-        if not isinstance(refreshed_user_obj, User):
-            raise OrderPlacementError(
-                "Could not retrieve your user profile after saving."
-                " Please contact support."
+        async with session.begin():
+            # --- Save user info for next time ---
+            # 1. Update their profile (e.g., phone)
+            await user_service.update_profile_details(
+                session, db_user.id, {"phone": user_data["phone"]}
+            )
+            # 2. Add the new address and set it as default
+            new_address_model = await user_service.add_new_address(
+                session, db_user.id, "Default", user_data["address"]
+            )
+            await user_service.set_user_default_address(
+                session,
+                db_user.id,
+                new_address_model.id,
             )
 
-        order = await order_service.place_order(
-            session=session,
-            db_user=refreshed_user_obj,
-            delivery_address=new_address_model,
-        )
+            refreshed_user_obj = await session.get(User, db_user.id)
+            if not isinstance(refreshed_user_obj, User):
+                raise OrderPlacementError(
+                    "Could not retrieve your user profile after saving."
+                    " Please contact support."
+                )
+
+            order = await order_service.place_order(
+                session=session,
+                db_user=refreshed_user_obj,
+                delivery_address=new_address_model,
+            )
+        
         success_text = (
             f"✅ <b>Thank you! Your order has been placed successfully!</b>\n\n"
             f"<b>Order Number:</b> <code>{order.order_number}</code>\n"
