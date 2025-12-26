@@ -389,7 +389,7 @@ async def set_cart_item_quantity(
         return cart_item
     else:
         # If quantity is 0 or less, delete the item.
-        await session.delete(cart_item)
+        session.delete(cart_item)
         await session.flush()
         return None
 
