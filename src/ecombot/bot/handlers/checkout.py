@@ -246,8 +246,8 @@ async def get_address_handler(
 
     confirmation_text = (
         "<b>Please confirm your details:</b>\n\n"
-        f"<b>Contact:</b> {user_data['name']}, {user_data['phone']}\n"
-        f"<b>Shipping to:</b>\n<code>{user_data['address']}</code>\n\n"
+        f"<b>Contact:</b> {escape(user_data['name'])}, {escape(user_data['phone'])}\n"
+        f"<b>Shipping to:</b>\n<code>{escape(user_data['address'])}</code>\n\n"
         f"<b>Total Price: ${cart_data.total_price:.2f}</b>"
     )
     await message.answer(
