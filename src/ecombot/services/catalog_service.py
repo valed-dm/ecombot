@@ -64,10 +64,8 @@ async def add_new_category(
 
     try:
         category = await crud.create_category(session, name, description)
-        await session.commit()
         return CategoryDTO.model_validate(category)
     except Exception:
-        await session.rollback()
         raise
 
 
@@ -85,11 +83,8 @@ async def delete_category_by_id(session: AsyncSession, category_id: int) -> bool
 
     try:
         success = await crud.delete_category(session, category_id)
-        if success:
-            await session.commit()
         return success
     except Exception:
-        await session.rollback()
         raise
 
 
@@ -143,7 +138,6 @@ async def add_new_product(
             category_id=category_id,
             image_url=image_url,
         )
-        await session.commit()
 
         refreshed_product = await crud.get_product(session, product.id)
         if not refreshed_product:
@@ -152,7 +146,6 @@ async def add_new_product(
         return ProductDTO.model_validate(refreshed_product)
 
     except Exception as e:
-        await session.rollback()
         log.error("Failed to create product: {}", e)
         raise
 
@@ -177,8 +170,6 @@ async def update_product_details(
                 f"Product with ID {product_id} not found for update."
             )
 
-        await session.commit()
-
         freshly_updated_product = await crud.get_product(session, product_id)
         if not freshly_updated_product:
             raise Exception("Failed to re-fetch the product after update.")
@@ -186,7 +177,6 @@ async def update_product_details(
         return AdminProductDTO.model_validate(freshly_updated_product)
 
     except Exception:
-        await session.rollback()
         raise
 
 
@@ -194,9 +184,6 @@ async def delete_product_by_id(session: AsyncSession, product_id: int) -> bool:
     """Service-level function to delete a product. Manages the transaction."""
     try:
         success = await crud.delete_product(session, product_id)
-        if success:
-            await session.commit()
         return success
     except Exception:
-        await session.rollback()
         raise
