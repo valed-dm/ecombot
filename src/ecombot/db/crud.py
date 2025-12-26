@@ -169,7 +169,7 @@ async def get_categories(session: AsyncSession) -> List[Category]:
     """Fetches all top-level categories."""
     stmt = (
         select(Category)
-        .where(Category.parent_id == None)  # noqa: E711
+        .where(Category.parent_id.is_(None))
         .order_by(Category.name)
     )
     result = await session.execute(stmt)
