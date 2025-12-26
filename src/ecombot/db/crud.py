@@ -264,15 +264,26 @@ async def update_product(
     Updates a product's details and returns the updated object with
     all necessary relationships eagerly loaded for DTO conversion.
     """
+    allowed_fields = {"name", "description", "price", "stock", "image_url"}
+    
+    filtered_data = {}
+    for key, value in update_data.items():
+        if key in allowed_fields:
+            filtered_data[key] = value
+        else:
+            log.warning(f"Attempt to update invalid product field '{key}' for product {product_id}")
+    
+    if not filtered_data:
+        return await get_product(session, product_id)
+    
     stmt = (
         update(Product)
         .where(Product.id == product_id)
-        .values(**update_data)
+        .values(**filtered_data)
         .returning(Product.id)
     )
     result = await session.execute(stmt)
     updated_id = result.scalar_one_or_none()
-    print(update_data)
 
     if updated_id:
         return await get_product(session, updated_id)
