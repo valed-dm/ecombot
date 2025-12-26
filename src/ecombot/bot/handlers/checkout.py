@@ -194,12 +194,16 @@ async def fast_checkout_edit_handler(
     db_user: User,
 ):
     """Redirects the user to their profile for editing details."""
-    await callback_message.delete()
     await state.clear()
 
     from .profile import profile_handler
 
-    await profile_handler(callback_message, session, db_user)
+    # Send a new message instead of using the deleted callback message
+    new_message = await callback_message.answer("Loading your profile...")
+    await profile_handler(new_message, session, db_user)
+    
+    # Delete the original callback message after sending the new one
+    await callback_message.delete()
     await query.answer("You can now edit your details.")
 
 
