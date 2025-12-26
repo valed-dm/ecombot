@@ -85,7 +85,6 @@ async def place_order_from_cart(
         )
 
         await crud.clear_cart(session, cart)
-        await session.commit()
 
         refreshed_order = await crud.get_order(session, order.id)
         if not refreshed_order:
@@ -97,10 +96,8 @@ async def place_order_from_cart(
 
     except ValueError as e:
         # "Not enough stock" error from crud.py
-        await session.rollback()
         raise OrderPlacementError(str(e)) from e
     except Exception as e:
-        await session.rollback()
         raise OrderPlacementError(
             f"An unexpected error occurred during checkout: {e}"
         ) from e
@@ -139,7 +136,6 @@ async def place_order(
             items=list(cart.items),
         )
         await crud.clear_cart(session, cart)
-        await session.commit()
 
         refreshed_order = await crud.get_order(session, order.id)
         if not refreshed_order:
@@ -147,10 +143,8 @@ async def place_order(
         return OrderDTO.model_validate(refreshed_order)
 
     except ValueError as e:
-        await session.rollback()
         raise OrderPlacementError(str(e)) from e
     except Exception:
-        await session.rollback()
         raise
 
 
@@ -214,7 +208,6 @@ async def change_order_status(
 
         order_to_update.status = new_status
         await session.flush()
-        await session.commit()
 
         refreshed_order = await crud.get_order(session, order_to_update.id)
         if not refreshed_order:
@@ -223,5 +216,4 @@ async def change_order_status(
         return OrderDTO.model_validate(refreshed_order)
 
     except Exception:
-        await session.rollback()
         raise

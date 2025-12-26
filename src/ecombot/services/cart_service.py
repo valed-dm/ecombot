@@ -57,7 +57,6 @@ async def add_product_to_cart(
     await crud.add_item_to_cart(
         session=session, cart=cart, product=product, quantity=quantity
     )
-    await session.commit()
 
     # Get the fully-loaded object for the DTO.
     fresh_cart_for_dto = await crud.get_or_create_cart(session, user_id)
@@ -98,12 +97,9 @@ async def alter_item_quantity(
 
     try:
         await crud.set_cart_item_quantity(session, cart_item_id, new_quantity)
-        await session.commit()
-
         fresh_cart = await crud.get_or_create_cart(session, user_id)
         return CartDTO.model_validate(fresh_cart)
     except Exception:
-        await session.rollback()
         raise
 
 
@@ -111,4 +107,3 @@ async def clear_user_cart(session: AsyncSession, user_id: int) -> None:
     """Clears all items from a user's cart."""
     cart = await crud.get_or_create_cart(session, user_id)
     await crud.clear_cart(session, cart)
-    await session.commit()
