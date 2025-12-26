@@ -32,12 +32,10 @@ async def update_profile_details(
     """Updates a user's profile and returns the updated DTO."""
     try:
         user = await crud.update_user_profile(session, user_id, update_data)
-        await session.commit()
         if not user:
             raise Exception("User not found during update.")
         return UserProfileDTO.model_validate(user)
     except Exception:
-        await session.rollback()
         raise
 
 
@@ -55,10 +53,8 @@ async def add_new_address(
     """Adds a new address for the user."""
     try:
         new_address = await crud.add_delivery_address(session, user_id, label, address)
-        await session.commit()
         return new_address
     except Exception:
-        await session.rollback()
         raise
 
 
@@ -68,10 +64,8 @@ async def delete_address(session: AsyncSession, user_id: int, address_id: int) -
         success = await crud.delete_delivery_address(session, address_id, user_id)
         if not success:
             raise AddressNotFoundError("Address not found or permission denied.")
-        await session.commit()
         return True
     except Exception:
-        await session.rollback()
         raise
 
 
@@ -85,8 +79,6 @@ async def set_user_default_address(
         result = await crud.set_default_address(session, user_id, address_id)
         if not result:
             raise AddressNotFoundError("Address not found or permission denied.")
-        await session.commit()
         return True
     except Exception:
-        await session.rollback()
         raise
