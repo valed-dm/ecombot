@@ -293,7 +293,7 @@ async def update_product(
 
 async def delete_product(session: AsyncSession, product_id: int) -> bool:
     """Deletes a product from the database by its ID."""
-    product = await get_product(session, product_id)
+    product = await session.get(Product, product_id)
     if product:
         session.delete(product)
         await session.flush()
