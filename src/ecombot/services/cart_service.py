@@ -48,9 +48,6 @@ async def add_product_to_cart(
     if not product:
         raise ProductNotFoundError(f"Product with ID {product_id} not found.")
 
-    if product.stock < quantity:
-        raise InsufficientStockError(f"Not enough stock for '{product.name}'.")
-
     # Get the user's cart using "lean" function.
     cart = await crud.get_or_create_cart_lean(session, user_id)
 
@@ -94,7 +91,6 @@ async def alter_item_quantity(
         new_quantity -= 1
     elif action == "remove":
         new_quantity = 0
-
     try:
         await crud.set_cart_item_quantity(session, cart_item_id, new_quantity)
         fresh_cart = await crud.get_or_create_cart(session, user_id)
