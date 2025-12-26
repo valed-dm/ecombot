@@ -20,6 +20,8 @@ from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from ..logging_setup import log
+
 from ..schemas.enums import OrderStatus
 from ..utils import generate_order_number
 from .models import Cart
@@ -74,10 +76,15 @@ async def update_user_profile(
     update_data: Dict[str, Any],
 ) -> Optional[User]:
     """Updates a user's profile details (phone, email)."""
+    allowed_fields = {"phone", "email", "first_name"}
+    
     user = await session.get(User, user_id)
     if user:
         for key, value in update_data.items():
-            setattr(user, key, value)
+            if key in allowed_fields:
+                setattr(user, key, value)
+            else:
+                log.warning(f"Attempt to update invalid field '{key}' for user {user_id}")
         await session.flush()
     return user
 
