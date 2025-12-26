@@ -327,6 +327,7 @@ async def get_or_create_cart(session: AsyncSession, user_id: int) -> Cart:
     if not cart:
         cart = Cart(user_id=user_id)
         session.add(cart)
+        await session.flush()
 
     return cart
 
@@ -344,6 +345,7 @@ async def get_or_create_cart_lean(session: AsyncSession, user_id: int) -> Cart:
     if not cart:
         cart = Cart(user_id=user_id)
         session.add(cart)
+        await session.flush()
 
     return cart
 
