@@ -42,9 +42,9 @@ class DbSessionMiddleware(BaseMiddleware):
         This method is called for each update.
         """
         async with self.session_pool() as session:
-            data["session"] = session
-
-            return await handler(event, data)
+            async with session.begin():
+                data["session"] = session
+                return await handler(event, data)
 
 
 class MessageInteractionMiddleware(BaseMiddleware):

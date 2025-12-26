@@ -59,7 +59,7 @@ async def get_or_create_user(
             first_name=telegram_user.full_name,
         )
         session.add(db_user)
-        await session.commit()
+        await session.flush()
         await session.refresh(db_user, attribute_names=["addresses"])
 
     return db_user
