@@ -21,7 +21,7 @@ from ecombot.bot.filters.is_admin import IsAdmin
 from ecombot.bot.handlers.admin import send_main_admin_panel
 from ecombot.bot.middlewares import MessageInteractionMiddleware
 from ecombot.db import crud
-from ecombot.logging_setup import logger
+from ecombot.logging_setup import log
 from ecombot.schemas.dto import OrderDTO
 from ecombot.schemas.enums import OrderStatus
 from ecombot.services import notification_service
@@ -83,7 +83,7 @@ async def send_order_details_view(message: Message, order: OrderDTO):
     try:
         await message.edit_text(text, reply_markup=keyboard)
     except Exception as e:
-        logger.error(f"Failed to edit order details message: {e}", exc_info=True)
+        log.error(f"Failed to edit order details message: {e}", exc_info=True)
         # Fallback: send as new message if edit fails
         await message.answer(text, reply_markup=keyboard)
 
@@ -100,7 +100,6 @@ async def back_to_main_admin_panel_handler(
     """
     Handles the "Back to Admin Panel" button from any order management view.
     """
-
     await send_main_admin_panel(callback_message)
     await query.answer()
 
@@ -223,7 +222,7 @@ async def change_order_status_handler(
         await send_order_details_view(callback_message, updated_order_dto)
 
     except Exception as e:
-        logger.error(
+        log.error(
             f"Failed to change status for order {order_id}: {e}", exc_info=True
         )
         await query.answer(
@@ -236,4 +235,4 @@ async def change_order_status_handler(
                 order_dto = OrderDTO.model_validate(order)
                 await send_order_details_view(callback_message, order_dto)
         except Exception as refresh_e:
-            logger.error(f"Failed to refresh order view for order {order_id}: {refresh_e}")
+            log.error(f"Failed to refresh order view for order {order_id}: {refresh_e}")
