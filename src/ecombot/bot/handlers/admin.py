@@ -1060,17 +1060,28 @@ async def delete_product_start(
     """Step 1 (Delete): Starts FSM. Asks for a category."""
     try:
         categories = await catalog_service.get_all_categories(session)
-        keyboard = keyboards.get_catalog_categories_keyboard(categories)
-        await callback_message.edit_text(
-            "Choose a category to find the product to delete:", reply_markup=keyboard
-        )
-        await state.set_state(DeleteProduct.choose_category)
-        await query.answer()
     except Exception as e:
         log.error(f"Failed to load categories for delete product: {e}", exc_info=True)
         await callback_message.edit_text("❌ An unexpected error occurred while loading categories.")
         await state.clear()
         await query.answer()
+        return
+    
+    if not categories:
+        await callback_message.edit_text(
+            "❌ No categories found. You need to create at least one category "
+            "before deleting products. Please use 'Add Category' first.",
+            reply_markup=keyboards.get_admin_panel_keyboard()
+        )
+        await query.answer()
+        return
+    
+    keyboard = keyboards.get_catalog_categories_keyboard(categories)
+    await callback_message.edit_text(
+        "Choose a category to find the product to delete:", reply_markup=keyboard
+    )
+    await state.set_state(DeleteProduct.choose_category)
+    await query.answer()
 
 
 @router.callback_query(
