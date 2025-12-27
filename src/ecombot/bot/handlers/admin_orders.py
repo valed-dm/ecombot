@@ -80,7 +80,12 @@ async def send_order_details_view(message: Message, order: OrderDTO):
         text = text[:4090] + "\n\n[Truncated due to length]"
 
     keyboard = keyboards.get_admin_order_details_keyboard(order)
-    await message.edit_text(text, reply_markup=keyboard)
+    try:
+        await message.edit_text(text, reply_markup=keyboard)
+    except Exception as e:
+        logger.error(f"Failed to edit order details message: {e}", exc_info=True)
+        # Fallback: send as new message if edit fails
+        await message.answer(text, reply_markup=keyboard)
 
 
 # =============================================================================
