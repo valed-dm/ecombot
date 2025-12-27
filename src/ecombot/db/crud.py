@@ -195,16 +195,6 @@ async def create_category(
     return new_category
 
 
-async def delete_category(session: AsyncSession, category_id: int) -> bool:
-    """Deletes a category from the database by its ID."""
-    category = await session.get(Category, category_id)
-    if category:
-        session.delete(category)
-        await session.flush()
-        return True
-    return False
-
-
 async def delete_category_if_empty(session: AsyncSession, category_id: int) -> tuple[bool, bool]:
     """
     Atomically checks if a category is empty and deletes it if so.
