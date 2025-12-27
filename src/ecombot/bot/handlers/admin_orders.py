@@ -5,6 +5,8 @@ This module contains the handlers for the admin workflow of viewing,
 filtering, and updating the status of customer orders.
 """
 
+from html import escape
+
 from aiogram import Bot
 from aiogram import F
 from aiogram import Router
@@ -53,19 +55,19 @@ async def send_order_details_view(message: Message, order: OrderDTO):
     Generates and sends the detailed view for a single order for an admin.
     """
     text_parts = [
-        f"<b>Order Details: {order.order_number}</b>\n\n",
+        f"<b>Order Details: {escape(order.order_number)}</b>\n\n",
         f"<b>Status:</b> <i>{order.status.capitalize()}</i>\n",
         f"<b>Placed on:</b> {order.created_at.strftime('%Y-%m-%d %H:%M')}\n\n",
-        f"<b>Customer:</b> {order.contact_name}\n",
-        f"<b>Phone:</b> <code>{order.phone}</code>\n",
-        f"<b>Address:</b> <code>{order.address}</code>\n\n",
+        f"<b>Customer:</b> {escape(order.contact_name or 'N/A')}\n",
+        f"<b>Phone:</b> <code>{escape(order.phone or 'N/A')}</code>\n",
+        f"<b>Address:</b> <code>{escape(order.address or 'N/A')}</code>\n\n",
         "<b>Items:</b>\n"
     ]
     
     for item in order.items:
         item_total = item.price * item.quantity
         text_parts.extend([
-            f"  - <b>{item.product.name}</b>\n",
+            f"  - <b>{escape(item.product.name)}</b>\n",
             f"    <code>{item.quantity} x ${item.price:.2f}",
             f" = ${item_total:.2f}</code>\n"
         ])
