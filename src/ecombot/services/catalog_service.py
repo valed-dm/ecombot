@@ -11,7 +11,6 @@ from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.db import crud
-from ecombot.db.models import Category
 from ecombot.logging_setup import log
 from ecombot.schemas.dto import AdminProductDTO
 from ecombot.schemas.dto import CategoryDTO
@@ -76,15 +75,15 @@ async def delete_category_by_id(session: AsyncSession, category_id: int) -> bool
     Uses atomic operation to check for products and delete within the same transaction.
     """
     deleted, category_exists = await crud.delete_category_if_empty(session, category_id)
-    
+
     if not category_exists:
         return False  # Category doesn't exist
-    
+
     if not deleted:
         raise CategoryNotEmptyError(
             f"Cannot delete category ID {category_id} because it contains products."
         )
-    
+
     return True
 
 

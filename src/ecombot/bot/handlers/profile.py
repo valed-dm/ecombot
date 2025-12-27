@@ -51,11 +51,14 @@ async def profile_handler(message: Message, session: AsyncSession, db_user: User
         (addr for addr in user_profile.addresses if addr.is_default), None
     )
 
+    phone_text = escape(user_profile.phone) if user_profile.phone else "Not set"
+    email_text = escape(user_profile.email) if user_profile.email else "Not set"
+
     text = (
         "<b>Your Profile</b>\n\n"
         f"<b>Name:</b> {escape(user_profile.first_name)}\n"
-        f"<b>Phone:</b> {escape(user_profile.phone) if user_profile.phone else 'Not set'}\n"
-        f"<b>Email:</b> {escape(user_profile.email) if user_profile.email else 'Not set'}\n\n"
+        f"<b>Phone:</b> {phone_text}\n"
+        f"<b>Email:</b> {email_text}\n\n"
         "<b>Default Address:</b>\n"
     )
     if default_address:
@@ -214,7 +217,8 @@ async def send_address_management_view(
         else:
             for addr in addresses:
                 text += (
-                    f"📍 <b>{escape(addr.address_label)}</b>:\n<code>{escape(addr.full_address)}</code>\n\n"
+                    f"📍 <b>{escape(addr.address_label)}</b>:\n"
+                    f"<code>{escape(addr.full_address)}</code>\n\n"
                 )
 
         try:
@@ -224,7 +228,10 @@ async def send_address_management_view(
             try:
                 await message.answer(text, reply_markup=keyboard)
             except Exception as fallback_e:
-                log.error(f"Failed to send fallback message for user {db_user.id}: {fallback_e}")
+                log.error(
+                    f"Failed to send fallback message for user {db_user.id}: "
+                    f"{fallback_e}"
+                )
                 raise
     except Exception as e:
         log.error(f"Failed to load addresses for user {db_user.id}: {e}", exc_info=True)

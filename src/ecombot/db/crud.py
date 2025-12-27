@@ -21,7 +21,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from ..logging_setup import log
-
 from ..schemas.enums import OrderStatus
 from ..utils import generate_order_number
 from .models import Cart
@@ -77,14 +76,16 @@ async def update_user_profile(
 ) -> Optional[User]:
     """Updates a user's profile details (phone, email)."""
     allowed_fields = {"phone", "email", "first_name"}
-    
+
     user = await session.get(User, user_id)
     if user:
         for key, value in update_data.items():
             if key in allowed_fields:
                 setattr(user, key, value)
             else:
-                log.warning(f"Attempt to update invalid field '{key}' for user {user_id}")
+                log.warning(
+                    f"Attempt to update invalid field '{key}' for user {user_id}"
+                )
         await session.flush()
     return user
 
@@ -167,11 +168,7 @@ async def set_default_address(
 
 async def get_categories(session: AsyncSession) -> List[Category]:
     """Fetches all top-level categories."""
-    stmt = (
-        select(Category)
-        .where(Category.parent_id.is_(None))
-        .order_by(Category.name)
-    )
+    stmt = select(Category).where(Category.parent_id.is_(None)).order_by(Category.name)
     result = await session.execute(stmt)
     return list(result.scalars().all())
 
@@ -195,7 +192,9 @@ async def create_category(
     return new_category
 
 
-async def delete_category_if_empty(session: AsyncSession, category_id: int) -> tuple[bool, bool]:
+async def delete_category_if_empty(
+    session: AsyncSession, category_id: int
+) -> tuple[bool, bool]:
     """
     Atomically checks if a category is empty and deletes it if so.
     Returns (deleted, category_exists) tuple.
@@ -204,13 +203,13 @@ async def delete_category_if_empty(session: AsyncSession, category_id: int) -> t
     category = await session.get(Category, category_id)
     if not category:
         return False, False  # Not deleted, doesn't exist
-    
+
     # Check for products in the category within the same transaction
     stmt = select(Product).where(Product.category_id == category_id).limit(1)
     result = await session.execute(stmt)
     if result.scalars().first():
         return False, True  # Not deleted, exists but has products
-    
+
     # Category exists and is empty, delete it
     session.delete(category)
     await session.flush()
@@ -277,17 +276,20 @@ async def update_product(
     all necessary relationships eagerly loaded for DTO conversion.
     """
     allowed_fields = {"name", "description", "price", "stock", "image_url"}
-    
+
     filtered_data = {}
     for key, value in update_data.items():
         if key in allowed_fields:
             filtered_data[key] = value
         else:
-            log.warning(f"Attempt to update invalid product field '{key}' for product {product_id}")
-    
+            log.warning(
+                f"Attempt to update invalid product field '{key}' "
+                f"for product {product_id}"
+            )
+
     if not filtered_data:
         return await get_product(session, product_id)
-    
+
     stmt = (
         update(Product)
         .where(Product.id == product_id)
@@ -409,7 +411,7 @@ async def set_cart_item_quantity(
 async def clear_cart(session: AsyncSession, cart: Cart) -> None:
     """Removes all items from a user's cart."""
     from sqlalchemy import delete
-    
+
     stmt = delete(CartItem).where(CartItem.cart_id == cart.id)
     await session.execute(stmt)
     cart.items = []  # Keep object state in sync with database
@@ -547,7 +549,7 @@ async def update_order_status(
     result = await session.execute(stmt)
     updated_id = result.scalar_one_or_none()
     await session.flush()
-    
+
     if updated_id:
         return await get_order(session, updated_id)
     return None
@@ -568,5 +570,5 @@ async def restore_stock_for_order_items(
             product.stock += item.quantity
         # Note: We don't raise an error if product is not found during restoration
         # as the product might have been deleted after the order was placed
-    
+
     await session.flush()

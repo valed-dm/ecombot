@@ -41,10 +41,9 @@ class DbSessionMiddleware(BaseMiddleware):
         """
         This method is called for each update.
         """
-        async with self.session_pool() as session:
-            async with session.begin():
-                data["session"] = session
-                return await handler(event, data)
+        async with self.session_pool() as session, session.begin():
+            data["session"] = session
+            return await handler(event, data)
 
 
 class MessageInteractionMiddleware(BaseMiddleware):
@@ -94,7 +93,7 @@ class UserMiddleware(BaseMiddleware):
         if not session:
             # If session is not available, skip user middleware
             return await handler(event, data)
-        
+
         db_user: User = await crud.get_or_create_user(session, telegram_user)
 
         # Inject the user object into the context

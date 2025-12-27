@@ -201,7 +201,7 @@ async def fast_checkout_edit_handler(
     # Send a new message instead of using the deleted callback message
     new_message = await callback_message.answer("Loading your profile...")
     await profile_handler(new_message, session, db_user)
-    
+
     # Delete the original callback message after sending the new one
     await callback_message.delete()
     await query.answer("You can now edit your details.")
@@ -243,7 +243,7 @@ async def get_address_handler(
     if not message.text or not message.text.strip():
         await message.answer("Please enter a valid shipping address (cannot be empty).")
         return
-    
+
     await state.update_data(address=message.text.strip())
     user_data = await state.get_data()
     cart_data = await cart_service.get_user_cart(session, db_user.telegram_id)
@@ -305,7 +305,7 @@ async def slow_path_confirm_handler(
                 db_user=refreshed_user_obj,
                 delivery_address=new_address_model,
             )
-        
+
         success_text = (
             f"✅ <b>Thank you! Your order has been placed successfully!</b>\n\n"
             f"<b>Order Number:</b> <code>{order.order_number}</code>\n"

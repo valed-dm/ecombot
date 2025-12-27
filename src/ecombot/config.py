@@ -12,7 +12,6 @@ Attributes:
 """
 
 from pathlib import Path
-
 from typing import Annotated
 
 from pydantic import Field
@@ -40,7 +39,10 @@ class Settings(BaseSettings):
     ADMIN_IDS: Annotated[list[int], Field(default=[1644421909])]
 
     STATIC_DIR: Annotated[Path, Field(default=BASE_DIR / "static")]
-    PRODUCT_IMAGE_DIR: Annotated[Path, Field(default=STATIC_DIR / "products")]
+
+    @property
+    def PRODUCT_IMAGE_DIR(self) -> Path:
+        return self.STATIC_DIR / "products"
 
     DEBUG: Annotated[bool, Field(default=True)]
 

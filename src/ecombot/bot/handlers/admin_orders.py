@@ -61,17 +61,19 @@ async def send_order_details_view(message: Message, order: OrderDTO):
         f"<b>Customer:</b> {escape(order.contact_name or 'N/A')}\n",
         f"<b>Phone:</b> <code>{escape(order.phone or 'N/A')}</code>\n",
         f"<b>Address:</b> <code>{escape(order.address or 'N/A')}</code>\n\n",
-        "<b>Items:</b>\n"
+        "<b>Items:</b>\n",
     ]
-    
+
     for item in order.items:
         item_total = item.price * item.quantity
-        text_parts.extend([
-            f"  - <b>{escape(item.product.name)}</b>\n",
-            f"    <code>{item.quantity} x ${item.price:.2f}",
-            f" = ${item_total:.2f}</code>\n"
-        ])
-    
+        text_parts.extend(
+            [
+                f"  - <b>{escape(item.product.name)}</b>\n",
+                f"    <code>{item.quantity} x ${item.price:.2f}",
+                f" = ${item_total:.2f}</code>\n",
+            ]
+        )
+
     text_parts.append(f"\n<b>Total: ${order.total_price:.2f}</b>")
     text = "".join(text_parts)
 
@@ -200,13 +202,13 @@ async def change_order_status_handler(
         raise InvalidQueryDataError("Query data cannot be None")
 
     _, order_id_str, new_status_value = query.data.split(":")
-    
+
     try:
         order_id = int(order_id_str)
     except ValueError:
         await query.answer("Invalid order ID format.", show_alert=True)
         return
-        
+
     new_status = OrderStatus(new_status_value)
 
     try:
@@ -222,9 +224,7 @@ async def change_order_status_handler(
         await send_order_details_view(callback_message, updated_order_dto)
 
     except Exception as e:
-        log.error(
-            f"Failed to change status for order {order_id}: {e}", exc_info=True
-        )
+        log.error(f"Failed to change status for order {order_id}: {e}", exc_info=True)
         await query.answer(
             "An error occurred while updating the status.", show_alert=True
         )

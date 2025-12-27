@@ -91,7 +91,9 @@ def upgrade() -> None:
             ),
             sa.PrimaryKeyConstraint("id"),
         )
-        op.create_index(op.f("ix_users_telegram_id"), "users", ["telegram_id"], unique=True)
+        op.create_index(
+            op.f("ix_users_telegram_id"), "users", ["telegram_id"], unique=True
+        )
         op.create_table(
             "delivery_addresses",
             sa.Column("id", sa.Integer(), nullable=False),

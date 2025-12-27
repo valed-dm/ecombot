@@ -20,7 +20,9 @@ if raw_db_url is None:
 try:
     expanded_db_url = os.path.expandvars(raw_db_url)
 except Exception as e:
-    raise ValueError(f"Failed to expand environment variables in database URL: {e}") from e
+    raise ValueError(
+        f"Failed to expand environment variables in database URL: {e}"
+    ) from e
 config.set_main_option("sqlalchemy.url", expanded_db_url)
 
 
