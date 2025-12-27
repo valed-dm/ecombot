@@ -1,12 +1,17 @@
 """Navigation and main panel handlers."""
 
-from aiogram import F, Router
-from aiogram.filters import Command, StateFilter
+from aiogram import F
+from aiogram import Router
+from aiogram.filters import Command
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery
+from aiogram.types import Message
 
 from ecombot.logging_setup import log
+
 from .helpers import send_main_admin_panel
+
 
 router = Router()
 
@@ -19,7 +24,7 @@ async def cancel_fsm_handler(
 ):
     """Universal handler to cancel any active FSM state for the user."""
     from aiogram.exceptions import TelegramBadRequest
-    
+
     current_state = await state.get_state()
     if current_state is None:
         if isinstance(event, CallbackQuery):

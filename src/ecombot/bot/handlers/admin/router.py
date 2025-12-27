@@ -6,7 +6,10 @@ from ecombot.bot.filters.is_admin import IsAdmin
 from ecombot.bot.middlewares import MessageInteractionMiddleware
 
 # Import all handler modules
-from . import categories, navigation, products
+from . import categories
+from . import navigation
+from . import products
+
 
 # Create main router
 router = Router()

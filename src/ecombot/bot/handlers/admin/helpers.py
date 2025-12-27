@@ -1,12 +1,12 @@
 """Helper functions and utilities for admin handlers."""
 
 import uuid
-from pathlib import Path
 from typing import Optional
 
 from aiogram import Bot
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import Message, PhotoSize
+from aiogram.types import Message
+from aiogram.types import PhotoSize
 
 from ecombot.bot import keyboards
 from ecombot.config import settings
@@ -34,9 +34,9 @@ async def send_product_edit_menu(
     product_list_message_id: int,
     category_id: int,
 ) -> Message:
-    """Displays the product edit menu by deleting the old message and sending a new one."""
+    """Displays the product edit menu by deleting and sending a new message."""
     from aiogram.types import FSInputFile
-    
+
     text = get_product_edit_menu_text(product)
     keyboard = keyboards.get_edit_product_menu_keyboard(
         product_id=product.id,
@@ -87,7 +87,9 @@ async def send_main_admin_panel(message: Message) -> None:
             raise
 
 
-async def process_photo_upload(bot: Bot, photo: PhotoSize, product_id: int) -> Optional[str]:
+async def process_photo_upload(
+    bot: Bot, photo: PhotoSize, product_id: int
+) -> Optional[str]:
     """Helper function to process photo upload for product editing."""
     try:
         settings.PRODUCT_IMAGE_DIR.mkdir(parents=True, exist_ok=True)
@@ -97,11 +99,15 @@ async def process_photo_upload(bot: Bot, photo: PhotoSize, product_id: int) -> O
         log.info(f"Successfully downloaded new photo to {destination}")
         return str(destination)
     except Exception as e:
-        log.error(f"Failed to download photo for product {product_id}: {e}", exc_info=True)
+        log.error(
+            f"Failed to download photo for product {product_id}: {e}", exc_info=True
+        )
         return None
 
 
-async def update_product_menu(bot: Bot, message: Message, updated_product: AdminProductDTO, menu_message_id: int) -> None:
+async def update_product_menu(
+    bot: Bot, message: Message, updated_product: AdminProductDTO, menu_message_id: int
+) -> None:
     """Helper function to update the product edit menu after successful changes."""
     updated_keyboard = keyboards.get_edit_product_menu_keyboard(
         product_id=updated_product.id,
@@ -118,6 +124,5 @@ async def update_product_menu(bot: Bot, message: Message, updated_product: Admin
     except TelegramBadRequest as e:
         log.warning(f"Failed to edit message {menu_message_id}: {e}")
         await message.answer(
-            get_product_edit_menu_text(updated_product),
-            reply_markup=updated_keyboard
+            get_product_edit_menu_text(updated_product), reply_markup=updated_keyboard
         )

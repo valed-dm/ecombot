@@ -2,35 +2,29 @@
 
 import decimal
 import uuid
-from contextlib import suppress
 from decimal import Decimal
 from pathlib import Path
-from typing import Any, Dict
 
-from aiogram import Bot, F, Router
+from aiogram import Bot
+from aiogram import F
+from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.filters import Command, or_f
+from aiogram.filters import Command
+from aiogram.filters import or_f
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message, PhotoSize
+from aiogram.types import CallbackQuery
+from aiogram.types import Message
+from aiogram.types import PhotoSize
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot import keyboards
-from ecombot.bot.callback_data import (
-    AdminNavCallbackFactory,
-    CatalogCallbackFactory,
-    ConfirmationCallbackFactory,
-    EditProductCallbackFactory,
-)
+from ecombot.bot.callback_data import CatalogCallbackFactory
 from ecombot.config import settings
 from ecombot.logging_setup import log
 from ecombot.services import catalog_service
-from .helpers import (
-    get_product_edit_menu_text,
-    process_photo_upload,
-    send_product_edit_menu,
-    update_product_menu,
-)
-from .states import AddProduct, DeleteProduct, EditProduct
+
+from .states import AddProduct
+
 
 router = Router()
 
@@ -52,7 +46,7 @@ async def add_product_start(
             await event.message.edit_text(text)
             await event.answer()
         return
-    
+
     if not categories:
         text = (
             "❌ No categories found. You need to create at least one category "
@@ -64,7 +58,7 @@ async def add_product_start(
             await event.message.edit_text(text)
             await event.answer()
         return
-    
+
     keyboard = keyboards.get_catalog_categories_keyboard(categories)
     text = "Please choose the category for the new product:"
 
@@ -113,7 +107,7 @@ async def add_product_name(message: Message, state: FSMContext):
             reply_markup=keyboards.get_cancel_keyboard(),
         )
         return
-    
+
     product_name = message.text.strip()
     if len(product_name) > 255:
         await message.answer(
@@ -121,7 +115,7 @@ async def add_product_name(message: Message, state: FSMContext):
             reply_markup=keyboards.get_cancel_keyboard(),
         )
         return
-    
+
     await state.update_data(name=product_name)
     await message.answer(
         "Got it. Now, please provide a description for the product.",
@@ -139,7 +133,7 @@ async def add_product_description_step(message: Message, state: FSMContext):
             reply_markup=keyboards.get_cancel_keyboard(),
         )
         return
-    
+
     product_description = message.text.strip()
     if len(product_description) > 1000:
         await message.answer(
@@ -147,7 +141,7 @@ async def add_product_description_step(message: Message, state: FSMContext):
             reply_markup=keyboards.get_cancel_keyboard(),
         )
         return
-    
+
     await state.update_data(description=product_description)
     await message.answer(
         "Excellent. What is the price? (e.g., 25.99)",
@@ -186,7 +180,9 @@ async def add_product_price_step(message: Message, state: FSMContext):
 async def add_product_stock_step(message: Message, state: FSMContext):
     """Step 6: Receives the stock, validates it, and asks for the product image."""
     if not message.text:
-        await message.answer("Please send the stock quantity as text, not a photo or sticker.")
+        await message.answer(
+            "Please send the stock quantity as text, not a photo or sticker."
+        )
         return
 
     try:
@@ -219,7 +215,7 @@ async def add_product_get_image(
     session: AsyncSession,
     bot: Bot,
 ):
-    """Step 7 (Final): Receives the photo (or /skip), saves it, and creates the product."""
+    """Step 7 (Final): Receives the photo (or /skip) and creates the product."""
     image_path: str | None = None
     if message.photo:
         photo: PhotoSize = message.photo[-1]
