@@ -20,7 +20,7 @@ from pydantic_settings import BaseSettings
 from pydantic_settings import SettingsConfigDict
 
 
-BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent
+BASE_DIR: Path = Path(__file__).resolve().parents[2]
 OUTPUT_DIR: Path = BASE_DIR / "output"
 
 
