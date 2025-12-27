@@ -194,7 +194,7 @@ async def send_product_edit_menu(
     return new_message
 
 
-async def send_main_admin_panel(message: Message):
+async def send_main_admin_panel(message: Message) -> None:
     """
     A helper function to generate and send the main admin panel view.
     Attempts to edit the message, falling back to sending a new one.
