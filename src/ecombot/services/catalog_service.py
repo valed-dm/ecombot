@@ -170,11 +170,7 @@ async def update_product_details(
                 f"Product with ID {product_id} not found for update."
             )
 
-        freshly_updated_product = await crud.get_product(session, product_id)
-        if not freshly_updated_product:
-            raise Exception("Failed to re-fetch the product after update.")
-
-        return AdminProductDTO.model_validate(freshly_updated_product)
+        return AdminProductDTO.model_validate(updated_product)
 
     except Exception:
         raise
