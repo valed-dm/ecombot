@@ -297,6 +297,17 @@ async def add_category_description(
     category_data = await state.get_data()
     description = message.text if message.text != "/skip" else None
 
+    if description is not None:
+        description = description.strip()
+        if not description:
+            description = None
+        elif len(description) > 1000:
+            await message.answer(
+                "Description is too long (maximum 1000 characters).",
+                reply_markup=keyboards.get_cancel_keyboard(),
+            )
+            return
+
     try:
         new_category = await catalog_service.add_new_category(
             session=session, name=category_data["name"], description=description
