@@ -587,18 +587,28 @@ async def edit_product_start(
     """Step 1: Starts the "Edit Product" FSM. Asks for a category."""
     try:
         categories = await catalog_service.get_all_categories(session)
-        keyboard = keyboards.get_catalog_categories_keyboard(categories)
-        await callback_message.edit_text(
-            "Please choose a category to find the product you want to edit:",
-            reply_markup=keyboard,
-        )
-        await state.set_state(EditProduct.choose_category)
-        await query.answer()
     except Exception as e:
         log.error(f"Failed to load categories for edit product: {e}", exc_info=True)
         await callback_message.edit_text("❌ An unexpected error occurred while loading categories.")
         await state.clear()
         await query.answer()
+        return
+    
+    if not categories:
+        await callback_message.edit_text(
+            "❌ No categories found. You need to create at least one category "
+            "before editing products. Please use 'Add Category' first."
+        )
+        await query.answer()
+        return
+    
+    keyboard = keyboards.get_catalog_categories_keyboard(categories)
+    await callback_message.edit_text(
+        "Please choose a category to find the product you want to edit:",
+        reply_markup=keyboard,
+    )
+    await state.set_state(EditProduct.choose_category)
+    await query.answer()
 
 
 @router.callback_query(
