@@ -264,9 +264,9 @@ async def edit_phone_get_phone(
         )
         await message.answer("✅ Phone number updated successfully!")
 
-        refreshed_user = await session.get(User, db_user.id)
+        await session.refresh(db_user)
         await message.delete()  # Delete the "new phone number" message
-        await profile_handler(message, session, refreshed_user)
+        await profile_handler(message, session, db_user)
 
     except Exception as e:
         log.error(f"Failed to update phone for user {db_user.id}: {e}", exc_info=True)
@@ -304,9 +304,9 @@ async def edit_email_get_email(
         )
         await message.answer("✅ Email address updated successfully!")
 
-        refreshed_user = await session.get(User, db_user.id)
+        await session.refresh(db_user)
         await message.delete()  # Clean up the user's "new email" message
-        await profile_handler(message, session, refreshed_user)
+        await profile_handler(message, session, db_user)
 
     except Exception as e:
         log.error(f"Failed to update email for user {db_user.id}: {e}", exc_info=True)
