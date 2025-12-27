@@ -787,6 +787,33 @@ async def edit_product_get_new_value(
             update_data["stock"] = parsed_stock
 
         elif field_to_edit in ["name", "description"]:
+            new_value = new_value.strip()
+            if field_to_edit == "name":
+                if not new_value:
+                    await message.answer(
+                        "Product name cannot be empty. Please try again.",
+                        reply_markup=keyboards.get_cancel_keyboard(),
+                    )
+                    return
+                if len(new_value) > 255:
+                    await message.answer(
+                        "Product name is too long (maximum 255 characters). Please try again.",
+                        reply_markup=keyboards.get_cancel_keyboard(),
+                    )
+                    return
+            elif field_to_edit == "description":
+                if not new_value:
+                    await message.answer(
+                        "Product description cannot be empty. Please try again.",
+                        reply_markup=keyboards.get_cancel_keyboard(),
+                    )
+                    return
+                if len(new_value) > 1000:
+                    await message.answer(
+                        "Product description is too long (maximum 1000 characters). Please try again.",
+                        reply_markup=keyboards.get_cancel_keyboard(),
+                    )
+                    return
             update_data[field_to_edit] = new_value
 
         else:
