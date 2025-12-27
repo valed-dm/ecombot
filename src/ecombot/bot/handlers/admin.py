@@ -876,11 +876,19 @@ async def edit_product_change_photo_start(
     Step 4a (Edit Photo): Asks the admin for the new photo.
     """
     await state.update_data(product_id=callback_data.product_id)
-    await callback_message.edit_text(
-        "Please upload the new photo for the product.\n\n"
-        "You can also send /remove to delete the current photo entirely.",
-        reply_markup=keyboards.get_cancel_keyboard(),
-    )
+    try:
+        await callback_message.edit_text(
+            "Please upload the new photo for the product.\n\n"
+            "You can also send /remove to delete the current photo entirely.",
+            reply_markup=keyboards.get_cancel_keyboard(),
+        )
+    except TelegramBadRequest as e:
+        log.warning(f"Failed to edit message: {e}")
+        await callback_message.answer(
+            "Please upload the new photo for the product.\n\n"
+            "You can also send /remove to delete the current photo entirely.",
+            reply_markup=keyboards.get_cancel_keyboard(),
+        )
     await state.set_state(EditProduct.get_new_image)
     await query.answer()
 
