@@ -75,6 +75,10 @@ async def send_order_details_view(message: Message, order: OrderDTO):
     text_parts.append(f"\n<b>Total: ${order.total_price:.2f}</b>")
     text = "".join(text_parts)
 
+    # Check Telegram's 4096 character limit
+    if len(text) > 4096:
+        text = text[:4090] + "\n\n[Truncated due to length]"
+
     keyboard = keyboards.get_admin_order_details_keyboard(order)
     await message.edit_text(text, reply_markup=keyboard)
 
