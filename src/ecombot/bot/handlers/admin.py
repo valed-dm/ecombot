@@ -222,7 +222,11 @@ async def command_admin_panel(message: Message):
     """
     Handler for the /admin command. Displays the main admin actions keyboard.
     """
-    await send_main_admin_panel(message)
+    try:
+        await send_main_admin_panel(message)
+    except Exception as e:
+        log.error(f"Failed to display admin panel: {e}", exc_info=True)
+        await message.answer("❌ Failed to load admin panel. Please try again.")
 
 
 # =============================================================================
