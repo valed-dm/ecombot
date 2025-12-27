@@ -13,6 +13,9 @@ Attributes:
 
 from pathlib import Path
 
+from typing import Annotated
+
+from pydantic import Field
 from pydantic_settings import BaseSettings
 from pydantic_settings import SettingsConfigDict
 
@@ -32,23 +35,23 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", case_sensitive=False)
 
-    APP_NAME: str = "ECOMBot"
-    BOT_TOKEN: str = ""
-    ADMIN_IDS: list[int] = [1644421909]
+    APP_NAME: Annotated[str, Field(default="ECOMBot")]
+    BOT_TOKEN: Annotated[str, Field(default="")]
+    ADMIN_IDS: Annotated[list[int], Field(default=[1644421909])]
 
-    STATIC_DIR: Path = BASE_DIR / "static"
-    PRODUCT_IMAGE_DIR: Path = STATIC_DIR / "products"
+    STATIC_DIR: Annotated[Path, Field(default=BASE_DIR / "static")]
+    PRODUCT_IMAGE_DIR: Annotated[Path, Field(default=STATIC_DIR / "products")]
 
-    DEBUG: bool = True
+    DEBUG: Annotated[bool, Field(default=True)]
 
-    PGDATABASE: str = "ecombot"
-    PGUSER: str = "postgres"
-    PGPASSWORD: str = "postgres_default"
-    PGHOST: str = "localhost"
-    PGPORT: int = 5432
+    PGDATABASE: Annotated[str, Field(default="ecombot")]
+    PGUSER: Annotated[str, Field(default="postgres")]
+    PGPASSWORD: Annotated[str, Field(default="postgres_default")]
+    PGHOST: Annotated[str, Field(default="localhost")]
+    PGPORT: Annotated[int, Field(default=5432)]
 
-    LOG_LEVEL: str = "DEBUG"
-    LOG_FILE: Path = OUTPUT_DIR / "ecombot.log"
+    LOG_LEVEL: Annotated[str, Field(default="DEBUG")]
+    LOG_FILE: Annotated[Path, Field(default=OUTPUT_DIR / "ecombot.log")]
 
 
 settings = Settings()
