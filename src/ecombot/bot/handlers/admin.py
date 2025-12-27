@@ -894,6 +894,14 @@ async def edit_product_get_new_photo(
         await state.set_state(EditProduct.choose_field)
 
     except Exception as e:
+        # Clean up the newly uploaded image if database update failed
+        if new_image_path:
+            try:
+                Path(new_image_path).unlink()
+                log.info(f"Cleaned up orphaned image file: {new_image_path}")
+            except OSError as cleanup_e:
+                log.error(f"Failed to clean up orphaned image file {new_image_path}: {cleanup_e}")
+        
         log.error(f"Failed to process new photo for product {product_id}: {e}", exc_info=True)
         await message.answer("❌ An unexpected error occurred. Please check the logs.")
         await state.clear()
