@@ -201,10 +201,10 @@ async def change_order_status(
                     f"Cannot cancel a {order_to_update.status.value} order."
                 )
 
-            for item in order_to_update.items:
-                await crud.increase_product_stock(
-                    session=session, product_id=item.product_id, quantity=item.quantity
-                )
+            # Atomically restore stock for all items with pessimistic locking
+            await crud.restore_stock_for_order_items(
+                session=session, order_items=order_to_update.items
+            )
 
         order_to_update.status = new_status
         await session.flush()

@@ -563,18 +563,20 @@ async def update_order_status(
     return None
 
 
-async def increase_product_stock(
+async def restore_stock_for_order_items(
     session: AsyncSession,
-    product_id: int,
-    quantity: int,
-) -> Optional[Product]:
+    order_items: List[OrderItem],
+) -> None:
     """
-    Increases the stock for a given product ID.
-    Uses a pessimistic lock to prevent race conditions.
+    Atomically restores stock for all items in an order using pessimistic locking.
+    Similar to create_order_with_items but for stock restoration.
     """
-    # Lock the product row to ensure atomic updates
-    product = await session.get(Product, product_id, with_for_update=True)
-    if product:
-        product.stock += quantity
-        await session.flush()
-    return product
+    for item in order_items:
+        # Get the product with a pessimistic lock
+        product = await session.get(Product, item.product_id, with_for_update=True)
+        if product:
+            product.stock += item.quantity
+        # Note: We don't raise an error if product is not found during restoration
+        # as the product might have been deleted after the order was placed
+    
+    await session.flush()
