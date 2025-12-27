@@ -335,7 +335,17 @@ async def add_product_start(
     """
     Step 1: Starts the "Add Product" FSM. Asks the admin to choose a category.
     """
-    categories = await catalog_service.get_all_categories(session)
+    try:
+        categories = await catalog_service.get_all_categories(session)
+    except Exception as e:
+        log.error(f"Failed to fetch categories: {e}", exc_info=True)
+        text = "❌ Failed to load categories. Please try again."
+        if isinstance(event, Message):
+            await event.answer(text)
+        elif isinstance(event, CallbackQuery) and isinstance(event.message, Message):
+            await event.message.edit_text(text)
+            await event.answer()
+        return
     
     if not categories:
         text = (
