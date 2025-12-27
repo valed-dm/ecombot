@@ -464,11 +464,15 @@ async def add_product_price_step(message: Message, state: FSMContext):
     try:
         price = Decimal(message.text)
         if price <= 0:
-            await message.answer("Price must be a positive number. Please try again.")
+            await message.answer(
+                "Price must be a positive number. Please try again.",
+                reply_markup=keyboards.get_cancel_keyboard(),
+            )
             return
     except decimal.InvalidOperation:
         await message.answer(
-            "Invalid price format. Please enter a number (e.g., 25.99)."
+            "Invalid price format. Please enter a number (e.g., 25.99).",
+            reply_markup=keyboards.get_cancel_keyboard(),
         )
         return
 
@@ -493,11 +497,15 @@ async def add_product_stock_step(message: Message, state: FSMContext):
         stock = int(message.text)
         if stock < 0:
             await message.answer(
-                "Stock cannot be negative. Please enter a whole number."
+                "Stock cannot be negative. Please enter a whole number.",
+                reply_markup=keyboards.get_cancel_keyboard(),
             )
             return
     except ValueError:
-        await message.answer("Invalid format. Please enter a whole number.")
+        await message.answer(
+            "Invalid format. Please enter a whole number.",
+            reply_markup=keyboards.get_cancel_keyboard(),
+        )
         return
 
     await state.update_data(stock=stock)
