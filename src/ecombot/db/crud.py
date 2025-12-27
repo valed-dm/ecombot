@@ -205,6 +205,28 @@ async def delete_category(session: AsyncSession, category_id: int) -> bool:
     return False
 
 
+async def delete_category_if_empty(session: AsyncSession, category_id: int) -> tuple[bool, bool]:
+    """
+    Atomically checks if a category is empty and deletes it if so.
+    Returns (deleted, category_exists) tuple.
+    """
+    # First check if category exists
+    category = await session.get(Category, category_id)
+    if not category:
+        return False, False  # Not deleted, doesn't exist
+    
+    # Check for products in the category within the same transaction
+    stmt = select(Product).where(Product.category_id == category_id).limit(1)
+    result = await session.execute(stmt)
+    if result.scalars().first():
+        return False, True  # Not deleted, exists but has products
+    
+    # Category exists and is empty, delete it
+    session.delete(category)
+    await session.flush()
+    return True, True  # Deleted successfully
+
+
 async def get_product(session: AsyncSession, product_id: int) -> Optional[Product]:
     """
     Fetches a single product by its ID, eagerly loading its category.

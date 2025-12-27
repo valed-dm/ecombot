@@ -11,6 +11,7 @@ from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.db import crud
+from ecombot.db.models import Category
 from ecombot.logging_setup import log
 from ecombot.schemas.dto import AdminProductDTO
 from ecombot.schemas.dto import CategoryDTO
@@ -72,20 +73,19 @@ async def add_new_category(
 async def delete_category_by_id(session: AsyncSession, category_id: int) -> bool:
     """
     Service-level function to delete a category.
-    Enforces the business rule that a category must be empty before deletion.
+    Uses atomic operation to check for products and delete within the same transaction.
     """
-    products_in_category = await crud.get_products_by_category(session, category_id)
-    if products_in_category:
+    deleted, category_exists = await crud.delete_category_if_empty(session, category_id)
+    
+    if not category_exists:
+        return False  # Category doesn't exist
+    
+    if not deleted:
         raise CategoryNotEmptyError(
-            f"Cannot delete. Category ID {category_id}"
-            f" contains {len(products_in_category)} products."
+            f"Cannot delete category ID {category_id} because it contains products."
         )
-
-    try:
-        success = await crud.delete_category(session, category_id)
-        return success
-    except Exception:
-        raise
+    
+    return True
 
 
 async def get_single_product_details(
