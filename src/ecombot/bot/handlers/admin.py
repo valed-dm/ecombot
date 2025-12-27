@@ -1253,24 +1253,37 @@ async def delete_category_confirm(
 ):
     """Step 2 (Delete Cat): Receives category, asks for confirmation."""
     category_id = callback_data.item_id
-    category = await session.get(
-        Category, category_id
-    )  # Using session.get for a quick fetch
-    if not category:
-        await callback_message.edit_text("Error: Category not found.")
-        await state.clear()
-        return
+    try:
+        category = await session.get(
+            Category, category_id
+        )  # Using session.get for a quick fetch
+        if not category:
+            await callback_message.edit_text(
+                "Error: Category not found.",
+                reply_markup=keyboards.get_admin_panel_keyboard()
+            )
+            await state.clear()
+            await query.answer()
+            return
 
-    await state.update_data(category_id=category_id, category_name=category.name)
-    keyboard = keyboards.get_delete_confirmation_keyboard(
-        action="delete_category", item_id=category_id
-    )
-    await callback_message.edit_text(
-        f"⚠️ Are you sure you want to permanently delete the category '{category.name}'?",
-        reply_markup=keyboard,
-    )
-    await state.set_state(DeleteCategory.confirm_deletion)
-    await query.answer()
+        await state.update_data(category_id=category_id, category_name=category.name)
+        keyboard = keyboards.get_delete_confirmation_keyboard(
+            action="delete_category", item_id=category_id
+        )
+        await callback_message.edit_text(
+            f"⚠️ Are you sure you want to permanently delete the category '{category.name}'?",
+            reply_markup=keyboard,
+        )
+        await state.set_state(DeleteCategory.confirm_deletion)
+        await query.answer()
+    except Exception as e:
+        log.error(f"Failed to load category details for deletion: {e}", exc_info=True)
+        await callback_message.edit_text(
+            "❌ An unexpected error occurred while loading category details.",
+            reply_markup=keyboards.get_admin_panel_keyboard()
+        )
+        await state.clear()
+        await query.answer()
 
 
 @router.callback_query(
