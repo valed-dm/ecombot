@@ -93,7 +93,7 @@ async def delete_address_handler(
         try:
             await user_service.delete_address(session, db_user.id, address_id)
             await query.answer("Address deleted successfully!", show_alert=True)
-            await manage_addresses_handler(query, session, db_user)
+            await manage_addresses_handler(query, session, db_user, query.message)
         except Exception as e:
             log.exception("Error deleting address {}", e)
             await query.answer("Failed to delete address.", show_alert=True)
