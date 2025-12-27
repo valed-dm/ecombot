@@ -627,6 +627,16 @@ async def edit_product_choose_category(
     await state.update_data(category_id=category_id)
     try:
         products = await catalog_service.get_products_in_category(session, category_id)
+        
+        if not products:
+            await callback_message.edit_text(
+                "❌ This category contains no products. Please add products to this category first.",
+                reply_markup=keyboards.get_admin_panel_keyboard(),
+            )
+            await state.clear()
+            await query.answer()
+            return
+        
         keyboard = keyboards.get_catalog_products_keyboard(products)
         await callback_message.edit_text(
             "Please choose the product you want to edit:", reply_markup=keyboard
