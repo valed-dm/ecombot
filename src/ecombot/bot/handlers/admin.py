@@ -243,10 +243,17 @@ async def add_category_start(
     """
     Step 1: Starts the "Add Category" FSM. Asks for the category name.
     """
-    await callback_message.edit_text(
-        "Please enter the name for the new category:",
-        reply_markup=keyboards.get_cancel_keyboard(),
-    )
+    try:
+        await callback_message.edit_text(
+            "Please enter the name for the new category:",
+            reply_markup=keyboards.get_cancel_keyboard(),
+        )
+    except TelegramBadRequest as e:
+        log.warning(f"Failed to edit message: {e}")
+        await callback_message.answer(
+            "Please enter the name for the new category:",
+            reply_markup=keyboards.get_cancel_keyboard(),
+        )
     await state.set_state(AddCategory.name)
     await query.answer()
 
