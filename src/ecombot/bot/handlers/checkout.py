@@ -90,8 +90,8 @@ async def checkout_start_handler(
         confirmation_text = (
             "<b>Confirm Your Order</b>\n\n"
             "Your order will be shipped to your default address:\n"
-            f"<code>{default_address.full_address}</code>\n\n"
-            f"Contact Phone: <code>{db_user.phone}</code>\n"
+            f"<code>{escape(default_address.full_address or '')}</code>\n\n"
+            f"Contact Phone: <code>{escape(db_user.phone or 'Not set')}</code>\n"
             f"<b>Total Price: ${cart.total_price:.2f}</b>"
         )
         keyboard = keyboards.get_fast_checkout_confirmation_keyboard()
