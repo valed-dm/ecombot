@@ -141,7 +141,7 @@ def get_product_edit_menu_text(product: AdminProductDTO) -> str:
         "You are editing:\n\n"
         f"<b>{product.name}</b>\n"
         f"<i>{product.description}</i>\n\n"
-        f"<b>Price:</b> ${product.price:.2f}\n"
+        f"<b>Price:</b> {settings.CURRENCY}{product.price:.2f}\n"
         f"<b>Stock:</b> {product.stock} units\n\n"
         "Choose a field to edit:"
     )

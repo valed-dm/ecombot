@@ -53,5 +53,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: Annotated[str, Field(default="DEBUG")]
     LOG_FILE: Annotated[Path, Field(default=OUTPUT_DIR / "ecombot.log")]
 
+    CURRENCY: Annotated[str, Field(default="₽")]
+
 
 settings = Settings()
