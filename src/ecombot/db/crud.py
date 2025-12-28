@@ -414,6 +414,12 @@ async def set_cart_item_quantity(
     Sets the quantity of a specific cart item.
     If the quantity is 0 or less, the item is deleted.
     """
+    if new_quantity < 0:
+        raise ValueError("Quantity cannot be negative")
+    
+    if new_quantity > 100:
+        raise ValueError("Quantity cannot exceed 100")
+    
     cart_item = await session.get(CartItem, cart_item_id)
     if not cart_item:
         return None
