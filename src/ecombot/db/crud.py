@@ -261,17 +261,20 @@ async def create_product(
     if price <= 0:
         log.warning(f"Attempt to create product '{name}' with invalid price: {price}")
         raise ValueError("Price must be positive")
-    
+
     if stock < 0:
         log.warning(f"Attempt to create product '{name}' with invalid stock: {stock}")
         raise ValueError("Stock must be non-negative")
-    
+
     # Validate category exists
     category = await session.get(Category, category_id)
     if not category:
-        log.warning(f"Attempt to create product '{name}' with non-existent category_id: {category_id}")
+        log.warning(
+            f"Attempt to create product '{name}' with non-existent "
+            f"category_id: {category_id}"
+        )
         raise ValueError(f"Category with ID {category_id} does not exist")
-    
+
     new_product = Product(
         name=name,
         description=description,
@@ -388,7 +391,7 @@ async def add_item_to_cart(
     """Adds a product to the cart or updates its quantity if it already exists."""
     if quantity <= 0:
         raise ValueError("Quantity must be positive")
-    
+
     stmt = select(CartItem).where(
         CartItem.cart_id == cart.id, CartItem.product_id == product.id
     )
@@ -416,10 +419,10 @@ async def set_cart_item_quantity(
     """
     if new_quantity < 0:
         raise ValueError("Quantity cannot be negative")
-    
+
     if new_quantity > 100:
         raise ValueError("Quantity cannot exceed 100")
-    
+
     cart_item = await session.get(CartItem, cart_item_id)
     if not cart_item:
         return None
@@ -597,8 +600,9 @@ async def restore_stock_for_order_items(
             product.stock += item.quantity
         else:
             log.warning(
-                f"Product with ID {item.product_id} not found during stock restoration. "
-                f"Product may have been deleted after order was placed."
+                f"Product with ID {item.product_id} not found during "
+                f"stock restoration. Product may have been deleted after "
+                f"order was placed."
             )
 
     await session.flush()

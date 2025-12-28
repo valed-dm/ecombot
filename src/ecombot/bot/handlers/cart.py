@@ -65,7 +65,7 @@ def format_cart_text(cart_dto: CartDTO) -> str:
     # Find the length of the longest line and add padding
     max_len = max(len(line) for line in lines) + 4
     padded_lines = [line.ljust(max_len) for line in lines]
-    
+
     final_text = "\n".join(padded_lines)
     return f"<b>{header}</b>\n<pre>{final_text}</pre>"
 

@@ -2,6 +2,7 @@
 Handlers for viewing user order history.
 """
 
+import contextlib
 from html import escape
 
 from aiogram import F
@@ -60,10 +61,8 @@ async def send_orders_view(message: Message, session: AsyncSession, db_user: Use
     try:
         await message.edit_text(text, reply_markup=keyboard)
     except TelegramBadRequest:
-        try:
+        with contextlib.suppress(TelegramBadRequest):
             await message.delete()
-        except TelegramBadRequest:
-            pass
         await message.answer(text, reply_markup=keyboard)
 
 
@@ -105,7 +104,7 @@ async def view_order_details_handler(
         f"Status: <i>{order_details.status.capitalize()}</i>\n\n"
         "<b>Items:</b>\n"
     ]
-    
+
     for item in order_details.items:
         item_total = item.price * item.quantity
         text_parts.append(
@@ -113,7 +112,7 @@ async def view_order_details_handler(
             f"    <code>{item.quantity} x ${item.price:.2f}"
             f" = ${item_total:.2f}</code>\n"
         )
-    
+
     text_parts.append(f"\n<b>Total: ${order_details.total_price:.2f}</b>")
     text = "".join(text_parts)
 

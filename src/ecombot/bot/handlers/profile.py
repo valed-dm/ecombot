@@ -148,7 +148,7 @@ async def back_to_profile_handler(
         await callback_message.delete()  # Delete the address menu
     except TelegramBadRequest as e:
         log.warning(f"Failed to delete message for user {db_user.id}: {e}")
-    
+
     await profile_handler(query.message, session, db_user)
     await query.answer()
 
@@ -179,7 +179,7 @@ async def add_address_get_label(message: Message, state: FSMContext):
     """Step 2 (Add Address): Receives the label, asks for the full address."""
     await state.update_data(label=message.text)
     await state.set_state(AddAddress.getting_address)
-    
+
     try:
         await message.answer(
             "Great. Now, please enter the full shipping address.",

@@ -16,7 +16,6 @@ from ecombot.schemas.dto import CategoryDTO
 from ecombot.schemas.dto import DeliveryAddressDTO
 from ecombot.schemas.dto import OrderDTO
 from ecombot.schemas.dto import ProductDTO
-from ecombot.schemas.dto import UserProfileDTO
 
 from ..schemas.enums import OrderStatus
 from .callback_data import AdminCallbackFactory
@@ -416,7 +415,7 @@ def get_orders_list_keyboard(orders: list[OrderDTO]) -> InlineKeyboardMarkup:
     button for each.
     """
     builder = InlineKeyboardBuilder()
-    
+
     if not orders:
         builder.button(
             text="🛍️ Go to Catalog",
@@ -426,9 +425,11 @@ def get_orders_list_keyboard(orders: list[OrderDTO]) -> InlineKeyboardMarkup:
         for order in orders:
             builder.button(
                 text=f"🔎 View Order #{order.order_number}",
-                callback_data=OrderCallbackFactory(action="view_details", item_id=order.id),
+                callback_data=OrderCallbackFactory(
+                    action="view_details", item_id=order.id
+                ),
             )
-    
+
     builder.adjust(1)
     return builder.as_markup()
 
