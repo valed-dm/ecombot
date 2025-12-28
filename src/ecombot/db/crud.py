@@ -310,6 +310,15 @@ async def update_product(
     if not filtered_data:
         return await get_product(session, product_id)
 
+    # Validate business rules for updates
+    if "price" in filtered_data and filtered_data["price"] <= 0:
+        log.warning(f"Attempt to update product {product_id} with invalid price: {filtered_data['price']}")
+        raise ValueError("Price must be positive")
+    
+    if "stock" in filtered_data and filtered_data["stock"] < 0:
+        log.warning(f"Attempt to update product {product_id} with invalid stock: {filtered_data['stock']}")
+        raise ValueError("Stock must be non-negative")
+
     stmt = (
         update(Product)
         .where(Product.id == product_id)
