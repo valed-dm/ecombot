@@ -227,7 +227,12 @@ async def get_name_handler(message: Message, state: FSMContext):
 async def get_phone_handler(message: Message, state: FSMContext):
     """Slow Path Step 2: Receives phone, asks for address."""
     phone = message.contact.phone_number if message.contact else message.text
-    await state.update_data(phone=phone)
+    
+    if not phone or not phone.strip():
+        await message.answer("Please enter a valid phone number (cannot be empty).")
+        return
+    
+    await state.update_data(phone=phone.strip())
     await message.answer(
         "Great. Finally, what is the full shipping address?",
         reply_markup=ReplyKeyboardRemove(),
