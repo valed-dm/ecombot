@@ -21,6 +21,12 @@ class AddressNotFoundError(Exception):
     pass
 
 
+class UserNotFoundError(Exception):
+    """Raised when a user is not found during operations."""
+
+    pass
+
+
 async def get_user_profile(session: AsyncSession, db_user: User) -> UserProfileDTO:
     """Fetches and converts a user's profile to a DTO."""
     return UserProfileDTO.model_validate(db_user)
@@ -30,13 +36,10 @@ async def update_profile_details(
     session: AsyncSession, user_id: int, update_data: Dict[str, Any]
 ) -> UserProfileDTO:
     """Updates a user's profile and returns the updated DTO."""
-    try:
-        user = await crud.update_user_profile(session, user_id, update_data)
-        if not user:
-            raise Exception("User not found during update.")
-        return UserProfileDTO.model_validate(user)
-    except Exception:
-        raise
+    user = await crud.update_user_profile(session, user_id, update_data)
+    if not user:
+        raise UserNotFoundError("User not found during update.")
+    return UserProfileDTO.model_validate(user)
 
 
 async def get_all_user_addresses(
@@ -51,22 +54,16 @@ async def add_new_address(
     session: AsyncSession, user_id: int, label: str, address: str
 ) -> DeliveryAddress:
     """Adds a new address for the user."""
-    try:
-        new_address = await crud.add_delivery_address(session, user_id, label, address)
-        return new_address
-    except Exception:
-        raise
+    new_address = await crud.add_delivery_address(session, user_id, label, address)
+    return new_address
 
 
 async def delete_address(session: AsyncSession, user_id: int, address_id: int) -> bool:
     """Deletes a user's address after an authorization check."""
-    try:
-        success = await crud.delete_delivery_address(session, address_id, user_id)
-        if not success:
-            raise AddressNotFoundError("Address not found or permission denied.")
-        return True
-    except Exception:
-        raise
+    success = await crud.delete_delivery_address(session, address_id, user_id)
+    if not success:
+        raise AddressNotFoundError("Address not found or permission denied.")
+    return True
 
 
 async def set_user_default_address(
@@ -75,10 +72,7 @@ async def set_user_default_address(
     address_id: int,
 ) -> bool:
     """Service-level function to set a user's default address."""
-    try:
-        result = await crud.set_default_address(session, user_id, address_id)
-        if not result:
-            raise AddressNotFoundError("Address not found or permission denied.")
-        return True
-    except Exception:
-        raise
+    result = await crud.set_default_address(session, user_id, address_id)
+    if not result:
+        raise AddressNotFoundError("Address not found or permission denied.")
+    return True
