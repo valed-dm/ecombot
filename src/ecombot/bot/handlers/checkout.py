@@ -299,7 +299,7 @@ async def slow_path_confirm_handler(
             )
 
             refreshed_user_obj = await session.get(User, db_user.id)
-            if not isinstance(refreshed_user_obj, User):
+            if refreshed_user_obj is None:
                 raise OrderPlacementError(
                     "Could not retrieve your user profile after saving."
                     " Please contact support."
