@@ -332,7 +332,7 @@ def get_checkout_confirmation_keyboard() -> InlineKeyboardMarkup:
         text="❌",
         callback_data=CheckoutCallbackFactory(action="cancel"),
     )
-
+    builder.adjust(2)
     return builder.as_markup()
 
 
