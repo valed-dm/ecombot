@@ -257,6 +257,21 @@ async def create_product(
     image_url: Optional[str] = None,
 ) -> Product:
     """Creates a new product in the database."""
+    # Validate business rules
+    if price <= 0:
+        log.warning(f"Attempt to create product '{name}' with invalid price: {price}")
+        raise ValueError("Price must be positive")
+    
+    if stock < 0:
+        log.warning(f"Attempt to create product '{name}' with invalid stock: {stock}")
+        raise ValueError("Stock must be non-negative")
+    
+    # Validate category exists
+    category = await session.get(Category, category_id)
+    if not category:
+        log.warning(f"Attempt to create product '{name}' with non-existent category_id: {category_id}")
+        raise ValueError(f"Category with ID {category_id} does not exist")
+    
     new_product = Product(
         name=name,
         description=description,
