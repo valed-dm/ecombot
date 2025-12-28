@@ -245,7 +245,7 @@ async def send_address_management_view(
                     f"Failed to send fallback message for user {db_user.id}: "
                     f"{fallback_e}"
                 )
-                raise
+                raise fallback_e from e
     except Exception as e:
         log.error(f"Failed to load addresses for user {db_user.id}: {e}", exc_info=True)
         await message.answer("❌ An error occurred while loading your addresses.")
