@@ -126,6 +126,9 @@ async def add_new_product(
     """
     Service-level function to handle the business logic of adding a new product.
     This is a complete unit of work.
+    
+    Note: The additional get_product call is necessary because ProductDTO requires
+    the category relationship, which is not eagerly loaded by create_product.
     """
     try:
         product = await crud.create_product(
