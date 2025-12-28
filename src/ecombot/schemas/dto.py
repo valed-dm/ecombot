@@ -95,7 +95,7 @@ class CartDTO(BaseDTO):
 class OrderItemDTO(BaseDTO):
     """DTO for an item within a confirmed order."""
 
-    quantity: int
+    quantity: int = Field(gt=0)
     price: Decimal
     product: ProductDTO
 
