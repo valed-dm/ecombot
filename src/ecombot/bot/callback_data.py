@@ -9,6 +9,13 @@ create and parse callback data in a type-safe and readable way, avoiding
 from aiogram.filters.callback_data import CallbackData
 
 
+class AdminCallbackFactory(CallbackData, prefix="admin"):
+    """CallbackData for admin panel actions."""
+
+    action: str  # "add_category", "delete_category", "add_product", etc.
+    item_id: int | None = None  # For actions that need an ID
+
+
 class AdminNavCallbackFactory(CallbackData, prefix="admin_nav"):
     """CallbackData for complex admin navigation, like going "back"."""
 

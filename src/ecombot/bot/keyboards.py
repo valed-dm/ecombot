@@ -19,6 +19,7 @@ from ecombot.schemas.dto import ProductDTO
 from ecombot.schemas.dto import UserProfileDTO
 
 from ..schemas.enums import OrderStatus
+from .callback_data import AdminCallbackFactory
 from .callback_data import AdminNavCallbackFactory
 from .callback_data import CartCallbackFactory
 from .callback_data import CatalogCallbackFactory
@@ -136,12 +137,30 @@ def get_cart_keyboard(cart: CartDTO) -> InlineKeyboardMarkup:
 def get_admin_panel_keyboard() -> InlineKeyboardMarkup:
     """Builds the main keyboard for the admin panel."""
     builder = InlineKeyboardBuilder()
-    builder.button(text="➕ Add Category", callback_data="admin:add_category")
-    builder.button(text="❌ Delete Category", callback_data="admin:delete_category")
-    builder.button(text="➕ Add Product", callback_data="admin:add_product")
-    builder.button(text="📝 Edit Product", callback_data="admin:edit_product")
-    builder.button(text="❌ Delete Product", callback_data="admin:delete_product")
-    builder.button(text="📦 View Orders", callback_data="admin:view_orders")
+    builder.button(
+        text="➕ Add Category",
+        callback_data=AdminCallbackFactory(action="add_category")
+    )
+    builder.button(
+        text="❌ Delete Category",
+        callback_data=AdminCallbackFactory(action="delete_category")
+    )
+    builder.button(
+        text="➕ Add Product",
+        callback_data=AdminCallbackFactory(action="add_product")
+    )
+    builder.button(
+        text="📝 Edit Product",
+        callback_data=AdminCallbackFactory(action="edit_product")
+    )
+    builder.button(
+        text="❌ Delete Product",
+        callback_data=AdminCallbackFactory(action="delete_product")
+    )
+    builder.button(
+        text="📦 View Orders",
+        callback_data=AdminCallbackFactory(action="view_orders")
+    )
     builder.adjust(2, 3, 1)
     return builder.as_markup()
 
@@ -171,7 +190,7 @@ def get_admin_order_filters_keyboard() -> InlineKeyboardMarkup:
     )
     builder.button(
         text="⬅️ Back to Admin Panel",
-        callback_data="admin_back_main",
+        callback_data=AdminCallbackFactory(action="back_main"),
     )
     builder.adjust(2, 2, 1, 1)
     return builder.as_markup()
