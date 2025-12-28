@@ -127,26 +127,21 @@ async def add_new_product(
     Note: The additional get_product call is necessary because ProductDTO requires
     the category relationship, which is not eagerly loaded by create_product.
     """
-    try:
-        product = await crud.create_product(
-            session=session,
-            name=name,
-            description=description,
-            price=price,
-            stock=stock,
-            category_id=category_id,
-            image_url=image_url,
-        )
+    product = await crud.create_product(
+        session=session,
+        name=name,
+        description=description,
+        price=price,
+        stock=stock,
+        category_id=category_id,
+        image_url=image_url,
+    )
 
-        refreshed_product = await crud.get_product(session, product.id)
-        if not refreshed_product:
-            raise Exception("Failed to retrieve the product after creation.")
+    refreshed_product = await crud.get_product(session, product.id)
+    if not refreshed_product:
+        raise Exception("Failed to retrieve the product after creation.")
 
-        return ProductDTO.model_validate(refreshed_product)
-
-    except Exception as e:
-        log.error("Failed to create product: {}", e)
-        raise
+    return ProductDTO.model_validate(refreshed_product)
 
 
 async def update_product_details(
