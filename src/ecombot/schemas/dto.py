@@ -57,7 +57,7 @@ class AdminProductDTO(ProductDTO):
     data like stock levels.
     """
 
-    stock: int
+    stock: int = Field(ge=0)
 
 
 # --- Cart DTOs ---
