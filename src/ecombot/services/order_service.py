@@ -144,8 +144,10 @@ async def place_order(
 
     except ValueError as e:
         raise OrderPlacementError(str(e)) from e
-    except Exception:
-        raise
+    except Exception as e:
+        raise OrderPlacementError(
+            f"An unexpected error occurred during checkout: {e}"
+        ) from e
 
 
 async def get_order_details(
