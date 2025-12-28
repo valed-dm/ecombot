@@ -46,7 +46,7 @@ def format_cart_text(cart_dto: CartDTO) -> str:
         return "🛒 <b>Your Shopping Cart</b>\n\nYour cart is currently empty."
 
     header = "🛒 Your Shopping Cart"
-    lines = [header, ""]
+    lines = [""]  # Start with empty line after header
 
     item_lines = []
     for item in cart_dto.items:
@@ -62,22 +62,12 @@ def format_cart_text(cart_dto: CartDTO) -> str:
     total_line = f"Total: ${cart_dto.total_price:,.2f}"
     lines.append(total_line)
 
-    # --- The Monospaced Block Trick ---
-    # Find the length of the longest line to determine the block width
-    # Add 4 extra spaces for padding
+    # Find the length of the longest line and add padding
     max_len = max(len(line) for line in lines) + 4
-
-    # Pad each line with spaces to match the max length
     padded_lines = [line.ljust(max_len) for line in lines]
-
-    # Join the lines and wrap the entire block in <pre> tags
-    # The <b> tags for the header will still work inside <pre>
+    
     final_text = "\n".join(padded_lines)
-
-    # Replace the header with the bolded version after padding
-    final_text = final_text.replace(header, f"<b>{header}</b>", 1)
-
-    return f"<pre>{final_text}</pre>"
+    return f"<b>{header}</b>\n<pre>{final_text}</pre>"
 
 
 async def update_cart_view(message: Message, cart_dto: CartDTO):
