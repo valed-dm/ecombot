@@ -575,9 +575,9 @@ async def update_order_status(
     )
     result = await session.execute(stmt)
     updated_id = result.scalar_one_or_none()
-    await session.flush()
 
     if updated_id:
+        await session.flush()
         return await get_order(session, updated_id)
     return None
 
