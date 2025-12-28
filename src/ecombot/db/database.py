@@ -23,7 +23,7 @@ DATABASE_URL = URL.create(
     database=settings.PGDATABASE,
 )
 
-async_engine = create_async_engine(DATABASE_URL, echo=False)
+async_engine = create_async_engine(DATABASE_URL, echo=settings.DEBUG)
 
 AsyncSessionLocal = async_sessionmaker(
     bind=async_engine,
