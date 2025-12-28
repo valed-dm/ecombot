@@ -24,8 +24,7 @@ class EmptyCartError(OrderPlacementError):
     """Raised when trying to place an order with an empty cart."""
 
     def __init__(self, message="Cannot place an order with an empty cart."):
-        self.message = message
-        super().__init__(self.message)
+        super().__init__(message)
 
 
 class OrderNotFoundError(Exception):
