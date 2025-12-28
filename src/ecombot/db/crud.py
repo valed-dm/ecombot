@@ -386,6 +386,9 @@ async def add_item_to_cart(
     session: AsyncSession, cart: Cart, product: Product, quantity: int = 1
 ) -> CartItem:
     """Adds a product to the cart or updates its quantity if it already exists."""
+    if quantity <= 0:
+        raise ValueError("Quantity must be positive")
+    
     stmt = select(CartItem).where(
         CartItem.cart_id == cart.id, CartItem.product_id == product.id
     )
