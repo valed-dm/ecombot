@@ -44,6 +44,9 @@ async def add_product_to_cart(
     Adds a specified quantity of a product to the user's cart.
     This is a complete "unit of work" and handles its own transaction.
     """
+    if quantity <= 0:
+        raise ValueError("Quantity must be positive")
+    
     product = await crud.get_product(session, product_id)
     if not product:
         raise ProductNotFoundError(f"Product with ID {product_id} not found.")
