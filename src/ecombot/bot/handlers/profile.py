@@ -45,7 +45,12 @@ class AddAddress(StatesGroup):
 @router.message(Command("profile"))
 async def profile_handler(message: Message, session: AsyncSession, db_user: User):
     """Displays the main user profile view including the default address."""
-    user_profile = await user_service.get_user_profile(session, db_user)
+    try:
+        user_profile = await user_service.get_user_profile(session, db_user)
+    except Exception as e:
+        log.error(f"Failed to load profile for user {db_user.id}: {e}", exc_info=True)
+        await message.answer("❌ An error occurred while loading your profile.")
+        return
 
     default_address = next(
         (addr for addr in user_profile.addresses if addr.is_default), None
