@@ -62,11 +62,8 @@ async def add_new_category(
             f"A category with the name '{name}' already exists."
         )
 
-    try:
-        category = await crud.create_category(session, name, description)
-        return CategoryDTO.model_validate(category)
-    except Exception:
-        raise
+    category = await crud.create_category(session, name, description)
+    return CategoryDTO.model_validate(category)
 
 
 async def delete_category_by_id(session: AsyncSession, category_id: int) -> bool:
@@ -161,27 +158,20 @@ async def update_product_details(
     Service-level function to update a product. Handles the transaction
     and returns the updated product as a DTO.
     """
-    try:
-        updated_product = await crud.update_product(
-            session,
-            product_id,
-            update_data,
+    updated_product = await crud.update_product(
+        session,
+        product_id,
+        update_data,
+    )
+    if not updated_product:
+        raise ProductNotFoundError(
+            f"Product with ID {product_id} not found for update."
         )
-        if not updated_product:
-            raise ProductNotFoundError(
-                f"Product with ID {product_id} not found for update."
-            )
 
-        return AdminProductDTO.model_validate(updated_product)
-
-    except Exception:
-        raise
+    return AdminProductDTO.model_validate(updated_product)
 
 
 async def delete_product_by_id(session: AsyncSession, product_id: int) -> bool:
     """Service-level function to delete a product. Manages the transaction."""
-    try:
-        success = await crud.delete_product(session, product_id)
-        return success
-    except Exception:
-        raise
+    success = await crud.delete_product(session, product_id)
+    return success
