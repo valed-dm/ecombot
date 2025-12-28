@@ -46,12 +46,7 @@ async def command_start_handler(message: Message, session: AsyncSession):
     """
     Handler for the /start command. Displays the main product categories.
     """
-    categories = await catalog_service.get_all_categories(session)
-    keyboard = keyboards.get_catalog_categories_keyboard(categories)
-    await message.answer(
-        "Welcome to our store! Please choose a category to start browsing:",
-        reply_markup=keyboard,
-    )
+    await show_main_catalog(message, session)
 
 
 @router.callback_query(CatalogCallbackFactory.filter(F.action == "back_to_main"))  # type: ignore[arg-type]
