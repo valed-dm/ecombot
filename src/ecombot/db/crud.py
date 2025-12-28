@@ -233,7 +233,9 @@ async def get_products_by_category(
     session: AsyncSession, category_id: int
 ) -> List[Product]:
     """
-    Fetches all products within a specific category, eagerly loading their categories.
+    Fetches all products within a specific category.
+    Note: Category relationship is eagerly loaded despite redundancy
+    to avoid lazy loading issues during DTO conversion.
     """
     stmt = (
         select(Product)
