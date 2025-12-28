@@ -355,7 +355,7 @@ def get_fast_checkout_confirmation_keyboard() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def get_profile_keyboard(user_profile: UserProfileDTO) -> InlineKeyboardMarkup:
+def get_profile_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.button(
         text="📞 Edit Phone",

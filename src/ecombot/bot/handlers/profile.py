@@ -71,7 +71,7 @@ async def profile_handler(message: Message, session: AsyncSession, db_user: User
     else:
         text += "<i>Not set. You can set one in 'Manage Addresses'.</i>"
 
-    keyboard = keyboards.get_profile_keyboard(user_profile)
+    keyboard = keyboards.get_profile_keyboard()
     await message.answer(text, reply_markup=keyboard)
 
 
