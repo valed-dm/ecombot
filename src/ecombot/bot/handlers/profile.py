@@ -144,7 +144,11 @@ async def back_to_profile_handler(
     callback_message: Message,
 ):
     """Handles the 'Back to Profile' button."""
-    await callback_message.delete()  # Delete the address menu
+    try:
+        await callback_message.delete()  # Delete the address menu
+    except TelegramBadRequest as e:
+        log.warning(f"Failed to delete message for user {db_user.id}: {e}")
+    
     await profile_handler(query.message, session, db_user)
     await query.answer()
 
