@@ -70,18 +70,22 @@ def format_cart_text(cart_dto: CartDTO) -> str:
     return f"<b>{header}</b>\n<pre>{final_text}</pre>"
 
 
-async def update_cart_view(message: Message, cart_dto: CartDTO):
+async def update_cart_view(message: Message, cart_dto: CartDTO) -> bool:
     """
     Helper function to edit a message to show the updated cart view.
+    Returns True on success, False on failure.
     """
     text = format_cart_text(cart_dto)
     keyboard = keyboards.get_cart_keyboard(cart_dto)
 
     try:
         await message.edit_text(text, reply_markup=keyboard)
+        return True
     except TelegramBadRequest as e:
         if "message is not modified" not in e.message:
             log.error(f"Error updating cart view: {e}")
+            return False
+        return True  # Not modified is considered success
 
 
 # =============================================================================
@@ -159,7 +163,10 @@ async def alter_cart_item(
         updated_cart = await cart_service.alter_item_quantity(
             session, user_id, cart_item_id, action
         )
-        await update_cart_view(callback_message, updated_cart)
+        success = await update_cart_view(callback_message, updated_cart)
+        if not success:
+            await query.answer("Failed to update cart display.", show_alert=True)
+            return
 
         feedback_text = {
             "increase": "Quantity +1",
