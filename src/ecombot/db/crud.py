@@ -595,7 +595,10 @@ async def restore_stock_for_order_items(
         product = await session.get(Product, item.product_id, with_for_update=True)
         if product:
             product.stock += item.quantity
-        # Note: We don't raise an error if product is not found during restoration
-        # as the product might have been deleted after the order was placed
+        else:
+            log.warning(
+                f"Product with ID {item.product_id} not found during stock restoration. "
+                f"Product may have been deleted after order was placed."
+            )
 
     await session.flush()
