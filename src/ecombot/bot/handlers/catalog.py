@@ -133,9 +133,7 @@ async def view_product_handler(
             await callback_message.delete()
 
         except Exception as e:
-            log.warning(
-                f"Failed to send image for product {product.id}: {e}"
-            )
+            log.warning(f"Failed to send image for product {product.id}: {e}")
             await callback_message.edit_text(text, reply_markup=keyboard)
     else:
         await callback_message.edit_text(text, reply_markup=keyboard)

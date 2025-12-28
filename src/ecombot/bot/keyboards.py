@@ -138,27 +138,25 @@ def get_admin_panel_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.button(
         text="➕ Add Category",
-        callback_data=AdminCallbackFactory(action="add_category")
+        callback_data=AdminCallbackFactory(action="add_category"),
     )
     builder.button(
         text="❌ Delete Category",
-        callback_data=AdminCallbackFactory(action="delete_category")
+        callback_data=AdminCallbackFactory(action="delete_category"),
     )
     builder.button(
-        text="➕ Add Product",
-        callback_data=AdminCallbackFactory(action="add_product")
+        text="➕ Add Product", callback_data=AdminCallbackFactory(action="add_product")
     )
     builder.button(
         text="📝 Edit Product",
-        callback_data=AdminCallbackFactory(action="edit_product")
+        callback_data=AdminCallbackFactory(action="edit_product"),
     )
     builder.button(
         text="❌ Delete Product",
-        callback_data=AdminCallbackFactory(action="delete_product")
+        callback_data=AdminCallbackFactory(action="delete_product"),
     )
     builder.button(
-        text="📦 View Orders",
-        callback_data=AdminCallbackFactory(action="view_orders")
+        text="📦 View Orders", callback_data=AdminCallbackFactory(action="view_orders")
     )
     builder.adjust(2, 3, 1)
     return builder.as_markup()
@@ -387,18 +385,24 @@ def get_address_management_keyboard(
             )
         )
         action_row = (
-            [InlineKeyboardButton(
-                text="Set as Default",
+            [
+                InlineKeyboardButton(
+                    text="Set as Default",
+                    callback_data=ProfileCallbackFactory(
+                        action="set_default_addr", address_id=addr.id
+                    ).pack(),
+                )
+            ]
+            if not addr.is_default
+            else []
+        ) + [
+            InlineKeyboardButton(
+                text="❌ Delete",
                 callback_data=ProfileCallbackFactory(
-                    action="set_default_addr", address_id=addr.id
+                    action="delete_addr", address_id=addr.id
                 ).pack(),
-            )] if not addr.is_default else []
-        ) + [InlineKeyboardButton(
-            text="❌ Delete",
-            callback_data=ProfileCallbackFactory(
-                action="delete_addr", address_id=addr.id
-            ).pack(),
-        )]
+            )
+        ]
         builder.row(*action_row)
 
     builder.button(
