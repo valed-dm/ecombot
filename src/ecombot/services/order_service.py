@@ -192,30 +192,26 @@ async def change_order_status(
     Includes special business logic: if an order is cancelled, the stock for
     the items in that order is returned to the inventory.
     """
-    try:
-        order_to_update = await crud.get_order(session, order_id)
-        if not order_to_update:
-            raise OrderPlacementError("Order not found.")
+    order_to_update = await crud.get_order(session, order_id)
+    if not order_to_update:
+        raise OrderPlacementError("Order not found.")
 
-        if new_status == OrderStatus.CANCELLED:
-            if order_to_update.status in [OrderStatus.COMPLETED, OrderStatus.CANCELLED]:
-                raise OrderPlacementError(
-                    f"Cannot cancel a {order_to_update.status.value} order."
-                )
-
-            # Atomically restore stock for all items with pessimistic locking
-            await crud.restore_stock_for_order_items(
-                session=session, order_items=order_to_update.items
+    if new_status == OrderStatus.CANCELLED:
+        if order_to_update.status in [OrderStatus.COMPLETED, OrderStatus.CANCELLED]:
+            raise OrderPlacementError(
+                f"Cannot cancel a {order_to_update.status.value} order."
             )
 
-        order_to_update.status = new_status
-        await session.flush()
+        # Atomically restore stock for all items with pessimistic locking
+        await crud.restore_stock_for_order_items(
+            session=session, order_items=order_to_update.items
+        )
 
-        refreshed_order = await crud.get_order(session, order_to_update.id)
-        if not refreshed_order:
-            raise OrderPlacementError("Failed to retrieve order after status update.")
+    order_to_update.status = new_status
+    await session.flush()
 
-        return OrderDTO.model_validate(refreshed_order)
+    refreshed_order = await crud.get_order(session, order_to_update.id)
+    if not refreshed_order:
+        raise OrderPlacementError("Failed to retrieve order after status update.")
 
-    except Exception:
-        raise
+    return OrderDTO.model_validate(refreshed_order)
