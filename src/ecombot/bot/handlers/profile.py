@@ -178,11 +178,15 @@ async def add_address_start(
 async def add_address_get_label(message: Message, state: FSMContext):
     """Step 2 (Add Address): Receives the label, asks for the full address."""
     await state.update_data(label=message.text)
-    await message.answer(
-        "Great. Now, please enter the full shipping address.",
-        reply_markup=keyboards.get_cancel_keyboard(),
-    )
     await state.set_state(AddAddress.getting_address)
+    
+    try:
+        await message.answer(
+            "Great. Now, please enter the full shipping address.",
+            reply_markup=keyboards.get_cancel_keyboard(),
+        )
+    except Exception as e:
+        log.error(f"Failed to send address prompt: {e}", exc_info=True)
 
 
 @router.message(AddAddress.getting_address, F.text)
