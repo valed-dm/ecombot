@@ -102,5 +102,5 @@ async def alter_item_quantity(
 
 async def clear_user_cart(session: AsyncSession, user_id: int) -> None:
     """Clears all items from a user's cart."""
-    cart = await crud.get_or_create_cart(session, user_id)
+    cart = await crud.get_or_create_cart_lean(session, user_id)
     await crud.clear_cart(session, cart)
