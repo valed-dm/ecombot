@@ -2,6 +2,8 @@
 Handlers for viewing user order history.
 """
 
+from html import escape
+
 from aiogram import F
 from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest
@@ -36,20 +38,22 @@ async def send_orders_view(message: Message, session: AsyncSession, db_user: Use
     A helper function to generate and send the main order history view.
     """
     user_orders = await order_service.list_user_orders(session, db_user.id)
-    text = "<b>Your Order History</b>\n\n"
+    text_parts = ["<b>Your Order History</b>\n\n"]
 
     if not user_orders:
-        text += "You have not placed any orders yet."
-        await message.answer(text)
+        text_parts.append("You have not placed any orders yet.")
+        await message.answer("".join(text_parts))
         return
 
     for order in user_orders:
-        text += (
-            f"📦 <b>Order #{order.order_number}</b>"
+        text_parts.append(
+            f"📦 <b>Order #{escape(order.order_number)}</b>"
             f" - <i>{order.status.capitalize()}</i>\n"
             f"Placed on: {order.created_at.strftime('%Y-%m-%d %H:%M')}\n"
             f"Total: ${order.total_price:.2f}\n\n"
         )
+
+    text = "".join(text_parts)
 
     keyboard = keyboards.get_orders_list_keyboard(user_orders)
 
@@ -93,19 +97,22 @@ async def view_order_details_handler(
         await query.answer("Could not find this order.", show_alert=True)
         return
 
-    text = (
+    text_parts = [
         f"<b>Details for Order #{order_details.id}</b>\n"
         f"Status: <i>{order_details.status.capitalize()}</i>\n\n"
         "<b>Items:</b>\n"
-    )
+    ]
+    
     for item in order_details.items:
         item_total = item.price * item.quantity
-        text += (
-            f"  - <b>{item.product.name}</b>\n"
+        text_parts.append(
+            f"  - <b>{escape(item.product.name)}</b>\n"
             f"    <code>{item.quantity} x ${item.price:.2f}"
             f" = ${item_total:.2f}</code>\n"
         )
-    text += f"\n<b>Total: ${order_details.total_price:.2f}</b>"
+    
+    text_parts.append(f"\n<b>Total: ${order_details.total_price:.2f}</b>")
+    text = "".join(text_parts)
 
     keyboard = keyboards.get_order_details_keyboard()
     await callback_message.edit_text(text, reply_markup=keyboard)
