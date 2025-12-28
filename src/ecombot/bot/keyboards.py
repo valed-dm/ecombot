@@ -422,11 +422,19 @@ def get_orders_list_keyboard(orders: list[OrderDTO]) -> InlineKeyboardMarkup:
     button for each.
     """
     builder = InlineKeyboardBuilder()
-    for order in orders:
+    
+    if not orders:
         builder.button(
-            text=f"🔎 View Order #{order.order_number}",
-            callback_data=OrderCallbackFactory(action="view_details", item_id=order.id),
+            text="🛍️ Go to Catalog",
+            callback_data=CatalogCallbackFactory(action="back_to_main", item_id=0),
         )
+    else:
+        for order in orders:
+            builder.button(
+                text=f"🔎 View Order #{order.order_number}",
+                callback_data=OrderCallbackFactory(action="view_details", item_id=order.id),
+            )
+    
     builder.adjust(1)
     return builder.as_markup()
 
