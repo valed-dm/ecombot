@@ -359,6 +359,7 @@ async def get_or_create_cart(session: AsyncSession, user_id: int) -> Cart:
         cart = Cart(user_id=user_id)
         session.add(cart)
         await session.flush()
+        await session.refresh(cart, attribute_names=["items"])
 
     return cart
 
