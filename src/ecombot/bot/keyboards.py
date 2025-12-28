@@ -387,25 +387,19 @@ def get_address_management_keyboard(
                 callback_data="do_nothing",
             )
         )
-        action_row = []
-
-        if not addr.is_default:
-            action_row.append(
-                InlineKeyboardButton(
-                    text="Set as Default",
-                    callback_data=ProfileCallbackFactory(
-                        action="set_default_addr", address_id=addr.id
-                    ).pack(),
-                )
-            )
-        action_row.append(
-            InlineKeyboardButton(
-                text="❌ Delete",
+        action_row = (
+            [InlineKeyboardButton(
+                text="Set as Default",
                 callback_data=ProfileCallbackFactory(
-                    action="delete_addr", address_id=addr.id
+                    action="set_default_addr", address_id=addr.id
                 ).pack(),
-            )
-        )
+            )] if not addr.is_default else []
+        ) + [InlineKeyboardButton(
+            text="❌ Delete",
+            callback_data=ProfileCallbackFactory(
+                action="delete_addr", address_id=addr.id
+            ).pack(),
+        )]
         builder.row(*action_row)
 
     builder.button(
