@@ -60,7 +60,10 @@ async def send_orders_view(message: Message, session: AsyncSession, db_user: Use
     try:
         await message.edit_text(text, reply_markup=keyboard)
     except TelegramBadRequest:
-        await message.delete()
+        try:
+            await message.delete()
+        except TelegramBadRequest:
+            pass
         await message.answer(text, reply_markup=keyboard)
 
 
