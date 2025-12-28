@@ -132,9 +132,9 @@ async def view_product_handler(
             )
             await callback_message.delete()
 
-        except FileNotFoundError:
+        except Exception as e:
             log.warning(
-                f"Image file not found for product {product.id}: {product.image_url}"
+                f"Failed to send image for product {product.id}: {e}"
             )
             await callback_message.edit_text(text, reply_markup=keyboard)
     else:
