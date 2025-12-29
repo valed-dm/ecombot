@@ -312,11 +312,17 @@ async def update_product(
 
     # Validate business rules for updates
     if "price" in filtered_data and filtered_data["price"] <= 0:
-        log.warning(f"Attempt to update product {product_id} with invalid price: {filtered_data['price']}")
+        log.warning(
+            f"Attempt to update product {product_id} with invalid price: "
+            f"{filtered_data['price']}"
+        )
         raise ValueError("Price must be positive")
-    
+
     if "stock" in filtered_data and filtered_data["stock"] < 0:
-        log.warning(f"Attempt to update product {product_id} with invalid stock: {filtered_data['stock']}")
+        log.warning(
+            f"Attempt to update product {product_id} with invalid stock: "
+            f"{filtered_data['stock']}"
+        )
         raise ValueError("Stock must be non-negative")
 
     stmt = (
