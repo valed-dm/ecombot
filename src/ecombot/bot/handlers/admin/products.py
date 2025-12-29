@@ -264,3 +264,75 @@ async def add_product_get_image(
         )
     finally:
         await state.clear()
+
+
+@router.callback_query(AdminCallbackFactory.filter(F.action == "edit_product"))  # type: ignore[arg-type]
+async def edit_product_start(
+    query: CallbackQuery,
+    callback_data: AdminCallbackFactory,
+    session: AsyncSession,
+    state: FSMContext,
+    callback_message: Message,
+):
+    """Step 1 (Edit Product): Shows list of categories to choose from."""
+    try:
+        categories = await catalog_service.get_all_categories(session)
+    except Exception as e:
+        log.error(f"Failed to load categories for edit product: {e}", exc_info=True)
+        await callback_message.edit_text(
+            "❌ An unexpected error occurred while loading categories.",
+            reply_markup=keyboards.get_admin_panel_keyboard(),
+        )
+        await query.answer()
+        return
+
+    if not categories:
+        await callback_message.edit_text(
+            "❌ No categories found. Please create categories and products first.",
+            reply_markup=keyboards.get_admin_panel_keyboard(),
+        )
+        await query.answer()
+        return
+
+    keyboard = keyboards.get_catalog_categories_keyboard(categories)
+    await callback_message.edit_text(
+        "Choose a category to edit products from:", reply_markup=keyboard
+    )
+    await state.set_state("EditProduct:choose_category")
+    await query.answer()
+
+
+@router.callback_query(AdminCallbackFactory.filter(F.action == "delete_product"))  # type: ignore[arg-type]
+async def delete_product_start(
+    query: CallbackQuery,
+    callback_data: AdminCallbackFactory,
+    session: AsyncSession,
+    state: FSMContext,
+    callback_message: Message,
+):
+    """Step 1 (Delete Product): Shows list of categories to choose from."""
+    try:
+        categories = await catalog_service.get_all_categories(session)
+    except Exception as e:
+        log.error(f"Failed to load categories for delete product: {e}", exc_info=True)
+        await callback_message.edit_text(
+            "❌ An unexpected error occurred while loading categories.",
+            reply_markup=keyboards.get_admin_panel_keyboard(),
+        )
+        await query.answer()
+        return
+
+    if not categories:
+        await callback_message.edit_text(
+            "❌ No categories found. Please create categories and products first.",
+            reply_markup=keyboards.get_admin_panel_keyboard(),
+        )
+        await query.answer()
+        return
+
+    keyboard = keyboards.get_catalog_categories_keyboard(categories)
+    await callback_message.edit_text(
+        "Choose a category to delete products from:", reply_markup=keyboard
+    )
+    await state.set_state("DeleteProduct:choose_category")
+    await query.answer()
