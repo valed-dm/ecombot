@@ -207,7 +207,10 @@ async def delete_category_final(
 ):
     """Step 3 (Delete Cat): Processes the final confirmation."""
     if not callback_data.confirm:
-        await callback_message.edit_text("Deletion cancelled.")
+        await callback_message.edit_text(
+            "Deletion cancelled.",
+            reply_markup=keyboards.get_admin_panel_keyboard(),
+        )
         await state.clear()
         await query.answer()
         return
@@ -219,25 +222,32 @@ async def delete_category_final(
         success = await catalog_service.delete_category_by_id(
             session, callback_data.item_id
         )
+        
         if success:
             await callback_message.edit_text(
-                f"✅ Category '{category_name}' has been deleted."
+                f"✅ Category '{category_name}' has been deleted.",
+                reply_markup=keyboards.get_admin_panel_keyboard(),
             )
         else:
             await callback_message.edit_text(
                 f"❌ Error: Could not delete '{category_name}'."
-                f" It may have already been removed."
+                f" It may have already been removed.",
+                reply_markup=keyboards.get_admin_panel_keyboard(),
             )
     except CategoryNotEmptyError:
         await callback_message.edit_text(
             f"❌ Cannot delete '{category_name}' because it still"
-            f" contains products. Please move or delete them first."
+            f" contains products. Please move or delete them first.",
+            reply_markup=keyboards.get_admin_panel_keyboard(),
         )
     except Exception as e:
         log.error(
             f"Error deleting category {callback_data.item_id}: {e}", exc_info=True
         )
-        await callback_message.edit_text("An unexpected error occurred.")
+        await callback_message.edit_text(
+            "An unexpected error occurred.",
+            reply_markup=keyboards.get_admin_panel_keyboard(),
+        )
 
     await state.clear()
     await query.answer()

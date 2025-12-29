@@ -11,6 +11,7 @@ from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.db import crud
+from ecombot.logging_setup import log
 from ecombot.schemas.dto import AdminProductDTO
 from ecombot.schemas.dto import CategoryDTO
 from ecombot.schemas.dto import ProductDTO

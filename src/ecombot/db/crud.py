@@ -210,9 +210,12 @@ async def delete_category_if_empty(
     if result.scalars().first():
         return False, True  # Not deleted, exists but has products
 
-    # Category exists and is empty, delete it
-    session.delete(category)
+    # Category exists and is empty, delete it using direct SQL
+    from sqlalchemy import delete
+    delete_stmt = delete(Category).where(Category.id == category_id)
+    await session.execute(delete_stmt)
     await session.flush()
+    
     return True, True  # Deleted successfully
 
 
