@@ -18,6 +18,7 @@ from aiogram.types import PhotoSize
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot import keyboards
+from ecombot.bot.callback_data import AdminCallbackFactory
 from ecombot.bot.callback_data import CatalogCallbackFactory
 from ecombot.config import settings
 from ecombot.logging_setup import log
@@ -30,9 +31,12 @@ router = Router()
 
 
 @router.message(Command("add_product"))
-@router.callback_query(F.data == "admin:add_product")
+@router.callback_query(AdminCallbackFactory.filter(F.action == "add_product"))  # type: ignore[arg-type]
 async def add_product_start(
-    event: Message | CallbackQuery, session: AsyncSession, state: FSMContext
+    event: Message | CallbackQuery, 
+    callback_data: AdminCallbackFactory | None,
+    session: AsyncSession, 
+    state: FSMContext
 ):
     """Step 1: Starts the Add Product FSM. Asks the admin to choose a category."""
     try:
