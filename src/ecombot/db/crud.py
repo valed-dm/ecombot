@@ -345,13 +345,43 @@ async def update_product(
 
 
 async def delete_product(session: AsyncSession, product_id: int) -> bool:
-    """Deletes a product from the database by its ID."""
+    """Deletes a product from the database by its ID using direct SQL."""
+    # First check if product exists
     product = await session.get(Product, product_id)
-    if product:
-        session.delete(product)
-        await session.flush()
-        return True
-    return False
+    if not product:
+        log.info(f"CRUD: Product {product_id} not found")
+        return False
+    
+    log.info(f"CRUD: Found product {product_id}: {product.name}")
+    
+    # Remove product from all carts first (to handle foreign key constraints)
+    from sqlalchemy import delete
+    cart_delete_stmt = delete(CartItem).where(CartItem.product_id == product_id)
+    cart_result = await session.execute(cart_delete_stmt)
+    if cart_result.rowcount > 0:
+        log.info(f"CRUD: Removed product {product_id} from {cart_result.rowcount} cart items")
+    
+    # Check for order items (these should prevent deletion as they're historical records)
+    order_items_stmt = select(OrderItem).where(OrderItem.product_id == product_id).limit(1)
+    order_result = await session.execute(order_items_stmt)
+    if order_result.scalars().first():
+        log.warning(f"CRUD: Product {product_id} has order history, cannot delete")
+        return False
+    
+    log.info(f"CRUD: No order history found, proceeding with deletion")
+    
+    # Delete the product using direct SQL
+    product_delete_stmt = delete(Product).where(Product.id == product_id)
+    result = await session.execute(product_delete_stmt)
+    await session.flush()
+    
+    log.info(f"CRUD: DELETE affected {result.rowcount} rows")
+    
+    # Verify deletion
+    verification = await session.get(Product, product_id)
+    log.info(f"CRUD: Product {product_id} still exists after delete: {verification is not None}")
+    
+    return result.rowcount > 0
 
 
 # -------------------
