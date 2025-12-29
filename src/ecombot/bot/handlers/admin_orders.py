@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ecombot.bot import keyboards
 from ecombot.bot.callback_data import OrderCallbackFactory
 from ecombot.bot.filters.is_admin import IsAdmin
-from ecombot.bot.handlers.admin import send_main_admin_panel
+from ecombot.bot.handlers.admin.helpers import send_main_admin_panel
 from ecombot.bot.middlewares import MessageInteractionMiddleware
 from ecombot.db import crud
 from ecombot.logging_setup import log
