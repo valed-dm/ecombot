@@ -1,5 +1,6 @@
 """Helper functions and utilities for admin handlers."""
 
+import contextlib
 import uuid
 from typing import Optional
 
@@ -80,11 +81,10 @@ async def send_main_admin_panel(message: Message) -> None:
         await message.edit_text(text, reply_markup=keyboard)
     except TelegramBadRequest as e:
         log.warning(f"Failed to edit admin panel message: {e}")
-        try:
-            await message.answer(text, reply_markup=keyboard)
-        except Exception as fallback_e:
-            log.error(f"Failed to send fallback admin panel message: {fallback_e}")
-            raise
+        # Delete the old message and send a new one
+        with contextlib.suppress(TelegramBadRequest):
+            await message.delete()
+        await message.answer(text, reply_markup=keyboard)
 
 
 async def process_photo_upload(
