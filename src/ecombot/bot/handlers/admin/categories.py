@@ -11,6 +11,7 @@ from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot import keyboards
+from ecombot.bot.callback_data import AdminCallbackFactory
 from ecombot.bot.callback_data import CatalogCallbackFactory
 from ecombot.bot.callback_data import ConfirmationCallbackFactory
 from ecombot.db.models import Category
@@ -26,9 +27,10 @@ from .states import DeleteCategory
 router = Router()
 
 
-@router.callback_query(F.data == "admin:add_category")
+@router.callback_query(AdminCallbackFactory.filter(F.action == "add_category"))  # type: ignore[arg-type]
 async def add_category_start(
     query: CallbackQuery,
+    callback_data: AdminCallbackFactory,
     state: FSMContext,
     callback_message: Message,
 ):
@@ -109,9 +111,10 @@ async def add_category_description(
         await state.clear()
 
 
-@router.callback_query(F.data == "admin:delete_category")
+@router.callback_query(AdminCallbackFactory.filter(F.action == "delete_category"))  # type: ignore[arg-type]
 async def delete_category_start(
     query: CallbackQuery,
+    callback_data: AdminCallbackFactory,
     session: AsyncSession,
     state: FSMContext,
     callback_message: Message,
