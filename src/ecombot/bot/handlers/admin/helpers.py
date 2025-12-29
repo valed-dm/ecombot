@@ -1,6 +1,5 @@
 """Helper functions and utilities for admin handlers."""
 
-import contextlib
 import uuid
 from typing import Optional
 
@@ -77,7 +76,7 @@ async def send_main_admin_panel(message: Message) -> None:
     """A helper function to generate and send the main admin panel view."""
     keyboard = keyboards.get_admin_panel_keyboard()
     text = "Welcome to the Admin Panel! Please choose an action:"
-    
+
     # Try to edit first (works for callback query messages)
     try:
         await message.edit_text(text, reply_markup=keyboard)
@@ -85,7 +84,7 @@ async def send_main_admin_panel(message: Message) -> None:
     except TelegramBadRequest:
         # Edit failed, send as new message instead
         pass
-    
+
     # Send as new message (works for command messages and when edit fails)
     await message.answer(text, reply_markup=keyboard)
 

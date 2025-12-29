@@ -222,7 +222,7 @@ async def delete_category_final(
         success = await catalog_service.delete_category_by_id(
             session, callback_data.item_id
         )
-        
+
         if success:
             await callback_message.edit_text(
                 f"✅ Category '{category_name}' has been deleted.",
