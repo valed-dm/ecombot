@@ -674,7 +674,7 @@ async def delete_product_choose_product(
     keyboard = keyboards.get_delete_confirmation_keyboard(
         action="delete_product", item_id=product_id
     )
-    
+
     text = (
         f"⚠️ Are you sure you want to permanently delete this product?\n\n"
         f"<b>{product.name}</b>\n"
@@ -683,7 +683,7 @@ async def delete_product_choose_product(
         f"<b>Stock:</b> {product.stock} units\n\n"
         "This action cannot be undone."
     )
-    
+
     await callback_message.edit_text(text, reply_markup=keyboard)
     await state.set_state(DeleteProduct.confirm_deletion)
     await query.answer()
@@ -728,9 +728,7 @@ async def delete_product_final(
                 reply_markup=keyboards.get_admin_panel_keyboard(),
             )
     except Exception as e:
-        log.error(
-            f"Error deleting product {product_id}: {e}", exc_info=True
-        )
+        log.error(f"Error deleting product {product_id}: {e}", exc_info=True)
         await callback_message.edit_text(
             "An unexpected error occurred while deleting the product.",
             reply_markup=keyboards.get_admin_panel_keyboard(),

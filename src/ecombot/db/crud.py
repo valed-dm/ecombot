@@ -350,35 +350,39 @@ async def delete_product(session: AsyncSession, product_id: int) -> bool:
     product = await session.get(Product, product_id)
     if not product:
         return False
-    
+
     image_path = product.image_url  # Store image path before deletion
-    
+
     # Remove product from all carts first (to handle foreign key constraints)
     from sqlalchemy import delete
+
     cart_delete_stmt = delete(CartItem).where(CartItem.product_id == product_id)
     await session.execute(cart_delete_stmt)
-    
-    # Check for order items (these should prevent deletion as they're historical records)
-    order_items_stmt = select(OrderItem).where(OrderItem.product_id == product_id).limit(1)
+
+    # Check for order items (prevent deletion of historical records)
+    order_items_stmt = (
+        select(OrderItem).where(OrderItem.product_id == product_id).limit(1)
+    )
     order_result = await session.execute(order_items_stmt)
     if order_result.scalars().first():
         log.warning(f"Cannot delete product {product_id}: has order history")
         return False
-    
+
     # Delete the product using direct SQL
     product_delete_stmt = delete(Product).where(Product.id == product_id)
     result = await session.execute(product_delete_stmt)
     await session.flush()
-    
+
     # Clean up image file if product was successfully deleted
     if result.rowcount > 0 and image_path:
         try:
             from pathlib import Path
+
             Path(image_path).unlink(missing_ok=True)
             log.info(f"Deleted product image: {image_path}")
         except OSError as e:
             log.error(f"Failed to delete image file {image_path}: {e}")
-    
+
     return result.rowcount > 0
 
 
