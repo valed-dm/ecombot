@@ -12,7 +12,6 @@ from aiogram import F
 from aiogram import Router
 from aiogram.types import CallbackQuery
 from aiogram.types import Message
-from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot import keyboards

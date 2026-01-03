@@ -173,8 +173,8 @@ def get_admin_orders_list_keyboard(orders: list[OrderDTO]) -> InlineKeyboardMark
         )
 
     builder.button(
-        text="⬅️ Back to Filters", 
-        callback_data=AdminCallbackFactory(action="view_orders")
+        text="⬅️ Back to Filters",
+        callback_data=AdminCallbackFactory(action="view_orders"),
     )
     builder.adjust(1)
     return builder.as_markup()
