@@ -38,9 +38,9 @@ router = Router()
 @router.callback_query(AdminCallbackFactory.filter(F.action == "add_product"))  # type: ignore[arg-type]
 async def add_product_start(
     event: Message | CallbackQuery,
-    callback_data: AdminCallbackFactory | None,
     session: AsyncSession,
     state: FSMContext,
+    callback_data: AdminCallbackFactory | None = None,
 ):
     """Step 1: Starts the Add Product FSM. Asks the admin to choose a category."""
     try:
