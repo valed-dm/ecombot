@@ -1,10 +1,13 @@
 """Shopping cart CRUD operations."""
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from ..models import Cart, CartItem, Product
+from ..models import Cart
+from ..models import CartItem
+from ..models import Product
 
 
 async def get_or_create_cart(session: AsyncSession, user_id: int) -> Cart:

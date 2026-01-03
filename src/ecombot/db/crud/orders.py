@@ -1,15 +1,21 @@
 """Order management CRUD operations."""
 
-from typing import List, Optional, Sequence
+from typing import List
+from typing import Optional
+from typing import Sequence
 
-from sqlalchemy import select, update
+from sqlalchemy import select
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from ...logging_setup import log
 from ...schemas.enums import OrderStatus
 from ...utils import generate_order_number
-from ..models import CartItem, Order, OrderItem, Product
+from ..models import CartItem
+from ..models import Order
+from ..models import OrderItem
+from ..models import Product
 
 
 async def create_order_with_items(

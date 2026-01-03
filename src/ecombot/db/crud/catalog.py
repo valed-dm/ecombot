@@ -2,14 +2,22 @@
 
 from decimal import Decimal
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
 
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete
+from sqlalchemy import select
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from ...logging_setup import log
-from ..models import CartItem, Category, OrderItem, Product
+from ..models import CartItem
+from ..models import Category
+from ..models import OrderItem
+from ..models import Product
 
 
 async def get_categories(session: AsyncSession) -> List[Category]:

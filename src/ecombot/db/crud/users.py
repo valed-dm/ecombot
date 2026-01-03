@@ -1,14 +1,19 @@
 """User and delivery address CRUD operations."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
 
 import aiogram
-from sqlalchemy import select, update
+from sqlalchemy import select
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from ...logging_setup import log
-from ..models import DeliveryAddress, User
+from ..models import DeliveryAddress
+from ..models import User
 
 
 async def get_or_create_user(
