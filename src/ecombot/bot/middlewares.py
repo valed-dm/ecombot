@@ -87,11 +87,11 @@ class UserMiddleware(BaseMiddleware):
     """
     This middleware fetches or creates a user record from the database for
     every update from a user and injects it into the handler's context.
-    Also sets role-based bot commands on first interaction.
+    Also sets role-based bot commands automatically.
     """
 
     def __init__(self):
-        self._user_commands_set = set()  # Track users who have commands set
+        self._user_commands_cache = {}  # Track user_id -> is_admin status
 
     async def __call__(
         self,
@@ -113,18 +113,20 @@ class UserMiddleware(BaseMiddleware):
         # Inject the user object into the context
         data["db_user"] = db_user
 
-        # Set role-based commands on first interaction
-        if telegram_user.id not in self._user_commands_set:
+        # Check if commands need updating
+        current_admin_status = telegram_user.id in settings.ADMIN_IDS
+        cached_status = self._user_commands_cache.get(telegram_user.id)
+
+        if cached_status != current_admin_status:
             bot: Bot = data.get("bot")
             if bot:
                 await self._set_user_commands(bot, telegram_user.id)
-                self._user_commands_set.add(telegram_user.id)
+                self._user_commands_cache[telegram_user.id] = current_admin_status
 
         return await handler(event, data)
 
     async def _set_user_commands(self, bot: Bot, user_id: int) -> None:
         """Set role-based commands for the user."""
-        # Common commands for all users
         common_commands = [
             BotCommand(command="start", description="🛍️ Browse catalog"),
             BotCommand(command="cart", description="🛒 View shopping cart"),
@@ -132,13 +134,11 @@ class UserMiddleware(BaseMiddleware):
             BotCommand(command="profile", description="👤 Manage profile"),
         ]
 
-        # Admin-specific commands
         admin_commands = [
             BotCommand(command="admin", description="⚙️ Admin panel"),
             BotCommand(command="cancel", description="❌ Cancel operation"),
         ]
 
-        # Use existing IsAdmin filter logic
         is_admin = user_id in settings.ADMIN_IDS
         commands = common_commands + (admin_commands if is_admin else [])
 
