@@ -162,6 +162,24 @@ def get_admin_panel_keyboard() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
+def get_admin_orders_list_keyboard(orders: list[OrderDTO]) -> InlineKeyboardMarkup:
+    """Builds a keyboard for the admin orders list with back to filters button."""
+    builder = InlineKeyboardBuilder()
+    for order in orders:
+        builder.button(
+            text=f"{order.order_number} - {order.contact_name}"
+            f" (${order.total_price:.2f})",
+            callback_data=OrderCallbackFactory(action="view_details", item_id=order.id),
+        )
+
+    builder.button(
+        text="⬅️ Back to Filters", 
+        callback_data=AdminCallbackFactory(action="view_orders")
+    )
+    builder.adjust(1)
+    return builder.as_markup()
+
+
 def get_admin_order_filters_keyboard() -> InlineKeyboardMarkup:
     """Builds a keyboard for filtering orders in the admin panel."""
     builder = InlineKeyboardBuilder()

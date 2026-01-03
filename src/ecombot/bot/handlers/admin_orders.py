@@ -16,6 +16,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot import keyboards
+from ecombot.bot.callback_data import AdminCallbackFactory
 from ecombot.bot.callback_data import OrderCallbackFactory
 from ecombot.bot.filters.is_admin import IsAdmin
 from ecombot.bot.handlers.admin.helpers import send_main_admin_panel
@@ -111,7 +112,7 @@ async def back_to_main_admin_panel_handler(
 # =============================================================================
 
 
-@router.callback_query(F.data == "admin:view_orders")
+@router.callback_query(AdminCallbackFactory.filter(F.action == "view_orders"))  # type: ignore[arg-type]
 async def view_orders_start_handler(query: CallbackQuery, callback_message: Message):
     """
     Entry point for viewing orders. Displays the status filter keyboard.
@@ -147,18 +148,8 @@ async def filter_orders_by_status_handler(
     if not orders:
         text += "No orders found with this status."
 
-    builder = InlineKeyboardBuilder()
-    for order in orders:
-        builder.button(
-            text=f"{order.order_number} - {order.contact_name}"
-            f" (${order.total_price:.2f})",
-            callback_data=OrderCallbackFactory(action="view_details", item_id=order.id),
-        )
-
-    builder.button(text="⬅️ Back to Filters", callback_data="admin:view_orders")
-    builder.adjust(1)
-
-    await callback_message.edit_text(text, reply_markup=builder.as_markup())
+    keyboard = keyboards.get_admin_orders_list_keyboard(orders)
+    await callback_message.edit_text(text, reply_markup=keyboard)
     await query.answer()
 
 
