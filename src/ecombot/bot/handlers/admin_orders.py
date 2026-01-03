@@ -96,7 +96,7 @@ async def send_order_details_view(message: Message, order: OrderDTO):
 # =============================================================================
 
 
-@router.callback_query(F.data == "admin_back_main")
+@router.callback_query(AdminCallbackFactory.filter(F.action == "back_main"))  # type: ignore[arg-type]
 async def back_to_main_admin_panel_handler(
     query: CallbackQuery, callback_message: Message
 ):
