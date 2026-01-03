@@ -10,6 +10,7 @@ from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.callback_data import CheckoutCallbackFactory
+from ecombot.bot.middlewares import MessageInteractionMiddleware
 from ecombot.db.models import DeliveryAddress
 from ecombot.db.models import User
 from ecombot.logging_setup import logger
@@ -25,6 +26,7 @@ from .states import CheckoutFSM
 
 
 router = Router()
+router.callback_query.middleware(MessageInteractionMiddleware())
 
 
 @router.callback_query(

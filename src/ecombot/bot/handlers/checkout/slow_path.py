@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot import keyboards
 from ecombot.bot.callback_data import CheckoutCallbackFactory
+from ecombot.bot.middlewares import MessageInteractionMiddleware
 from ecombot.db.models import User
 from ecombot.logging_setup import logger
 from ecombot.services import cart_service
@@ -33,6 +34,7 @@ from .utils import generate_slow_path_confirmation_text
 
 
 router = Router()
+router.callback_query.middleware(MessageInteractionMiddleware())
 
 
 @router.message(CheckoutFSM.getting_name, F.text)
