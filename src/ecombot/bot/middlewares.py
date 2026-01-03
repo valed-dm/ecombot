@@ -117,7 +117,7 @@ class UserMiddleware(BaseMiddleware):
         current_admin_status = telegram_user.id in settings.ADMIN_IDS
         cached_status = self._user_commands_cache.get(telegram_user.id)
 
-        if cached_status != current_admin_status:
+        if cached_status is None or cached_status != current_admin_status:
             bot: Bot = data.get("bot")
             if bot:
                 await self._set_user_commands(bot, telegram_user.id)
