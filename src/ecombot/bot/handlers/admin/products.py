@@ -34,13 +34,12 @@ from .states import EditProduct
 router = Router()
 
 
-@router.message(Command("add_product"))
 @router.callback_query(AdminCallbackFactory.filter(F.action == "add_product"))  # type: ignore[arg-type]
 async def add_product_start(
-    event: Message | CallbackQuery,
+    event: CallbackQuery,
     session: AsyncSession,
     state: FSMContext,
-    callback_data: AdminCallbackFactory | None = None,
+    callback_data: AdminCallbackFactory,
 ):
     """Step 1: Starts the Add Product FSM. Asks the admin to choose a category."""
     try:
@@ -48,9 +47,7 @@ async def add_product_start(
     except Exception as e:
         log.error(f"Failed to fetch categories: {e}", exc_info=True)
         text = "❌ Failed to load categories. Please try again."
-        if isinstance(event, Message):
-            await event.answer(text)
-        elif isinstance(event, CallbackQuery) and isinstance(event.message, Message):
+        if isinstance(event.message, Message):
             await event.message.edit_text(text)
             await event.answer()
         return
@@ -60,9 +57,7 @@ async def add_product_start(
             "❌ No categories found. You need to create at least one category "
             "before adding products. Please use 'Add Category' first."
         )
-        if isinstance(event, Message):
-            await event.answer(text)
-        elif isinstance(event, CallbackQuery) and isinstance(event.message, Message):
+        if isinstance(event.message, Message):
             await event.message.edit_text(text)
             await event.answer()
         return
@@ -70,9 +65,7 @@ async def add_product_start(
     keyboard = keyboards.get_catalog_categories_keyboard(categories)
     text = "Please choose the category for the new product:"
 
-    if isinstance(event, Message):
-        await event.answer(text, reply_markup=keyboard)
-    elif isinstance(event, CallbackQuery) and isinstance(event.message, Message):
+    if isinstance(event.message, Message):
         await event.message.edit_text(text, reply_markup=keyboard)
         await event.answer()
 

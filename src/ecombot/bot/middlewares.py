@@ -6,18 +6,22 @@ This is the ideal place for tasks like managing database sessions, handling
 authorization, or collecting metrics.
 """
 
+import contextlib
 from typing import Any
 from typing import Awaitable
 from typing import Callable
 from typing import Dict
 
 from aiogram import BaseMiddleware
+from aiogram import Bot
+from aiogram.types import BotCommand
 from aiogram.types import CallbackQuery
 from aiogram.types import Message
 from aiogram.types import TelegramObject
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
+from ecombot.config import settings
 from ecombot.db import crud
 from ecombot.db.models import User
 
@@ -83,7 +87,11 @@ class UserMiddleware(BaseMiddleware):
     """
     This middleware fetches or creates a user record from the database for
     every update from a user and injects it into the handler's context.
+    Also sets role-based bot commands on first interaction.
     """
+
+    def __init__(self):
+        self._user_commands_set = set()  # Track users who have commands set
 
     async def __call__(
         self,
@@ -105,4 +113,36 @@ class UserMiddleware(BaseMiddleware):
         # Inject the user object into the context
         data["db_user"] = db_user
 
+        # Set role-based commands on first interaction
+        if telegram_user.id not in self._user_commands_set:
+            bot: Bot = data.get("bot")
+            if bot:
+                await self._set_user_commands(bot, telegram_user.id)
+                self._user_commands_set.add(telegram_user.id)
+
         return await handler(event, data)
+
+    async def _set_user_commands(self, bot: Bot, user_id: int) -> None:
+        """Set role-based commands for the user."""
+        # Common commands for all users
+        common_commands = [
+            BotCommand(command="start", description="🛍️ Browse catalog"),
+            BotCommand(command="cart", description="🛒 View shopping cart"),
+            BotCommand(command="orders", description="📦 Order history"),
+            BotCommand(command="profile", description="👤 Manage profile"),
+        ]
+
+        # Admin-specific commands
+        admin_commands = [
+            BotCommand(command="admin", description="⚙️ Admin panel"),
+            BotCommand(command="cancel", description="❌ Cancel operation"),
+        ]
+
+        # Use existing IsAdmin filter logic
+        is_admin = user_id in settings.ADMIN_IDS
+        commands = common_commands + (admin_commands if is_admin else [])
+
+        with contextlib.suppress(Exception):
+            await bot.set_my_commands(
+                commands, scope={"type": "chat", "chat_id": user_id}
+            )
