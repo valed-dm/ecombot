@@ -48,6 +48,7 @@ class ProductDTO(BaseDTO):
     price: Decimal = Field(gt=0)
     image_url: str | None = None
     category: CategoryDTO
+    deleted_at: datetime | None = None
 
 
 class AdminProductDTO(ProductDTO):

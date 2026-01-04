@@ -71,19 +71,31 @@ async def create_order_with_items(
 
 
 async def get_order(session: AsyncSession, order_id: int) -> Optional[Order]:
-    """Fetches a single order by its ID, loading its items."""
+    """Fetches a single order by its ID, loading its items with products
+    (including deleted)."""
     stmt = (
         select(Order)
         .where(Order.id == order_id)
         .options(
             selectinload(Order.user),
-            selectinload(Order.items)
-            .selectinload(OrderItem.product)
-            .selectinload(Product.category),
+            selectinload(Order.items),
         )
     )
     result = await session.execute(stmt)
-    return result.scalars().first()
+    order = result.scalars().first()
+
+    if order:
+        # Manually load products including deleted ones
+        for item in order.items:
+            product_stmt = (
+                select(Product)
+                .where(Product.id == item.product_id)
+                .options(selectinload(Product.category))
+            )
+            product_result = await session.execute(product_stmt)
+            item.product = product_result.scalars().first()
+
+    return order
 
 
 async def get_orders_by_user_pk(
@@ -99,34 +111,56 @@ async def get_orders_by_user_pk(
         .where(Order.user_id == user_id)
         .options(
             selectinload(Order.user),
-            selectinload(Order.items)
-            .selectinload(OrderItem.product)
-            .selectinload(Product.category),
+            selectinload(Order.items),
         )
         .order_by(Order.created_at.desc())
     )
     result = await session.execute(stmt)
-    return result.scalars().all()
+    orders = result.scalars().all()
+
+    # Manually load products including deleted ones
+    for order in orders:
+        for item in order.items:
+            product_stmt = (
+                select(Product)
+                .where(Product.id == item.product_id)
+                .options(selectinload(Product.category))
+            )
+            product_result = await session.execute(product_stmt)
+            item.product = product_result.scalars().first()
+
+    return orders
 
 
 async def get_orders_by_status(
     session: AsyncSession,
     status: OrderStatus,
 ) -> Sequence[Order]:
-    """Fetches all orders with a specific status."""
+    """Fetches all orders with a specific status, including deleted products."""
     stmt = (
         select(Order)
         .where(Order.status == status)
         .options(
             selectinload(Order.user),
-            selectinload(Order.items)
-            .selectinload(OrderItem.product)
-            .selectinload(Product.category),
+            selectinload(Order.items),
         )
         .order_by(Order.created_at.desc())
     )
     result = await session.execute(stmt)
-    return result.scalars().all()
+    orders = result.scalars().all()
+
+    # Manually load products including deleted ones
+    for order in orders:
+        for item in order.items:
+            product_stmt = (
+                select(Product)
+                .where(Product.id == item.product_id)
+                .options(selectinload(Product.category))
+            )
+            product_result = await session.execute(product_stmt)
+            item.product = product_result.scalars().first()
+
+    return orders
 
 
 async def update_order_status(

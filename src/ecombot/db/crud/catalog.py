@@ -16,6 +16,7 @@ from sqlalchemy.orm import selectinload
 from ...logging_setup import log
 from ..models import CartItem
 from ..models import Category
+from ..models import OrderItem
 from ..models import Product
 
 
@@ -52,7 +53,7 @@ async def create_category(
 async def soft_delete_category(session: AsyncSession, category_id: int) -> bool:
     """
     Soft deletes a category by setting deleted_at timestamp.
-    Also cascades to soft delete all products and subcategories.
+    Also cascades to soft delete all products and subcategories, restoring stock.
     Returns True if category was found and soft deleted.
     """
     # Check if category exists and is not already deleted
@@ -60,13 +61,28 @@ async def soft_delete_category(session: AsyncSession, category_id: int) -> bool:
     if not category or category.deleted_at is not None:
         return False
 
-    # Cascade soft delete to all products in this category
-    products_stmt = (
-        update(Product)
-        .where(Product.category_id == category_id, Product.deleted_at.is_(None))
-        .values(deleted_at=func.now())
+    # Get all products in this category that are active
+    products_stmt = select(Product.id).where(
+        Product.category_id == category_id, Product.deleted_at.is_(None)
     )
-    await session.execute(products_stmt)
+    products_result = await session.execute(products_stmt)
+    product_ids = [row[0] for row in products_result.fetchall()]
+
+    # For each product, calculate sold quantity and restore stock
+    for product_id in product_ids:
+        sold_quantity_stmt = select(
+            func.coalesce(func.sum(OrderItem.quantity), 0)
+        ).where(OrderItem.product_id == product_id)
+        sold_result = await session.execute(sold_quantity_stmt)
+        total_sold = sold_result.scalar() or 0
+
+        # Update product: soft delete and restore stock
+        product_update_stmt = (
+            update(Product)
+            .where(Product.id == product_id)
+            .values(deleted_at=func.now(), stock=Product.stock + total_sold)
+        )
+        await session.execute(product_update_stmt)
 
     # Remove products from carts (no longer available)
     cart_delete_stmt = delete(CartItem).where(
@@ -247,7 +263,7 @@ async def get_category_including_deleted(
 async def soft_delete_product(session: AsyncSession, product_id: int) -> bool:
     """
     Soft deletes a product by setting deleted_at timestamp.
-    Also removes product from all carts since it's no longer available.
+    Also removes product from all carts and restores stock from placed orders.
     Returns True if product was found and soft deleted.
     """
     # Check if product exists and is not already deleted
@@ -255,12 +271,109 @@ async def soft_delete_product(session: AsyncSession, product_id: int) -> bool:
     if not product or product.deleted_at is not None:
         return False
 
+    # Calculate total quantity sold from orders and restore to stock
+    sold_quantity_stmt = select(func.coalesce(func.sum(OrderItem.quantity), 0)).where(
+        OrderItem.product_id == product_id
+    )
+    result = await session.execute(sold_quantity_stmt)
+    total_sold = result.scalar() or 0
+
     # Remove product from all carts (no longer available for purchase)
     cart_delete_stmt = delete(CartItem).where(CartItem.product_id == product_id)
     await session.execute(cart_delete_stmt)
 
-    # Soft delete the product
-    stmt = update(Product).where(Product.id == product_id).values(deleted_at=func.now())
+    # Soft delete the product and restore stock from orders
+    stmt = (
+        update(Product)
+        .where(Product.id == product_id)
+        .values(deleted_at=func.now(), stock=product.stock + total_sold)
+    )
+    result = await session.execute(stmt)
+    await session.flush()
+
+    return result.rowcount > 0
+
+
+async def restore_category(session: AsyncSession, category_id: int) -> bool:
+    """
+    Restores a soft-deleted category by clearing deleted_at timestamp.
+    Also restores all products and subcategories within it, including stock.
+    Returns True if category was found and restored.
+    """
+    # Check if category exists and is soft-deleted
+    category = await session.get(Category, category_id)
+    if not category or category.deleted_at is None:
+        return False
+
+    # Restore the category itself
+    stmt = update(Category).where(Category.id == category_id).values(deleted_at=None)
+    result = await session.execute(stmt)
+
+    # Get all products in this category that are soft-deleted
+    products_stmt = select(Product.id).where(
+        Product.category_id == category_id, Product.deleted_at.is_not(None)
+    )
+    products_result = await session.execute(products_stmt)
+    product_ids = [row[0] for row in products_result.fetchall()]
+
+    # Restore each product with stock calculation
+    for product_id in product_ids:
+        # Calculate total quantity sold from orders
+        sold_quantity_stmt = select(
+            func.coalesce(func.sum(OrderItem.quantity), 0)
+        ).where(OrderItem.product_id == product_id)
+        sold_result = await session.execute(sold_quantity_stmt)
+        total_sold = sold_result.scalar() or 0
+
+        # Get current stock and restore product with decreased stock
+        product = await session.get(Product, product_id)
+        if product:
+            # Ensure stock doesn't go negative
+            new_stock = max(0, product.stock - total_sold)
+            restore_stmt = (
+                update(Product)
+                .where(Product.id == product_id)
+                .values(deleted_at=None, stock=new_stock)
+            )
+            await session.execute(restore_stmt)
+
+    # Restore all subcategories
+    subcategories_stmt = (
+        update(Category)
+        .where(Category.parent_id == category_id, Category.deleted_at.is_not(None))
+        .values(deleted_at=None)
+    )
+    await session.execute(subcategories_stmt)
+
+    await session.flush()
+    return result.rowcount > 0
+
+
+async def restore_product(session: AsyncSession, product_id: int) -> bool:
+    """
+    Restores a soft-deleted product by clearing deleted_at timestamp.
+    Also restores stock that was decremented from placed orders.
+    Returns True if product was found and restored.
+    """
+    # Check if product exists and is soft-deleted
+    product = await session.get(Product, product_id)
+    if not product or product.deleted_at is None:
+        return False
+
+    # Calculate total quantity sold from orders while product was active
+    sold_quantity_stmt = select(func.coalesce(func.sum(OrderItem.quantity), 0)).where(
+        OrderItem.product_id == product_id
+    )
+    result = await session.execute(sold_quantity_stmt)
+    total_sold = result.scalar() or 0
+
+    # Restore the product and decrease stock for existing orders
+    new_stock = max(0, product.stock - total_sold)  # Ensure stock doesn't go negative
+    stmt = (
+        update(Product)
+        .where(Product.id == product_id)
+        .values(deleted_at=None, stock=new_stock)
+    )
     result = await session.execute(stmt)
     await session.flush()
 
@@ -270,3 +383,24 @@ async def soft_delete_product(session: AsyncSession, product_id: int) -> bool:
 async def delete_product(session: AsyncSession, product_id: int) -> bool:
     """Soft deletes a product (replaces hard delete)."""
     return await soft_delete_product(session, product_id)
+
+
+async def get_deleted_categories(session: AsyncSession) -> List[Category]:
+    """Fetches all soft-deleted categories."""
+    stmt = (
+        select(Category).where(Category.deleted_at.is_not(None)).order_by(Category.name)
+    )
+    result = await session.execute(stmt)
+    return list(result.scalars().all())
+
+
+async def get_deleted_products(session: AsyncSession) -> List[Product]:
+    """Fetches all soft-deleted products with their categories."""
+    stmt = (
+        select(Product)
+        .where(Product.deleted_at.is_not(None))
+        .options(selectinload(Product.category))
+        .order_by(Product.name)
+    )
+    result = await session.execute(stmt)
+    return list(result.scalars().all())

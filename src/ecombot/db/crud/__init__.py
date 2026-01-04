@@ -15,12 +15,16 @@ from .cart import get_or_create_cart_lean
 from .cart import set_cart_item_quantity
 from .catalog import create_category
 from .catalog import create_product
-from .catalog import delete_category_if_empty
 from .catalog import delete_product
 from .catalog import get_categories
 from .catalog import get_category_by_name
+from .catalog import get_deleted_categories
+from .catalog import get_deleted_products
 from .catalog import get_product
 from .catalog import get_products_by_category
+from .catalog import restore_category
+from .catalog import restore_product
+from .catalog import soft_delete_category
 from .catalog import update_product
 from .orders import create_order_with_items
 from .orders import get_order
@@ -46,12 +50,16 @@ __all__ = [
     # Catalog functions
     "create_category",
     "create_product",
-    "delete_category_if_empty",
     "delete_product",
     "get_categories",
     "get_category_by_name",
+    "get_deleted_categories",
+    "get_deleted_products",
     "get_product",
     "get_products_by_category",
+    "restore_category",
+    "restore_product",
+    "soft_delete_category",
     "update_product",
     # Order functions
     "create_order_with_items",

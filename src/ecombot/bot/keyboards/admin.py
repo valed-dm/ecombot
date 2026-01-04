@@ -24,6 +24,10 @@ def get_admin_panel_keyboard() -> InlineKeyboardMarkup:
         callback_data=AdminCallbackFactory(action="delete_category"),
     )
     builder.button(
+        text="🔄 Restore Category",
+        callback_data=AdminCallbackFactory(action="restore_category"),
+    )
+    builder.button(
         text="➕ Add Product",
         callback_data=AdminCallbackFactory(action="add_product"),
     )
@@ -36,10 +40,14 @@ def get_admin_panel_keyboard() -> InlineKeyboardMarkup:
         callback_data=AdminCallbackFactory(action="delete_product"),
     )
     builder.button(
+        text="🔄 Restore Product",
+        callback_data=AdminCallbackFactory(action="restore_product"),
+    )
+    builder.button(
         text="📦 View Orders",
         callback_data=AdminCallbackFactory(action="view_orders"),
     )
-    builder.adjust(2, 3, 1)
+    builder.adjust(3, 4, 1)
     return builder.as_markup()
 
 

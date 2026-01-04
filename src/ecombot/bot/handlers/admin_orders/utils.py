@@ -31,17 +31,47 @@ def generate_order_details_text(order: OrderDTO) -> str:
         "<b>Items:</b>\n",
     ]
 
+    has_deleted_products = False
+    active_total = 0.0
+    deleted_total = 0.0
+
     for item in order.items:
-        item_total = item.price * item.quantity
+        item_total = float(item.price * item.quantity)
+
+        # Check if product is soft-deleted
+        is_deleted = item.product.deleted_at is not None
+
+        if is_deleted:
+            product_status = " ⚠️ <i>(Deleted - Not Charged)</i>"
+            has_deleted_products = True
+            deleted_total += item_total
+        else:
+            product_status = ""
+            active_total += item_total
+
         text_parts.extend(
             [
-                f"  - <b>{escape(item.product.name)}</b>\n",
+                f"  - <b>{escape(item.product.name)}</b>{product_status}\n",
                 f"    <code>{item.quantity} x ${item.price:.2f}",
                 f" = ${item_total:.2f}</code>\n",
             ]
         )
 
-    text_parts.append(f"\n<b>Total: ${order.total_price:.2f}</b>")
+    # Show totals breakdown
+    text_parts.append("\n")
+    if has_deleted_products:
+        text_parts.extend(
+            [
+                f"<b>Active Items Total: ${active_total:.2f}</b>\n",
+                f"<s>Deleted Items: ${deleted_total:.2f}</s>\n",
+                f"<b>Final Total: ${active_total:.2f}</b>\n\n",
+                "⚠️ <i>Deleted products are not charged. "
+                "Customer pays only for active items.</i>",
+            ]
+        )
+    else:
+        text_parts.append(f"<b>Total: ${active_total:.2f}</b>")
+
     text = "".join(text_parts)
 
     # Check Telegram's character limit

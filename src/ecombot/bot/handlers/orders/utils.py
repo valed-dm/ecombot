@@ -46,15 +46,43 @@ def format_order_details_text(order_details: OrderDTO) -> str:
         ORDER_ITEMS_HEADER,
     ]
 
+    has_deleted_products = False
+    active_total = 0.0
+    deleted_total = 0.0
+
     for item in order_details.items:
-        item_total = item.price * item.quantity
+        item_total = float(item.price * item.quantity)
+
+        # Check if product is soft-deleted
+        is_deleted = item.product.deleted_at is not None
+
+        if is_deleted:
+            product_status = " ⚠️ <i>(Deleted)</i>"
+            has_deleted_products = True
+            deleted_total += item_total
+        else:
+            product_status = ""
+            active_total += item_total
+
         text_parts.append(
-            f"  - <b>{escape(item.product.name)}</b>\n"
+            f"  - <b>{escape(item.product.name)}</b>{product_status}\n"
             f"    <code>{item.quantity} x ${item.price:.2f}"
             f" = ${item_total:.2f}</code>\n"
         )
 
-    text_parts.append(f"\n<b>Total: ${order_details.total_price:.2f}</b>")
+    # Show totals breakdown
+    text_parts.append("\n")
+    if has_deleted_products:
+        text_parts.extend(
+            [
+                f"<b>Active Items: ${active_total:.2f}</b>\n",
+                f"<s>Deleted Items: ${deleted_total:.2f}</s>\n",
+                f"<b>Total Paid: ${active_total:.2f}</b>",
+            ]
+        )
+    else:
+        text_parts.append(f"<b>Total: ${active_total:.2f}</b>")
+
     return "".join(text_parts)
 
 

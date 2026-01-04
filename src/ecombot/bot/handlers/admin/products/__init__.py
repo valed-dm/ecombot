@@ -5,9 +5,11 @@ from aiogram import Router
 from . import add
 from . import delete
 from . import edit
+from . import restore
 
 
 router = Router()
 router.include_router(add.router)
 router.include_router(edit.router)
 router.include_router(delete.router)
+router.include_router(restore.router)
