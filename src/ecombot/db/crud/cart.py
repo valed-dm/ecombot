@@ -102,8 +102,9 @@ async def set_cart_item_quantity(
         await session.flush()
         return cart_item
     else:
-        # If quantity is 0 or less, delete the item.
-        session.delete(cart_item)
+        # If quantity is 0 or less, delete the item using direct SQL.
+        delete_stmt = delete(CartItem).where(CartItem.id == cart_item_id)
+        await session.execute(delete_stmt)
         await session.flush()
         return None
 
