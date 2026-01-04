@@ -388,6 +388,16 @@ def get_profile_keyboard() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
+def get_address_details_keyboard() -> InlineKeyboardMarkup:
+    """Builds a keyboard for address details view."""
+    builder = InlineKeyboardBuilder()
+    builder.button(
+        text="⬅️ Back to Addresses",
+        callback_data=ProfileCallbackFactory(action="manage_addr"),
+    )
+    return builder.as_markup()
+
+
 def get_address_management_keyboard(
     addresses: list[DeliveryAddressDTO],
 ) -> InlineKeyboardMarkup:
@@ -399,7 +409,9 @@ def get_address_management_keyboard(
         builder.row(
             InlineKeyboardButton(
                 text=f"{prefix} {addr.address_label}",
-                callback_data="do_nothing",
+                callback_data=ProfileCallbackFactory(
+                    action="view_addr", address_id=addr.id
+                ).pack(),
             )
         )
         action_row = (
