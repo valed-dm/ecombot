@@ -7,8 +7,8 @@ from aiogram.types import CallbackQuery
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ecombot.bot import keyboards
 from ecombot.bot.callback_data import CartCallbackFactory
+from ecombot.bot.keyboards.cart import get_cart_keyboard
 from ecombot.logging_setup import log
 from ecombot.services import cart_service
 from ecombot.services.cart_service import InsufficientStockError
@@ -34,7 +34,7 @@ async def view_cart_handler(message: Message, session: AsyncSession):
     cart_dto = await cart_service.get_user_cart(session, user_id)
 
     text = format_cart_text(cart_dto)
-    keyboard = keyboards.get_cart_keyboard(cart_dto)
+    keyboard = get_cart_keyboard(cart_dto)
     await message.answer(text, reply_markup=keyboard)
 
 

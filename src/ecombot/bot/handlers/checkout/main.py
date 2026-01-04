@@ -7,7 +7,7 @@ from aiogram.types import CallbackQuery
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ecombot.bot import keyboards
+from ecombot.bot.keyboards.checkout import get_fast_checkout_confirmation_keyboard
 from ecombot.bot.middlewares import MessageInteractionMiddleware
 from ecombot.db.models import User
 from ecombot.services import cart_service
@@ -50,7 +50,7 @@ async def checkout_start_handler(
         confirmation_text = generate_fast_path_confirmation_text(
             db_user, default_address, cart
         )
-        keyboard = keyboards.get_fast_checkout_confirmation_keyboard()
+        keyboard = get_fast_checkout_confirmation_keyboard()
         await callback_message.answer(confirmation_text, reply_markup=keyboard)
         await state.set_state(CheckoutFSM.confirm_fast_path)
     else:

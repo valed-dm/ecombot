@@ -6,8 +6,8 @@ from aiogram.types import CallbackQuery
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ecombot.bot import keyboards
 from ecombot.bot.callback_data import OrderCallbackFactory
+from ecombot.bot.keyboards.orders import get_order_details_keyboard
 from ecombot.db.models import User
 from ecombot.services import order_service
 
@@ -41,6 +41,6 @@ async def view_order_details_handler(
         return
 
     text = format_order_details_text(order_details)
-    keyboard = keyboards.get_order_details_keyboard()
+    keyboard = get_order_details_keyboard()
     await callback_message.edit_text(text, reply_markup=keyboard)
     await query.answer()

@@ -1,11 +1,15 @@
 """Navigation handlers for profile package."""
 
-from aiogram import F, Router
-from aiogram.filters import Command, StateFilter
+from aiogram import F
+from aiogram import Router
+from aiogram.filters import Command
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery
+from aiogram.types import Message
 
 from ecombot.logging_setup import log
+
 
 router = Router()
 

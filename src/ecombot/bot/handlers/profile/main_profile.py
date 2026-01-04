@@ -2,15 +2,15 @@
 
 from aiogram import F
 from aiogram import Router
-from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ecombot.bot import keyboards
 from ecombot.bot.callback_data import ProfileCallbackFactory
+from ecombot.bot.keyboards.common import get_cancel_keyboard
+from ecombot.bot.keyboards.profile import get_profile_keyboard
 from ecombot.db.models import User
 from ecombot.logging_setup import log
 from ecombot.services import user_service
@@ -40,7 +40,7 @@ async def profile_handler(message: Message, session: AsyncSession, db_user: User
         return
 
     text = format_profile_text(user_profile)
-    keyboard = keyboards.get_profile_keyboard()
+    keyboard = get_profile_keyboard()
     await message.answer(text, reply_markup=keyboard)
 
 
@@ -55,12 +55,12 @@ async def back_to_profile_handler(
     try:
         user_profile = await user_service.get_user_profile(session, db_user)
         text = format_profile_text(user_profile)
-        keyboard = keyboards.get_profile_keyboard()
+        keyboard = get_profile_keyboard()
         await callback_message.edit_text(text, reply_markup=keyboard)
     except Exception as e:
         log.error(f"Failed to load profile for user {db_user.id}: {e}", exc_info=True)
         await callback_message.edit_text(ERROR_PROFILE_LOAD_FAILED)
-    
+
     await query.answer()
 
 
@@ -73,7 +73,7 @@ async def edit_phone_start(
     """Start the FSM to edit the user's phone number."""
     await callback_message.edit_text(
         EDIT_PHONE_PROMPT,
-        reply_markup=keyboards.get_cancel_keyboard(),
+        reply_markup=get_cancel_keyboard(),
     )
     await state.set_state(EditProfile.getting_phone)
     await query.answer()
@@ -112,7 +112,7 @@ async def edit_email_start(
     """Start the FSM to edit the user's email address."""
     await callback_message.edit_text(
         EDIT_EMAIL_PROMPT,
-        reply_markup=keyboards.get_cancel_keyboard(),
+        reply_markup=get_cancel_keyboard(),
     )
     await state.set_state(EditProfile.getting_email)
     await query.answer()

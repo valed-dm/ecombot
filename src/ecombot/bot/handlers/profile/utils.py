@@ -6,7 +6,7 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ecombot.bot import keyboards
+from ecombot.bot.keyboards.profile import get_address_management_keyboard
 from ecombot.db.models import User
 from ecombot.logging_setup import log
 from ecombot.services import user_service
@@ -61,7 +61,7 @@ async def send_address_management_view(
     """Send or edit a message to show the address management view."""
     try:
         addresses = await user_service.get_all_user_addresses(session, db_user.id)
-        keyboard = keyboards.get_address_management_keyboard(addresses)
+        keyboard = get_address_management_keyboard(addresses)
         text = format_address_management_text(addresses)
 
         try:

@@ -4,7 +4,7 @@ from html import escape
 
 from aiogram.types import Message
 
-from ecombot.bot import keyboards
+from ecombot.bot.keyboards.admin import get_admin_order_details_keyboard
 from ecombot.logging_setup import log
 from ecombot.schemas.dto import OrderDTO
 
@@ -54,7 +54,7 @@ def generate_order_details_text(order: OrderDTO) -> str:
 async def send_order_details_view(message: Message, order: OrderDTO):
     """Generate and send the detailed view for a single order for an admin."""
     text = generate_order_details_text(order)
-    keyboard = keyboards.get_admin_order_details_keyboard(order)
+    keyboard = get_admin_order_details_keyboard(order)
 
     try:
         await message.edit_text(text, reply_markup=keyboard)

@@ -6,9 +6,10 @@ from aiogram.types import CallbackQuery
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ecombot.bot import keyboards
 from ecombot.bot.callback_data import AdminCallbackFactory
 from ecombot.bot.callback_data import OrderCallbackFactory
+from ecombot.bot.keyboards.admin import get_admin_order_filters_keyboard
+from ecombot.bot.keyboards.admin import get_admin_orders_list_keyboard
 from ecombot.db import crud
 from ecombot.schemas.dto import OrderDTO
 from ecombot.schemas.enums import OrderStatus
@@ -30,7 +31,7 @@ router = Router()
 @router.callback_query(AdminCallbackFactory.filter(F.action == "view_orders"))  # type: ignore[arg-type]
 async def view_orders_start_handler(query: CallbackQuery, callback_message: Message):
     """Entry point for viewing orders. Displays the status filter keyboard."""
-    keyboard = keyboards.get_admin_order_filters_keyboard()
+    keyboard = get_admin_order_filters_keyboard()
     await callback_message.edit_text(SELECT_STATUS_PROMPT, reply_markup=keyboard)
     await query.answer()
 
@@ -56,7 +57,7 @@ async def filter_orders_by_status_handler(
     if not orders:
         text += NO_ORDERS_FOUND
 
-    keyboard = keyboards.get_admin_orders_list_keyboard(orders)
+    keyboard = get_admin_orders_list_keyboard(orders)
     await callback_message.edit_text(text, reply_markup=keyboard)
     await query.answer()
 

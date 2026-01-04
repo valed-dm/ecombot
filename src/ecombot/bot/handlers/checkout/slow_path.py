@@ -11,8 +11,9 @@ from aiogram.types import Message
 from aiogram.types import ReplyKeyboardRemove
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ecombot.bot import keyboards
 from ecombot.bot.callback_data import CheckoutCallbackFactory
+from ecombot.bot.keyboards.checkout import get_checkout_confirmation_keyboard
+from ecombot.bot.keyboards.checkout import get_request_contact_keyboard
 from ecombot.bot.middlewares import MessageInteractionMiddleware
 from ecombot.db.models import User
 from ecombot.logging_setup import logger
@@ -43,7 +44,7 @@ async def get_name_handler(message: Message, state: FSMContext):
     await state.update_data(name=message.text)
     await message.answer(
         SLOW_PATH_PHONE,
-        reply_markup=keyboards.get_request_contact_keyboard(),
+        reply_markup=get_request_contact_keyboard(),
     )
     await state.set_state(CheckoutFSM.getting_phone)
 
@@ -81,7 +82,7 @@ async def get_address_handler(
     confirmation_text = generate_slow_path_confirmation_text(user_data, cart_data)
     await message.answer(
         confirmation_text,
-        reply_markup=keyboards.get_checkout_confirmation_keyboard(),
+        reply_markup=get_checkout_confirmation_keyboard(),
     )
     await state.set_state(CheckoutFSM.confirm_slow_path)
 

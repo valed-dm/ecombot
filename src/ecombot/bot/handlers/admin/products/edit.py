@@ -13,10 +13,14 @@ from aiogram.types import Message
 from aiogram.types import PhotoSize
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ecombot.bot import keyboards
 from ecombot.bot.callback_data import AdminCallbackFactory
 from ecombot.bot.callback_data import CatalogCallbackFactory
 from ecombot.bot.callback_data import EditProductCallbackFactory
+from ecombot.bot.keyboards.admin import get_admin_panel_keyboard
+from ecombot.bot.keyboards.admin import get_edit_product_menu_keyboard
+from ecombot.bot.keyboards.catalog import get_catalog_categories_keyboard
+from ecombot.bot.keyboards.catalog import get_catalog_products_keyboard
+from ecombot.bot.keyboards.common import get_cancel_keyboard
 from ecombot.config import settings
 from ecombot.logging_setup import log
 from ecombot.services import catalog_service
@@ -42,7 +46,7 @@ async def edit_product_start(
         log.error(f"Failed to load categories for edit product: {e}", exc_info=True)
         await callback_message.edit_text(
             "❌ An unexpected error occurred while loading categories.",
-            reply_markup=keyboards.get_admin_panel_keyboard(),
+            reply_markup=get_admin_panel_keyboard(),
         )
         await query.answer()
         return
@@ -50,12 +54,12 @@ async def edit_product_start(
     if not categories:
         await callback_message.edit_text(
             "❌ No categories found. Please create categories and products first.",
-            reply_markup=keyboards.get_admin_panel_keyboard(),
+            reply_markup=get_admin_panel_keyboard(),
         )
         await query.answer()
         return
 
-    keyboard = keyboards.get_catalog_categories_keyboard(categories)
+    keyboard = get_catalog_categories_keyboard(categories)
     await callback_message.edit_text(
         "Choose a category to edit products from:", reply_markup=keyboard
     )
@@ -82,7 +86,7 @@ async def edit_product_choose_category(
         log.error(f"Failed to load products for edit: {e}", exc_info=True)
         await callback_message.edit_text(
             "❌ An unexpected error occurred while loading products.",
-            reply_markup=keyboards.get_admin_panel_keyboard(),
+            reply_markup=get_admin_panel_keyboard(),
         )
         await state.clear()
         await query.answer()
@@ -91,13 +95,13 @@ async def edit_product_choose_category(
     if not products:
         await callback_message.edit_text(
             "❌ No products found in this category. Please add products first.",
-            reply_markup=keyboards.get_admin_panel_keyboard(),
+            reply_markup=get_admin_panel_keyboard(),
         )
         await state.clear()
         await query.answer()
         return
 
-    keyboard = keyboards.get_catalog_products_keyboard(products)
+    keyboard = get_catalog_products_keyboard(products)
     await callback_message.edit_text("Choose a product to edit:", reply_markup=keyboard)
     await state.set_state(EditProduct.choose_product)
     await query.answer()
@@ -124,7 +128,7 @@ async def edit_product_choose_product(
         log.error(f"Failed to load product for edit: {e}", exc_info=True)
         await callback_message.edit_text(
             "❌ An unexpected error occurred while loading product.",
-            reply_markup=keyboards.get_admin_panel_keyboard(),
+            reply_markup=get_admin_panel_keyboard(),
         )
         await state.clear()
         await query.answer()
@@ -133,14 +137,14 @@ async def edit_product_choose_product(
     if not product:
         await callback_message.edit_text(
             "❌ Product not found.",
-            reply_markup=keyboards.get_admin_panel_keyboard(),
+            reply_markup=get_admin_panel_keyboard(),
         )
         await state.clear()
         await query.answer()
         return
 
     await state.update_data(product_id=product_id, product_name=product.name)
-    keyboard = keyboards.get_edit_product_menu_keyboard(
+    keyboard = get_edit_product_menu_keyboard(
         product_id=product_id,
         product_list_message_id=callback_message.message_id,
         category_id=product.category.id,
@@ -176,7 +180,7 @@ async def edit_product_choose_field(
     if field == "change_photo":
         await callback_message.edit_text(
             "Please upload a new photo for the product:",
-            reply_markup=keyboards.get_cancel_keyboard(),
+            reply_markup=get_cancel_keyboard(),
         )
         await state.update_data(edit_field="image_url")
         await state.set_state(EditProduct.get_new_image)
@@ -190,7 +194,7 @@ async def edit_product_choose_field(
 
         await callback_message.edit_text(
             field_prompts.get(field, "Enter the new value:"),
-            reply_markup=keyboards.get_cancel_keyboard(),
+            reply_markup=get_cancel_keyboard(),
         )
         await state.update_data(edit_field=field)
         await state.set_state(EditProduct.get_new_value)
@@ -213,7 +217,7 @@ async def edit_product_get_new_value(
     if not message.text or not message.text.strip():
         await message.answer(
             "Please enter a valid value (cannot be empty).",
-            reply_markup=keyboards.get_cancel_keyboard(),
+            reply_markup=get_cancel_keyboard(),
         )
         return
 
@@ -226,7 +230,7 @@ async def edit_product_get_new_value(
             if new_value <= 0:
                 await message.answer(
                     "Price must be a positive number. Please try again.",
-                    reply_markup=keyboards.get_cancel_keyboard(),
+                    reply_markup=get_cancel_keyboard(),
                 )
                 return
         elif field == "stock":
@@ -234,7 +238,7 @@ async def edit_product_get_new_value(
             if new_value < 0:
                 await message.answer(
                     "Stock cannot be negative. Please try again.",
-                    reply_markup=keyboards.get_cancel_keyboard(),
+                    reply_markup=get_cancel_keyboard(),
                 )
                 return
         elif field in ["name", "description"]:
@@ -243,14 +247,14 @@ async def edit_product_get_new_value(
                 await message.answer(
                     f"{field.capitalize()} is too long "
                     f"(maximum {max_length} characters).",
-                    reply_markup=keyboards.get_cancel_keyboard(),
+                    reply_markup=get_cancel_keyboard(),
                 )
                 return
     except (ValueError, decimal.InvalidOperation):
         field_type = "number" if field in ["price", "stock"] else "text"
         await message.answer(
             f"Invalid {field_type} format. Please try again.",
-            reply_markup=keyboards.get_cancel_keyboard(),
+            reply_markup=get_cancel_keyboard(),
         )
         return
 
@@ -261,13 +265,13 @@ async def edit_product_get_new_value(
         )
         await message.answer(
             f"✅ Product '{product_name}' {field} updated successfully!",
-            reply_markup=keyboards.get_admin_panel_keyboard(),
+            reply_markup=get_admin_panel_keyboard(),
         )
     except Exception as e:
         log.error(f"Failed to update product {product_id}: {e}", exc_info=True)
         await message.answer(
             "❌ An unexpected error occurred while updating the product.",
-            reply_markup=keyboards.get_admin_panel_keyboard(),
+            reply_markup=get_admin_panel_keyboard(),
         )
 
     await state.clear()
@@ -301,13 +305,13 @@ async def edit_product_get_new_image(
 
         await message.answer(
             f"✅ Product '{product_name}' image updated successfully!",
-            reply_markup=keyboards.get_admin_panel_keyboard(),
+            reply_markup=get_admin_panel_keyboard(),
         )
     except Exception as e:
         log.error(f"Failed to update product image {product_id}: {e}", exc_info=True)
         await message.answer(
             "❌ An unexpected error occurred while updating the product image.",
-            reply_markup=keyboards.get_admin_panel_keyboard(),
+            reply_markup=get_admin_panel_keyboard(),
         )
 
     await state.clear()

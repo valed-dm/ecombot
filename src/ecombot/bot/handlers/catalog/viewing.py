@@ -7,8 +7,8 @@ from aiogram.types import CallbackQuery
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ecombot.bot import keyboards
 from ecombot.bot.callback_data import CatalogCallbackFactory
+from ecombot.bot.keyboards.catalog import get_catalog_products_keyboard
 from ecombot.services import catalog_service
 
 from .constants import CATEGORY_PRODUCTS_MESSAGE
@@ -34,7 +34,7 @@ async def view_category_handler(
     """
     category_id = callback_data.item_id
     products = await catalog_service.get_products_in_category(session, category_id)
-    keyboard = keyboards.get_catalog_products_keyboard(products)
+    keyboard = get_catalog_products_keyboard(products)
 
     await handle_message_with_photo_transition(
         callback_message, bot, CATEGORY_PRODUCTS_MESSAGE, keyboard

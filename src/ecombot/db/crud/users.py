@@ -105,20 +105,19 @@ async def delete_delivery_address(
     Deletes a delivery address, ensuring it belongs to the correct user.
     """
     from sqlalchemy import delete
-    
+
     # First check if address exists and belongs to user
     address = await session.get(DeliveryAddress, address_id)
     if not address or address.user_id != user_id:
         return False
-    
+
     # Delete using direct SQL
     delete_stmt = delete(DeliveryAddress).where(
-        DeliveryAddress.id == address_id,
-        DeliveryAddress.user_id == user_id
+        DeliveryAddress.id == address_id, DeliveryAddress.user_id == user_id
     )
     result = await session.execute(delete_stmt)
     await session.flush()
-    
+
     return result.rowcount > 0
 
 

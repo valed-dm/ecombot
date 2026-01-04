@@ -8,7 +8,8 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 from aiogram.types import PhotoSize
 
-from ecombot.bot import keyboards
+from ecombot.bot.keyboards.admin import get_admin_panel_keyboard
+from ecombot.bot.keyboards.admin import get_edit_product_menu_keyboard
 from ecombot.config import settings
 from ecombot.logging_setup import log
 from ecombot.schemas.dto import AdminProductDTO
@@ -38,7 +39,7 @@ async def send_product_edit_menu(
     from aiogram.types import FSInputFile
 
     text = get_product_edit_menu_text(product)
-    keyboard = keyboards.get_edit_product_menu_keyboard(
+    keyboard = get_edit_product_menu_keyboard(
         product_id=product.id,
         product_list_message_id=product_list_message_id,
         category_id=category_id,
@@ -74,7 +75,7 @@ async def send_product_edit_menu(
 
 async def send_main_admin_panel(message: Message) -> None:
     """A helper function to generate and send the main admin panel view."""
-    keyboard = keyboards.get_admin_panel_keyboard()
+    keyboard = get_admin_panel_keyboard()
     text = "Welcome to the Admin Panel! Please choose an action:"
 
     # Try to edit first (works for callback query messages)
@@ -111,7 +112,7 @@ async def update_product_menu(
     bot: Bot, message: Message, updated_product: AdminProductDTO, menu_message_id: int
 ) -> None:
     """Helper function to update the product edit menu after successful changes."""
-    updated_keyboard = keyboards.get_edit_product_menu_keyboard(
+    updated_keyboard = get_edit_product_menu_keyboard(
         product_id=updated_product.id,
         product_list_message_id=menu_message_id,
         category_id=updated_product.category.id,

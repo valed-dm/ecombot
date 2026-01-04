@@ -17,9 +17,10 @@ from aiogram.types import Message
 from aiogram.types import PhotoSize
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ecombot.bot import keyboards
 from ecombot.bot.callback_data import AdminCallbackFactory
 from ecombot.bot.callback_data import CatalogCallbackFactory
+from ecombot.bot.keyboards.catalog import get_catalog_categories_keyboard
+from ecombot.bot.keyboards.common import get_cancel_keyboard
 from ecombot.config import settings
 from ecombot.logging_setup import log
 from ecombot.services import catalog_service
@@ -58,7 +59,7 @@ async def add_product_start(
             await event.answer()
         return
 
-    keyboard = keyboards.get_catalog_categories_keyboard(categories)
+    keyboard = get_catalog_categories_keyboard(categories)
     text = "Please choose the category for the new product:"
 
     if isinstance(event.message, Message):
@@ -83,13 +84,13 @@ async def add_product_choose_category(
     try:
         await callback_message.edit_text(
             "Great. Now, what is the name of the product?",
-            reply_markup=keyboards.get_cancel_keyboard(),
+            reply_markup=get_cancel_keyboard(),
         )
     except TelegramBadRequest as e:
         log.warning(f"Failed to edit message: {e}")
         await callback_message.answer(
             "Great. Now, what is the name of the product?",
-            reply_markup=keyboards.get_cancel_keyboard(),
+            reply_markup=get_cancel_keyboard(),
         )
     await state.set_state(AddProduct.name)
     await query.answer()
@@ -101,7 +102,7 @@ async def add_product_name(message: Message, state: FSMContext):
     if not message.text or not message.text.strip():
         await message.answer(
             "Please enter a valid product name (cannot be empty).",
-            reply_markup=keyboards.get_cancel_keyboard(),
+            reply_markup=get_cancel_keyboard(),
         )
         return
 
@@ -109,14 +110,14 @@ async def add_product_name(message: Message, state: FSMContext):
     if len(product_name) > 255:
         await message.answer(
             "Product name is too long (maximum 255 characters).",
-            reply_markup=keyboards.get_cancel_keyboard(),
+            reply_markup=get_cancel_keyboard(),
         )
         return
 
     await state.update_data(name=product_name)
     await message.answer(
         "Got it. Now, please provide a description for the product.",
-        reply_markup=keyboards.get_cancel_keyboard(),
+        reply_markup=get_cancel_keyboard(),
     )
     await state.set_state(AddProduct.description)
 
@@ -127,7 +128,7 @@ async def add_product_description_step(message: Message, state: FSMContext):
     if not message.text or not message.text.strip():
         await message.answer(
             "Please enter a valid product description (cannot be empty).",
-            reply_markup=keyboards.get_cancel_keyboard(),
+            reply_markup=get_cancel_keyboard(),
         )
         return
 
@@ -135,14 +136,14 @@ async def add_product_description_step(message: Message, state: FSMContext):
     if len(product_description) > 1000:
         await message.answer(
             "Product description is too long (maximum 1000 characters).",
-            reply_markup=keyboards.get_cancel_keyboard(),
+            reply_markup=get_cancel_keyboard(),
         )
         return
 
     await state.update_data(description=product_description)
     await message.answer(
         "Excellent. What is the price? (e.g., 25.99)",
-        reply_markup=keyboards.get_cancel_keyboard(),
+        reply_markup=get_cancel_keyboard(),
     )
     await state.set_state(AddProduct.price)
 
@@ -155,20 +156,20 @@ async def add_product_price_step(message: Message, state: FSMContext):
         if price <= 0:
             await message.answer(
                 "Price must be a positive number. Please try again.",
-                reply_markup=keyboards.get_cancel_keyboard(),
+                reply_markup=get_cancel_keyboard(),
             )
             return
     except decimal.InvalidOperation:
         await message.answer(
             "Invalid price format. Please enter a number (e.g., 25.99).",
-            reply_markup=keyboards.get_cancel_keyboard(),
+            reply_markup=get_cancel_keyboard(),
         )
         return
 
     await state.update_data(price=price)
     await message.answer(
         "Good. Now, how many units are in stock? (e.g., 50)",
-        reply_markup=keyboards.get_cancel_keyboard(),
+        reply_markup=get_cancel_keyboard(),
     )
     await state.set_state(AddProduct.stock)
 
@@ -187,20 +188,20 @@ async def add_product_stock_step(message: Message, state: FSMContext):
         if stock < 0:
             await message.answer(
                 "Stock cannot be negative. Please enter a whole number.",
-                reply_markup=keyboards.get_cancel_keyboard(),
+                reply_markup=get_cancel_keyboard(),
             )
             return
     except ValueError:
         await message.answer(
             "Invalid format. Please enter a whole number.",
-            reply_markup=keyboards.get_cancel_keyboard(),
+            reply_markup=get_cancel_keyboard(),
         )
         return
 
     await state.update_data(stock=stock)
     await message.answer(
         "Excellent. Now, please upload a photo for the product (or send /skip).",
-        reply_markup=keyboards.get_cancel_keyboard(),
+        reply_markup=get_cancel_keyboard(),
     )
     await state.set_state(AddProduct.get_image)
 

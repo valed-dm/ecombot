@@ -9,8 +9,9 @@ from aiogram.types import CallbackQuery
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ecombot.bot import keyboards
 from ecombot.bot.callback_data import ProfileCallbackFactory
+from ecombot.bot.keyboards.common import get_cancel_keyboard
+from ecombot.bot.keyboards.profile import get_address_details_keyboard
 from ecombot.db.models import User
 from ecombot.logging_setup import log
 from ecombot.services import user_service
@@ -44,15 +45,15 @@ async def view_address_handler(
     if not address_id:
         await query.answer("Address not found.", show_alert=True)
         return
-    
+
     try:
         addresses = await user_service.get_all_user_addresses(session, db_user.id)
         address = next((addr for addr in addresses if addr.id == address_id), None)
-        
+
         if not address:
             await query.answer("Address not found.", show_alert=True)
             return
-        
+
         prefix = "⭐️ Default Address" if address.is_default else "📍 Address"
         text = (
             f"<b>{prefix}</b>\n\n"
@@ -60,13 +61,16 @@ async def view_address_handler(
             f"<b>Full Address:</b>\n"
             f"<code>{escape(address.full_address)}</code>"
         )
-        
-        keyboard = keyboards.get_address_details_keyboard()
+
+        keyboard = get_address_details_keyboard()
         await callback_message.edit_text(text, reply_markup=keyboard)
         await query.answer()
-        
+
     except Exception as e:
-        log.error(f"Failed to load address details for user {db_user.id}: {e}", exc_info=True)
+        log.error(
+            f"Failed to load address details for user {db_user.id}: {e}",
+            exc_info=True,
+        )
         await query.answer("Failed to load address details.", show_alert=True)
 
 
@@ -137,7 +141,7 @@ async def add_address_start(
     """Step 1 (Add Address): Ask for a label for the new address."""
     await callback_message.edit_text(
         ADD_ADDRESS_START_PROMPT,
-        reply_markup=keyboards.get_cancel_keyboard(),
+        reply_markup=get_cancel_keyboard(),
     )
     await state.set_state(AddAddress.getting_label)
     await query.answer()
@@ -152,7 +156,7 @@ async def add_address_get_label(message: Message, state: FSMContext):
     try:
         await message.answer(
             ADD_ADDRESS_FULL_PROMPT,
-            reply_markup=keyboards.get_cancel_keyboard(),
+            reply_markup=get_cancel_keyboard(),
         )
     except Exception as e:
         log.error(f"Failed to send address prompt: {e}", exc_info=True)

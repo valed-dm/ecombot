@@ -5,7 +5,8 @@ from aiogram.types import FSInputFile
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ecombot.bot import keyboards
+from ecombot.bot.keyboards.catalog import get_catalog_categories_keyboard
+from ecombot.bot.keyboards.catalog import get_product_details_keyboard
 from ecombot.logging_setup import log
 from ecombot.schemas.dto import ProductDTO
 from ecombot.services import catalog_service
@@ -21,7 +22,7 @@ async def show_main_catalog(
     Display the main catalog. Can either send a new message or edit an existing one.
     """
     categories = await catalog_service.get_all_categories(session)
-    keyboard = keyboards.get_catalog_categories_keyboard(categories)
+    keyboard = get_catalog_categories_keyboard(categories)
 
     if is_edit and isinstance(event_target, Message):
         await event_target.edit_text(WELCOME_MESSAGE, reply_markup=keyboard)
@@ -49,7 +50,7 @@ async def send_product_with_photo(
     text = PRODUCT_DETAILS_TEMPLATE.format(
         name=product.name, description=product.description, price=product.price
     )
-    keyboard = keyboards.get_product_details_keyboard(product)
+    keyboard = get_product_details_keyboard(product)
 
     if product.image_url:
         try:

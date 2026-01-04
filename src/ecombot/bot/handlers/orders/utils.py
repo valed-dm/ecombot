@@ -7,7 +7,7 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ecombot.bot import keyboards
+from ecombot.bot.keyboards.orders import get_orders_list_keyboard
 from ecombot.db.models import User
 from ecombot.schemas.dto import OrderDTO
 from ecombot.services import order_service
@@ -67,7 +67,7 @@ async def send_orders_view(message: Message, session: AsyncSession, db_user: Use
         await message.answer(text)
         return
 
-    keyboard = keyboards.get_orders_list_keyboard(user_orders)
+    keyboard = get_orders_list_keyboard(user_orders)
 
     try:
         await message.edit_text(text, reply_markup=keyboard)

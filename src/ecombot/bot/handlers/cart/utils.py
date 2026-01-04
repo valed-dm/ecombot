@@ -7,8 +7,8 @@ from aiogram.types import CallbackQuery
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ecombot.bot import keyboards
 from ecombot.bot.callback_data import CartCallbackFactory
+from ecombot.bot.keyboards.cart import get_cart_keyboard
 from ecombot.logging_setup import log
 from ecombot.schemas.dto import CartDTO
 from ecombot.services import cart_service
@@ -63,7 +63,7 @@ async def update_cart_view(message: Message, cart_dto: CartDTO) -> bool:
     Returns True on success, False on failure.
     """
     text = format_cart_text(cart_dto)
-    keyboard = keyboards.get_cart_keyboard(cart_dto)
+    keyboard = get_cart_keyboard(cart_dto)
 
     try:
         await message.edit_text(text, reply_markup=keyboard)

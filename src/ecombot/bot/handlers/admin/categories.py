@@ -10,10 +10,13 @@ from aiogram.types import CallbackQuery
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ecombot.bot import keyboards
 from ecombot.bot.callback_data import AdminCallbackFactory
 from ecombot.bot.callback_data import CatalogCallbackFactory
 from ecombot.bot.callback_data import ConfirmationCallbackFactory
+from ecombot.bot.keyboards.admin import get_admin_panel_keyboard
+from ecombot.bot.keyboards.catalog import get_catalog_categories_keyboard
+from ecombot.bot.keyboards.common import get_cancel_keyboard
+from ecombot.bot.keyboards.common import get_delete_confirmation_keyboard
 from ecombot.db.models import Category
 from ecombot.logging_setup import log
 from ecombot.services import catalog_service
@@ -38,13 +41,13 @@ async def add_category_start(
     try:
         await callback_message.edit_text(
             "Please enter the name for the new category:",
-            reply_markup=keyboards.get_cancel_keyboard(),
+            reply_markup=get_cancel_keyboard(),
         )
     except TelegramBadRequest as e:
         log.warning(f"Failed to edit message: {e}")
         await callback_message.answer(
             "Please enter the name for the new category:",
-            reply_markup=keyboards.get_cancel_keyboard(),
+            reply_markup=get_cancel_keyboard(),
         )
     await state.set_state(AddCategory.name)
     await query.answer()
@@ -56,7 +59,7 @@ async def add_category_name(message: Message, state: FSMContext):
     if not message.text or not message.text.strip():
         await message.answer(
             "Please enter a valid category name (cannot be empty).",
-            reply_markup=keyboards.get_cancel_keyboard(),
+            reply_markup=get_cancel_keyboard(),
         )
         return
 
@@ -64,14 +67,14 @@ async def add_category_name(message: Message, state: FSMContext):
     if len(category_name) > 255:
         await message.answer(
             "Category name is too long (maximum 255 characters).",
-            reply_markup=keyboards.get_cancel_keyboard(),
+            reply_markup=get_cancel_keyboard(),
         )
         return
 
     await state.update_data(name=category_name)
     await message.answer(
         "Great. Now enter a description for the category (or send /skip):",
-        reply_markup=keyboards.get_cancel_keyboard(),
+        reply_markup=get_cancel_keyboard(),
     )
     await state.set_state(AddCategory.description)
 
@@ -91,7 +94,7 @@ async def add_category_description(
         elif len(description) > 1000:
             await message.answer(
                 "Description is too long (maximum 1000 characters).",
-                reply_markup=keyboards.get_cancel_keyboard(),
+                reply_markup=get_cancel_keyboard(),
             )
             return
 
@@ -126,7 +129,7 @@ async def delete_category_start(
         log.error(f"Failed to load categories for delete: {e}", exc_info=True)
         await callback_message.edit_text(
             "❌ An unexpected error occurred while loading categories.",
-            reply_markup=keyboards.get_admin_panel_keyboard(),
+            reply_markup=get_admin_panel_keyboard(),
         )
         await state.clear()
         await query.answer()
@@ -136,12 +139,12 @@ async def delete_category_start(
         await callback_message.edit_text(
             "❌ No categories found. You need to create at least one category "
             "before deleting categories. Please use 'Add Category' first.",
-            reply_markup=keyboards.get_admin_panel_keyboard(),
+            reply_markup=get_admin_panel_keyboard(),
         )
         await query.answer()
         return
 
-    keyboard = keyboards.get_catalog_categories_keyboard(categories)
+    keyboard = get_catalog_categories_keyboard(categories)
     await callback_message.edit_text(
         "Choose the category you want to delete:", reply_markup=keyboard
     )
@@ -167,14 +170,14 @@ async def delete_category_confirm(
         if not category:
             await callback_message.edit_text(
                 "Error: Category not found.",
-                reply_markup=keyboards.get_admin_panel_keyboard(),
+                reply_markup=get_admin_panel_keyboard(),
             )
             await state.clear()
             await query.answer()
             return
 
         await state.update_data(category_id=category_id, category_name=category.name)
-        keyboard = keyboards.get_delete_confirmation_keyboard(
+        keyboard = get_delete_confirmation_keyboard(
             action="delete_category", item_id=category_id
         )
         await callback_message.edit_text(
@@ -188,7 +191,7 @@ async def delete_category_confirm(
         log.error(f"Failed to load category details for deletion: {e}", exc_info=True)
         await callback_message.edit_text(
             "❌ An unexpected error occurred while loading category details.",
-            reply_markup=keyboards.get_admin_panel_keyboard(),
+            reply_markup=get_admin_panel_keyboard(),
         )
         await state.clear()
         await query.answer()
@@ -209,7 +212,7 @@ async def delete_category_final(
     if not callback_data.confirm:
         await callback_message.edit_text(
             "Deletion cancelled.",
-            reply_markup=keyboards.get_admin_panel_keyboard(),
+            reply_markup=get_admin_panel_keyboard(),
         )
         await state.clear()
         await query.answer()
@@ -226,19 +229,19 @@ async def delete_category_final(
         if success:
             await callback_message.edit_text(
                 f"✅ Category '{category_name}' has been deleted.",
-                reply_markup=keyboards.get_admin_panel_keyboard(),
+                reply_markup=get_admin_panel_keyboard(),
             )
         else:
             await callback_message.edit_text(
                 f"❌ Error: Could not delete '{category_name}'."
                 f" It may have already been removed.",
-                reply_markup=keyboards.get_admin_panel_keyboard(),
+                reply_markup=get_admin_panel_keyboard(),
             )
     except CategoryNotEmptyError:
         await callback_message.edit_text(
             f"❌ Cannot delete '{category_name}' because it still"
             f" contains products. Please move or delete them first.",
-            reply_markup=keyboards.get_admin_panel_keyboard(),
+            reply_markup=get_admin_panel_keyboard(),
         )
     except Exception as e:
         log.error(
@@ -246,7 +249,7 @@ async def delete_category_final(
         )
         await callback_message.edit_text(
             "An unexpected error occurred.",
-            reply_markup=keyboards.get_admin_panel_keyboard(),
+            reply_markup=get_admin_panel_keyboard(),
         )
 
     await state.clear()
