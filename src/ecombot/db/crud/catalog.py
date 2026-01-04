@@ -1,13 +1,13 @@
 """Product and category catalog CRUD operations."""
 
 from decimal import Decimal
-from pathlib import Path
 from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
 
 from sqlalchemy import delete
+from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,20 +16,23 @@ from sqlalchemy.orm import selectinload
 from ...logging_setup import log
 from ..models import CartItem
 from ..models import Category
-from ..models import OrderItem
 from ..models import Product
 
 
 async def get_categories(session: AsyncSession) -> List[Category]:
-    """Fetches all top-level categories."""
-    stmt = select(Category).where(Category.parent_id.is_(None)).order_by(Category.name)
+    """Fetches all active (non-deleted) top-level categories."""
+    stmt = (
+        select(Category)
+        .where(Category.parent_id.is_(None), Category.deleted_at.is_(None))
+        .order_by(Category.name)
+    )
     result = await session.execute(stmt)
     return list(result.scalars().all())
 
 
 async def get_category_by_name(session: AsyncSession, name: str) -> Optional[Category]:
-    """Fetches a category by its exact name."""
-    stmt = select(Category).where(Category.name == name)
+    """Fetches an active (non-deleted) category by its exact name."""
+    stmt = select(Category).where(Category.name == name, Category.deleted_at.is_(None))
     result = await session.execute(stmt)
     return result.scalars().first()
 
@@ -46,39 +49,58 @@ async def create_category(
     return new_category
 
 
-async def delete_category_if_empty(
-    session: AsyncSession, category_id: int
-) -> tuple[bool, bool]:
+async def soft_delete_category(session: AsyncSession, category_id: int) -> bool:
     """
-    Atomically checks if a category is empty and deletes it if so.
-    Returns (deleted, category_exists) tuple.
+    Soft deletes a category by setting deleted_at timestamp.
+    Also cascades to soft delete all products and subcategories.
+    Returns True if category was found and soft deleted.
     """
-    # First check if category exists
+    # Check if category exists and is not already deleted
     category = await session.get(Category, category_id)
-    if not category:
-        return False, False  # Not deleted, doesn't exist
+    if not category or category.deleted_at is not None:
+        return False
 
-    # Check for products in the category within the same transaction
-    stmt = select(Product).where(Product.category_id == category_id).limit(1)
+    # Cascade soft delete to all products in this category
+    products_stmt = (
+        update(Product)
+        .where(Product.category_id == category_id, Product.deleted_at.is_(None))
+        .values(deleted_at=func.now())
+    )
+    await session.execute(products_stmt)
+
+    # Remove products from carts (no longer available)
+    cart_delete_stmt = delete(CartItem).where(
+        CartItem.product_id.in_(
+            select(Product.id).where(Product.category_id == category_id)
+        )
+    )
+    await session.execute(cart_delete_stmt)
+
+    # Cascade soft delete to all subcategories
+    subcategories_stmt = (
+        update(Category)
+        .where(Category.parent_id == category_id, Category.deleted_at.is_(None))
+        .values(deleted_at=func.now())
+    )
+    await session.execute(subcategories_stmt)
+
+    # Finally, soft delete the category itself
+    stmt = (
+        update(Category).where(Category.id == category_id).values(deleted_at=func.now())
+    )
     result = await session.execute(stmt)
-    if result.scalars().first():
-        return False, True  # Not deleted, exists but has products
-
-    # Category exists and is empty, delete it using direct SQL
-    delete_stmt = delete(Category).where(Category.id == category_id)
-    await session.execute(delete_stmt)
     await session.flush()
-
-    return True, True  # Deleted successfully
+    return result.rowcount > 0
 
 
 async def get_product(session: AsyncSession, product_id: int) -> Optional[Product]:
     """
-    Fetches a single product by its ID, eagerly loading its category.
+    Fetches a single active (non-deleted) product by its ID,
+    eagerly loading its category.
     """
     stmt = (
         select(Product)
-        .where(Product.id == product_id)
+        .where(Product.id == product_id, Product.deleted_at.is_(None))
         .options(selectinload(Product.category))
     )
     result = await session.execute(stmt)
@@ -89,13 +111,13 @@ async def get_products_by_category(
     session: AsyncSession, category_id: int
 ) -> List[Product]:
     """
-    Fetches all products within a specific category.
+    Fetches all active (non-deleted) products within a specific category.
     Note: Category relationship is eagerly loaded despite redundancy
     to avoid lazy loading issues during DTO conversion.
     """
     stmt = (
         select(Product)
-        .where(Product.category_id == category_id)
+        .where(Product.category_id == category_id, Product.deleted_at.is_(None))
         .options(selectinload(Product.category))
         .order_by(Product.name)
     )
@@ -196,39 +218,55 @@ async def update_product(
     return None
 
 
-async def delete_product(session: AsyncSession, product_id: int) -> bool:
-    """Deletes a product from the database by its ID using direct SQL."""
-    # First check if product exists and get image path
+async def get_product_including_deleted(
+    session: AsyncSession, product_id: int
+) -> Optional[Product]:
+    """
+    Fetches a product by ID including soft-deleted ones (for order history).
+    """
+    stmt = (
+        select(Product)
+        .where(Product.id == product_id)
+        .options(selectinload(Product.category))
+    )
+    result = await session.execute(stmt)
+    return result.scalars().first()
+
+
+async def get_category_including_deleted(
+    session: AsyncSession, category_id: int
+) -> Optional[Category]:
+    """
+    Fetches a category by ID including soft-deleted ones (for order history).
+    """
+    stmt = select(Category).where(Category.id == category_id)
+    result = await session.execute(stmt)
+    return result.scalars().first()
+
+
+async def soft_delete_product(session: AsyncSession, product_id: int) -> bool:
+    """
+    Soft deletes a product by setting deleted_at timestamp.
+    Also removes product from all carts since it's no longer available.
+    Returns True if product was found and soft deleted.
+    """
+    # Check if product exists and is not already deleted
     product = await session.get(Product, product_id)
-    if not product:
+    if not product or product.deleted_at is not None:
         return False
 
-    image_path = product.image_url  # Store image path before deletion
-
-    # Remove product from all carts first (to handle foreign key constraints)
+    # Remove product from all carts (no longer available for purchase)
     cart_delete_stmt = delete(CartItem).where(CartItem.product_id == product_id)
     await session.execute(cart_delete_stmt)
 
-    # Check for order items (prevent deletion of historical records)
-    order_items_stmt = (
-        select(OrderItem).where(OrderItem.product_id == product_id).limit(1)
-    )
-    order_result = await session.execute(order_items_stmt)
-    if order_result.scalars().first():
-        log.warning(f"Cannot delete product {product_id}: has order history")
-        return False
-
-    # Delete the product using direct SQL
-    product_delete_stmt = delete(Product).where(Product.id == product_id)
-    result = await session.execute(product_delete_stmt)
+    # Soft delete the product
+    stmt = update(Product).where(Product.id == product_id).values(deleted_at=func.now())
+    result = await session.execute(stmt)
     await session.flush()
 
-    # Clean up image file if product was successfully deleted
-    if result.rowcount > 0 and image_path:
-        try:
-            Path(image_path).unlink(missing_ok=True)
-            log.info(f"Deleted product image: {image_path}")
-        except OSError as e:
-            log.error(f"Failed to delete image file {image_path}: {e}")
-
     return result.rowcount > 0
+
+
+async def delete_product(session: AsyncSession, product_id: int) -> bool:
+    """Soft deletes a product (replaces hard delete)."""
+    return await soft_delete_product(session, product_id)

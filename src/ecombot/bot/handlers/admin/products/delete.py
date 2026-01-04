@@ -143,12 +143,12 @@ async def delete_product_choose_product(
     )
 
     text = (
-        f"⚠️ Are you sure you want to permanently delete this product?\n\n"
+        f"⚠️ Are you sure you want to delete this product?\n\n"
         f"<b>{product.name}</b>\n"
         f"<i>{product.description}</i>\n\n"
         f"<b>Price:</b> ${product.price:.2f}\n"
         f"<b>Stock:</b> {product.stock} units\n\n"
-        "This action cannot be undone."
+        "The product will be hidden from the catalog but preserved in order history."
     )
 
     await callback_message.edit_text(text, reply_markup=keyboard)

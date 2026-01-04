@@ -39,6 +39,15 @@ class TimestampMixin:
     )
 
 
+@declarative_mixin
+class SoftDeleteMixin:
+    """Mixin for entities that support soft deletion."""
+
+    deleted_at: Mapped[datetime.datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+
 class User(Base, TimestampMixin):
     __tablename__ = "users"
 
@@ -66,7 +75,7 @@ class DeliveryAddress(Base, TimestampMixin):
     user: Mapped["User"] = relationship(back_populates="addresses")
 
 
-class Category(Base, TimestampMixin):
+class Category(Base, TimestampMixin, SoftDeleteMixin):
     __tablename__ = "categories"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -81,7 +90,7 @@ class Category(Base, TimestampMixin):
     products: Mapped[list[Product]] = relationship(back_populates="category")
 
 
-class Product(Base, TimestampMixin):
+class Product(Base, TimestampMixin, SoftDeleteMixin):
     __tablename__ = "products"
     __table_args__ = (
         CheckConstraint("stock >= 0", name="stock_non_negative"),

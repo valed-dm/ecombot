@@ -67,20 +67,10 @@ async def add_new_category(
 
 async def delete_category_by_id(session: AsyncSession, category_id: int) -> bool:
     """
-    Service-level function to delete a category.
-    Uses atomic operation to check for products and delete within the same transaction.
+    Service-level function to soft delete a category with cascading deletion.
+    Soft deletes the category and all its products and subcategories.
     """
-    deleted, category_exists = await crud.delete_category_if_empty(session, category_id)
-
-    if not category_exists:
-        return False  # Category doesn't exist
-
-    if not deleted:
-        raise CategoryNotEmptyError(
-            f"Cannot delete category ID {category_id} because it contains products."
-        )
-
-    return True
+    return await crud.soft_delete_category(session, category_id)
 
 
 async def get_single_product_details(
@@ -166,6 +156,8 @@ async def update_product_details(
 
 
 async def delete_product_by_id(session: AsyncSession, product_id: int) -> bool:
-    """Service-level function to delete a product. Manages the transaction."""
+    """Service-level function to soft delete a product.
+    Always succeeds if product exists.
+    """
     success = await crud.delete_product(session, product_id)
     return success

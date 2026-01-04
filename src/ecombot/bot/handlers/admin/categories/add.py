@@ -1,10 +1,13 @@
 """Category addition handlers."""
 
-from aiogram import F, Router
+from aiogram import F
+from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.filters import Command, or_f
+from aiogram.filters import Command
+from aiogram.filters import or_f
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery
+from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.callback_data import AdminCallbackFactory
@@ -14,6 +17,7 @@ from ecombot.services import catalog_service
 from ecombot.services.catalog_service import CategoryAlreadyExistsError
 
 from .states import AddCategory
+
 
 router = Router()
 

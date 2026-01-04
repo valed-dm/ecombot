@@ -4,11 +4,6 @@ from aiogram.fsm.state import State
 from aiogram.fsm.state import StatesGroup
 
 
-class AddCategory(StatesGroup):
-    name = State()
-    description = State()
-
-
 class AddProduct(StatesGroup):
     choose_category = State()
     name = State()
@@ -29,9 +24,4 @@ class EditProduct(StatesGroup):
 class DeleteProduct(StatesGroup):
     choose_category = State()
     choose_product = State()
-    confirm_deletion = State()
-
-
-class DeleteCategory(StatesGroup):
-    choose_category = State()
     confirm_deletion = State()

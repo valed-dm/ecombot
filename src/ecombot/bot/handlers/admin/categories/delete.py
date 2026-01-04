@@ -1,11 +1,15 @@
 """Category deletion handlers."""
 
-from aiogram import F, Router
+from aiogram import F
+from aiogram import Router
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery
+from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ecombot.bot.callback_data import AdminCallbackFactory, CatalogCallbackFactory, ConfirmationCallbackFactory
+from ecombot.bot.callback_data import AdminCallbackFactory
+from ecombot.bot.callback_data import CatalogCallbackFactory
+from ecombot.bot.callback_data import ConfirmationCallbackFactory
 from ecombot.bot.keyboards.admin import get_admin_panel_keyboard
 from ecombot.bot.keyboards.catalog import get_catalog_categories_keyboard
 from ecombot.bot.keyboards.common import get_delete_confirmation_keyboard
@@ -14,6 +18,7 @@ from ecombot.logging_setup import log
 from ecombot.services import catalog_service
 
 from .states import DeleteCategory
+
 
 router = Router()
 
@@ -86,7 +91,8 @@ async def delete_category_confirm(
         )
         await callback_message.edit_text(
             f"⚠️ Are you sure you want to delete the category "
-            f"'{category.name}'? It will be hidden from the catalog but preserved in order history.",
+            f"'{category.name}'? It will be hidden from the catalog "
+            f"but preserved in order history.",
             reply_markup=keyboard,
         )
         await state.set_state(DeleteCategory.confirm_deletion)
@@ -142,7 +148,9 @@ async def delete_category_final(
                 reply_markup=get_admin_panel_keyboard(),
             )
     except Exception as e:
-        log.error(f"Error deleting category {callback_data.item_id}: {e}", exc_info=True)
+        log.error(
+            f"Error deleting category {callback_data.item_id}: {e}", exc_info=True
+        )
         await callback_message.edit_text(
             f"❌ An unexpected error occurred while deleting '{category_name}'.",
             reply_markup=get_admin_panel_keyboard(),
