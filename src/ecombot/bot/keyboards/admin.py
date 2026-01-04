@@ -6,12 +6,10 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from ecombot.schemas.dto import OrderDTO
 from ecombot.schemas.enums import OrderStatus
 
-from ..callback_data import (
-    AdminCallbackFactory,
-    AdminNavCallbackFactory,
-    EditProductCallbackFactory,
-    OrderCallbackFactory,
-)
+from ..callback_data import AdminCallbackFactory
+from ..callback_data import AdminNavCallbackFactory
+from ..callback_data import EditProductCallbackFactory
+from ..callback_data import OrderCallbackFactory
 
 
 def get_admin_panel_keyboard() -> InlineKeyboardMarkup:

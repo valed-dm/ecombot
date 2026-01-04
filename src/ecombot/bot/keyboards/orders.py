@@ -5,7 +5,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from ecombot.schemas.dto import OrderDTO
 
-from ..callback_data import CatalogCallbackFactory, OrderCallbackFactory
+from ..callback_data import CatalogCallbackFactory
+from ..callback_data import OrderCallbackFactory
 
 
 def get_orders_list_keyboard(orders: list[OrderDTO]) -> InlineKeyboardMarkup:

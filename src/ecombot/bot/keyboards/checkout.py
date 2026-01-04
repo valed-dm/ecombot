@@ -1,6 +1,8 @@
 """Checkout-related keyboards."""
 
-from aiogram.types import InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup
+from aiogram.types import InlineKeyboardMarkup
+from aiogram.types import KeyboardButton
+from aiogram.types import ReplyKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from ..callback_data import CheckoutCallbackFactory

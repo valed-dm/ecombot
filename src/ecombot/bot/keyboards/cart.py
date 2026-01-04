@@ -1,11 +1,13 @@
 """Cart-related keyboards."""
 
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from ecombot.schemas.dto import CartDTO
 
-from ..callback_data import CartCallbackFactory, CatalogCallbackFactory
+from ..callback_data import CartCallbackFactory
+from ..callback_data import CatalogCallbackFactory
 
 
 def get_cart_keyboard(cart: CartDTO) -> InlineKeyboardMarkup:

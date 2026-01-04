@@ -3,9 +3,11 @@
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from ecombot.schemas.dto import CategoryDTO, ProductDTO
+from ecombot.schemas.dto import CategoryDTO
+from ecombot.schemas.dto import ProductDTO
 
-from ..callback_data import CatalogCallbackFactory, CartCallbackFactory
+from ..callback_data import CartCallbackFactory
+from ..callback_data import CatalogCallbackFactory
 
 
 def get_catalog_categories_keyboard(
