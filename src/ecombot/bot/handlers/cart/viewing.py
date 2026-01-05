@@ -9,14 +9,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.callback_data import CartCallbackFactory
 from ecombot.bot.keyboards.cart import get_cart_keyboard
+from ecombot.core import manager
 from ecombot.logging_setup import log
 from ecombot.services import cart_service
 from ecombot.services.cart_service import InsufficientStockError
 from ecombot.services.cart_service import ProductNotFoundError
 
-from .constants import ERROR_ADD_TO_CART_FAILED
-from .constants import ERROR_USER_NOT_IDENTIFIED
-from .constants import SUCCESS_ADDED_TO_CART
 from .utils import format_cart_text
 
 
@@ -27,7 +25,8 @@ router = Router()
 async def view_cart_handler(message: Message, session: AsyncSession):
     """Handle the /cart command to display the user's current cart."""
     if not message.from_user:
-        await message.answer("Could not identify you.")
+        error_msg = manager.get_message("cart", "error_user_not_identified")
+        await message.answer(error_msg)
         return
 
     user_id = message.from_user.id
@@ -44,7 +43,8 @@ async def add_to_cart_handler(
 ):
     """Handle the 'Add to Cart' button click from a product view."""
     if not query.from_user:
-        await query.answer(ERROR_USER_NOT_IDENTIFIED, show_alert=True)
+        error_msg = manager.get_message("cart", "error_user_not_identified")
+        await query.answer(error_msg, show_alert=True)
         return
 
     user_id = query.from_user.id
@@ -56,10 +56,12 @@ async def add_to_cart_handler(
             user_id=user_id,
             product_id=product_id,
         )
-        await query.answer(SUCCESS_ADDED_TO_CART, show_alert=False)
+        success_msg = manager.get_message("cart", "success_added_to_cart")
+        await query.answer(success_msg, show_alert=False)
 
     except (InsufficientStockError, ProductNotFoundError) as e:
         await query.answer(str(e), show_alert=True)
     except Exception as e:
         log.error("Error adding to cart: {}", e)
-        await query.answer(ERROR_ADD_TO_CART_FAILED, show_alert=True)
+        error_msg = manager.get_message("cart", "error_add_to_cart_failed")
+        await query.answer(error_msg, show_alert=True)
