@@ -3,6 +3,7 @@
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from ecombot.core.manager import central_manager as manager
 from ecombot.schemas.dto import OrderDTO
 from ecombot.schemas.enums import OrderStatus
 
@@ -16,35 +17,35 @@ def get_admin_panel_keyboard() -> InlineKeyboardMarkup:
     """Builds the main keyboard for the admin panel."""
     builder = InlineKeyboardBuilder()
     builder.button(
-        text="➕ Add Category",
+        text=manager.get_message("keyboards", "add_category"),
         callback_data=AdminCallbackFactory(action="add_category"),
     )
     builder.button(
-        text="❌ Delete Category",
+        text=manager.get_message("keyboards", "delete_category"),
         callback_data=AdminCallbackFactory(action="delete_category"),
     )
     builder.button(
-        text="🔄 Restore Category",
+        text=manager.get_message("keyboards", "restore_category"),
         callback_data=AdminCallbackFactory(action="restore_category"),
     )
     builder.button(
-        text="➕ Add Product",
+        text=manager.get_message("keyboards", "add_product"),
         callback_data=AdminCallbackFactory(action="add_product"),
     )
     builder.button(
-        text="📝 Edit Product",
+        text=manager.get_message("keyboards", "edit_product"),
         callback_data=AdminCallbackFactory(action="edit_product"),
     )
     builder.button(
-        text="❌ Delete Product",
+        text=manager.get_message("keyboards", "delete_product"),
         callback_data=AdminCallbackFactory(action="delete_product"),
     )
     builder.button(
-        text="🔄 Restore Product",
+        text=manager.get_message("keyboards", "restore_product"),
         callback_data=AdminCallbackFactory(action="restore_product"),
     )
     builder.button(
-        text="📦 View Orders",
+        text=manager.get_message("keyboards", "view_orders"),
         callback_data=AdminCallbackFactory(action="view_orders"),
     )
     builder.adjust(3, 4, 1)
@@ -62,7 +63,7 @@ def get_admin_orders_list_keyboard(orders: list[OrderDTO]) -> InlineKeyboardMark
         )
 
     builder.button(
-        text="⬅️ Back to Filters",
+        text=manager.get_message("keyboards", "back_to_filters"),
         callback_data=AdminCallbackFactory(action="view_orders"),
     )
     builder.adjust(1)
@@ -73,27 +74,27 @@ def get_admin_order_filters_keyboard() -> InlineKeyboardMarkup:
     """Builds a keyboard for filtering orders in the admin panel."""
     builder = InlineKeyboardBuilder()
     builder.button(
-        text="⏳ Pending",
+        text=manager.get_message("keyboards", "pending"),
         callback_data=f"admin_order_filter:{OrderStatus.PENDING.value}",
     )
     builder.button(
-        text="⚙️ Processing",
+        text=manager.get_message("keyboards", "processing"),
         callback_data=f"admin_order_filter:{OrderStatus.PROCESSING.value}",
     )
     builder.button(
-        text="🚚 Shipped",
+        text=manager.get_message("keyboards", "shipped"),
         callback_data=f"admin_order_filter:{OrderStatus.SHIPPED.value}",
     )
     builder.button(
-        text="✅ Completed",
+        text=manager.get_message("keyboards", "completed"),
         callback_data=f"admin_order_filter:{OrderStatus.COMPLETED.value}",
     )
     builder.button(
-        text="❌ Cancelled",
+        text=manager.get_message("keyboards", "cancelled"),
         callback_data=f"admin_order_filter:{OrderStatus.CANCELLED.value}",
     )
     builder.button(
-        text="⬅️ Back to Admin Panel",
+        text=manager.get_message("keyboards", "back_to_admin_panel"),
         callback_data=AdminCallbackFactory(action="back_main"),
     )
     builder.adjust(2, 2, 1, 1)
@@ -107,28 +108,28 @@ def get_admin_order_details_keyboard(order: OrderDTO) -> InlineKeyboardMarkup:
     # Logic to show the NEXT valid status, not all statuses
     if order.status == OrderStatus.PENDING:
         builder.button(
-            text="Mark as Processing",
+            text=manager.get_message("keyboards", "mark_as_processing"),
             callback_data=f"admin_order_status:{order.id}:{OrderStatus.PROCESSING.value}",
         )
     elif order.status == OrderStatus.PROCESSING:
         builder.button(
-            text="Mark as Shipped",
+            text=manager.get_message("keyboards", "mark_as_shipped"),
             callback_data=f"admin_order_status:{order.id}:{OrderStatus.SHIPPED.value}",
         )
     elif order.status == OrderStatus.SHIPPED:
         builder.button(
-            text="Mark as Completed",
+            text=manager.get_message("keyboards", "mark_as_completed"),
             callback_data=f"admin_order_status:{order.id}:{OrderStatus.COMPLETED.value}",
         )
 
     if order.status not in [OrderStatus.COMPLETED, OrderStatus.CANCELLED]:
         builder.button(
-            text="Cancel Order",
+            text=manager.get_message("keyboards", "cancel_order"),
             callback_data=f"admin_order_status:{order.id}:{OrderStatus.CANCELLED.value}",
         )
 
     builder.button(
-        text="⬅️ Back to Orders List",
+        text=manager.get_message("keyboards", "back_to_orders_list"),
         callback_data=f"admin_order_filter:{order.status.value}",
     )
     builder.adjust(1)
@@ -144,10 +145,10 @@ def get_edit_product_menu_keyboard(
     builder = InlineKeyboardBuilder()
 
     fields_to_edit = {
-        "name": "📝 Name",
-        "description": "📄 Description",
-        "price": "💰 Price",
-        "stock": "📦 Stock",
+        "name": manager.get_message("keyboards", "edit_name"),
+        "description": manager.get_message("keyboards", "edit_description"),
+        "price": manager.get_message("keyboards", "edit_price"),
+        "stock": manager.get_message("keyboards", "edit_stock"),
     }
 
     for field, text in fields_to_edit.items():
@@ -159,14 +160,14 @@ def get_edit_product_menu_keyboard(
         )
 
     builder.button(
-        text="🖼️ Change Photo",
+        text=manager.get_message("keyboards", "change_photo"),
         callback_data=EditProductCallbackFactory(
             action="change_photo", product_id=product_id
         ),
     )
 
     builder.button(
-        text="⬅️ Back to Products",
+        text=manager.get_message("keyboards", "back_to_products"),
         callback_data=AdminNavCallbackFactory(
             action="back_to_product_list",
             target_message_id=product_list_message_id,

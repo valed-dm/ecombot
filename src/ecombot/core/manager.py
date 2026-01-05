@@ -7,6 +7,7 @@ from ..messages.cart import CartMessageManager
 from ..messages.catalog import CatalogMessageManager
 from ..messages.checkout import CheckoutMessageManager
 from ..messages.common import CommonMessageManager
+from ..messages.keyboards import KeyboardMessageManager
 from ..messages.orders import OrdersMessageManager
 from ..messages.profile import ProfileMessageManager
 from .commands import EcomBotCommandManager
@@ -29,6 +30,7 @@ class CentralizedManager:
             "catalog": CatalogMessageManager(default_language),
             "cart": CartMessageManager(default_language),
             "checkout": CheckoutMessageManager(default_language),
+            "keyboards": KeyboardMessageManager(default_language),
             "orders": OrdersMessageManager(default_language),
             "profile": ProfileMessageManager(default_language),
         }

@@ -63,9 +63,7 @@ class AdminOrdersMessageManager(BaseMessageManager):
             "error_query_data_none": "Los datos de consulta no pueden ser nulos",
             "error_order_not_found": "No se pudo encontrar este pedido.",
             "error_invalid_order_id": "Formato de ID de pedido inválido.",
-            "error_status_update_failed": (
-                "Ocurrió un error al actualizar el estado."
-            ),
+            "error_status_update_failed": ("Ocurrió un error al actualizar el estado."),
             # Success messages
             "success_status_updated": "Estado del pedido actualizado a {status}",
             # Progress messages
@@ -114,9 +112,7 @@ class AdminOrdersMessageManager(BaseMessageManager):
             "error_query_data_none": "Данные запроса не могут быть пустыми",
             "error_order_not_found": "Не удалось найти этот заказ.",
             "error_invalid_order_id": "Неверный формат ID заказа.",
-            "error_status_update_failed": (
-                "Произошла ошибка при обновлении статуса."
-            ),
+            "error_status_update_failed": ("Произошла ошибка при обновлении статуса."),
             # Success messages
             "success_status_updated": "Статус заказа обновлен на {status}",
             # Progress messages
