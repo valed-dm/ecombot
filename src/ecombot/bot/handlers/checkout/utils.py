@@ -3,7 +3,7 @@
 from html import escape
 from typing import Optional
 
-from ecombot.core import manager
+from ecombot.core.manager import central_manager as manager
 from ecombot.db.models import DeliveryAddress
 from ecombot.db.models import User
 from ecombot.schemas.dto import CartDTO

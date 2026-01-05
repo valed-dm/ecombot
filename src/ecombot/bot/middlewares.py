@@ -21,7 +21,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from ecombot.config import settings
-from ecombot.core import manager
+from ecombot.core.manager import central_manager as manager
 from ecombot.db import crud
 from ecombot.db.models import User
 

@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.callback_data import OrderCallbackFactory
 from ecombot.bot.keyboards.orders import get_order_details_keyboard
-from ecombot.core import manager
+from ecombot.core.manager import central_manager as manager
 from ecombot.db.models import User
 from ecombot.services import order_service
 

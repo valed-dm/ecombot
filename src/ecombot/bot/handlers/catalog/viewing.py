@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.callback_data import CatalogCallbackFactory
 from ecombot.bot.keyboards.catalog import get_catalog_products_keyboard
-from ecombot.core import manager
+from ecombot.core.manager import central_manager as manager
 from ecombot.services import catalog_service
 
 from .utils import handle_message_with_photo_transition

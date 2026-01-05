@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.keyboards.catalog import get_catalog_categories_keyboard
 from ecombot.bot.keyboards.catalog import get_product_details_keyboard
-from ecombot.core import manager
+from ecombot.core.manager import central_manager as manager
 from ecombot.logging_setup import log
 from ecombot.schemas.dto import ProductDTO
 from ecombot.services import catalog_service

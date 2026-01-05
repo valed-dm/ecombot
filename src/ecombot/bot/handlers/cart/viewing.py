@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.callback_data import CartCallbackFactory
 from ecombot.bot.keyboards.cart import get_cart_keyboard
-from ecombot.core import manager
+from ecombot.core.manager import central_manager as manager
 from ecombot.logging_setup import log
 from ecombot.services import cart_service
 from ecombot.services.cart_service import InsufficientStockError

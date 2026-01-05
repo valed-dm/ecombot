@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.keyboards.checkout import get_fast_checkout_confirmation_keyboard
 from ecombot.bot.middlewares import MessageInteractionMiddleware
-from ecombot.core import manager
+from ecombot.core.manager import central_manager as manager
 from ecombot.db.models import User
 from ecombot.services import cart_service
 

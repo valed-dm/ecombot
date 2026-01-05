@@ -15,7 +15,7 @@ from ecombot.bot.callback_data import CheckoutCallbackFactory
 from ecombot.bot.keyboards.checkout import get_checkout_confirmation_keyboard
 from ecombot.bot.keyboards.checkout import get_request_contact_keyboard
 from ecombot.bot.middlewares import MessageInteractionMiddleware
-from ecombot.core import manager
+from ecombot.core.manager import central_manager as manager
 from ecombot.db.models import User
 from ecombot.logging_setup import logger
 from ecombot.services import cart_service

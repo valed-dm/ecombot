@@ -8,7 +8,7 @@ from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.keyboards.orders import get_orders_list_keyboard
-from ecombot.core import manager
+from ecombot.core.manager import central_manager as manager
 from ecombot.db.models import User
 from ecombot.schemas.dto import OrderDTO
 from ecombot.services import order_service
