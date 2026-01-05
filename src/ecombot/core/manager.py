@@ -6,6 +6,7 @@ from ..messages.cart import CartMessageManager
 from ..messages.catalog import CatalogMessageManager
 from ..messages.checkout import CheckoutMessageManager
 from ..messages.common import CommonMessageManager
+from ..messages.orders import OrdersMessageManager
 from .commands import EcomBotCommandManager
 from .logging import EcomBotLogManager
 from .messages import Language
@@ -25,6 +26,7 @@ class CentralizedManager:
             "catalog": CatalogMessageManager(default_language),
             "cart": CartMessageManager(default_language),
             "checkout": CheckoutMessageManager(default_language),
+            "orders": OrdersMessageManager(default_language),
         }
 
     def get_message(

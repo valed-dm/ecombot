@@ -4,6 +4,7 @@ from .cart import CartMessageManager
 from .catalog import CatalogMessageManager
 from .checkout import CheckoutMessageManager
 from .common import CommonMessageManager
+from .orders import OrdersMessageManager
 
 
 __all__ = [
@@ -11,4 +12,5 @@ __all__ = [
     "CatalogMessageManager",
     "CartMessageManager",
     "CheckoutMessageManager",
+    "OrdersMessageManager",
 ]

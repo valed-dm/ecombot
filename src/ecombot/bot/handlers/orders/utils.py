@@ -8,42 +8,48 @@ from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.keyboards.orders import get_orders_list_keyboard
+from ecombot.core import manager
 from ecombot.db.models import User
 from ecombot.schemas.dto import OrderDTO
 from ecombot.services import order_service
 
-from .constants import DATE_FORMAT
-from .constants import NO_ORDERS_MESSAGE
-from .constants import ORDER_DETAILS_HEADER
-from .constants import ORDER_HISTORY_HEADER
-from .constants import ORDER_ITEMS_HEADER
-
 
 def format_order_list_text(user_orders: list[OrderDTO]) -> str:
     """Format the order history list text."""
-    text_parts = [ORDER_HISTORY_HEADER]
+    header = manager.get_message("orders", "order_history_header")
+    text_parts = [header]
 
     if not user_orders:
-        text_parts.append(NO_ORDERS_MESSAGE)
+        no_orders_msg = manager.get_message("orders", "no_orders_message")
+        text_parts.append(no_orders_msg)
         return "".join(text_parts)
 
+    date_format = manager.get_message("orders", "date_format")
     for order in user_orders:
-        text_parts.append(
-            f"📦 <b>Order #{escape(order.order_number)}</b>"
-            f" - <i>{order.status.capitalize()}</i>\n"
-            f"Placed on: {order.created_at.strftime(DATE_FORMAT)}\n"
-            f"Total: ${order.total_price:.2f}\n\n"
+        order_item = manager.get_message(
+            "orders",
+            "order_list_item",
+            order_number=escape(order.order_number),
+            status=order.status.capitalize(),
+            date=order.created_at.strftime(date_format),
+            total=order.total_price,
         )
+        text_parts.append(order_item)
 
     return "".join(text_parts)
 
 
 def format_order_details_text(order_details: OrderDTO) -> str:
     """Format the order details text."""
+    header = manager.get_message(
+        "orders", "order_details_header", order_id=order_details.id
+    )
+    items_header = manager.get_message("orders", "order_items_header")
+
     text_parts = [
-        ORDER_DETAILS_HEADER.format(order_id=order_details.id),
+        header,
         f"Status: <i>{order_details.status.capitalize()}</i>\n\n",
-        ORDER_ITEMS_HEADER,
+        items_header,
     ]
 
     has_deleted_products = False
@@ -64,11 +70,15 @@ def format_order_details_text(order_details: OrderDTO) -> str:
             product_status = ""
             active_total += item_total
 
-        text_parts.append(
-            f"  - <b>{escape(item.product.name)}</b>{product_status}\n"
-            f"    <code>{item.quantity} x ${item.price:.2f}"
-            f" = ${item_total:.2f}</code>\n"
+        item_text = manager.get_message(
+            "orders",
+            "order_item_template",
+            name=escape(item.product.name) + product_status,
+            quantity=item.quantity,
+            price=item.price,
+            total=item_total,
         )
+        text_parts.append(item_text)
 
     # Show totals breakdown
     text_parts.append("\n")

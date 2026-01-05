@@ -8,10 +8,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.callback_data import OrderCallbackFactory
 from ecombot.bot.keyboards.orders import get_order_details_keyboard
+from ecombot.core import manager
 from ecombot.db.models import User
 from ecombot.services import order_service
 
-from .constants import ERROR_ORDER_NOT_FOUND
 from .utils import format_order_details_text
 
 
@@ -37,7 +37,8 @@ async def view_order_details_handler(
         )
 
     if not order_details:
-        await query.answer(ERROR_ORDER_NOT_FOUND, show_alert=True)
+        error_msg = manager.get_message("orders", "error_order_not_found")
+        await query.answer(error_msg, show_alert=True)
         return
 
     text = format_order_details_text(order_details)
