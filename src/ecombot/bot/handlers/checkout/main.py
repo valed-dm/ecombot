@@ -9,11 +9,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.keyboards.checkout import get_fast_checkout_confirmation_keyboard
 from ecombot.bot.middlewares import MessageInteractionMiddleware
+from ecombot.core import manager
 from ecombot.db.models import User
 from ecombot.services import cart_service
 
-from .states import ERROR_EMPTY_CART
-from .states import SLOW_PATH_START
 from .states import CheckoutFSM
 from .utils import determine_missing_info
 from .utils import generate_fast_path_confirmation_text
@@ -39,7 +38,8 @@ async def checkout_start_handler(
 
     cart = await cart_service.get_user_cart(session, db_user.telegram_id)
     if not cart.items:
-        await callback_message.answer(ERROR_EMPTY_CART)
+        error_msg = manager.get_message("checkout", "error_empty_cart")
+        await callback_message.answer(error_msg)
         return
 
     default_address = get_default_address(db_user)
@@ -56,7 +56,8 @@ async def checkout_start_handler(
     else:
         # --- SLOW PATH ---
         missing_info = determine_missing_info(db_user, default_address)
-        await callback_message.answer(
-            SLOW_PATH_START.format(missing_info=", ".join(missing_info))
+        slow_path_msg = manager.get_message(
+            "checkout", "slow_path_start", missing_info=", ".join(missing_info)
         )
+        await callback_message.answer(slow_path_msg)
         await state.set_state(CheckoutFSM.getting_name)

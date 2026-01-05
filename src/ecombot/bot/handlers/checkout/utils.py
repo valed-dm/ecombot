@@ -3,6 +3,7 @@
 from html import escape
 from typing import Optional
 
+from ecombot.core import manager
 from ecombot.db.models import DeliveryAddress
 from ecombot.db.models import User
 from ecombot.schemas.dto import CartDTO
@@ -30,11 +31,13 @@ def generate_fast_path_confirmation_text(
 ) -> str:
     """Generate confirmation text for fast path checkout."""
     return (
-        "<b>Confirm Your Order</b>\n\n"
-        "Your order will be shipped to your default address:\n"
-        f"<code>{escape(default_address.full_address or '')}</code>\n\n"
-        f"Contact Phone: <code>{escape(user.phone or 'Not set')}</code>\n"
-        f"<b>Total Price: ${cart.total_price:.2f}</b>"
+        manager.get_message(
+            "checkout",
+            "fast_path_confirm",
+            address=escape(default_address.full_address or ""),
+            phone=escape(user.phone or "Not set"),
+        )
+        + f"\n\n<b>Total Price: ${cart.total_price:.2f}</b>"
     )
 
 

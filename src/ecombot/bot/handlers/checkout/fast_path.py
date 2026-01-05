@@ -11,17 +11,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.callback_data import CheckoutCallbackFactory
 from ecombot.bot.middlewares import MessageInteractionMiddleware
+from ecombot.core import manager
 from ecombot.db.models import DeliveryAddress
 from ecombot.db.models import User
 from ecombot.logging_setup import logger
 from ecombot.services import order_service
 from ecombot.services.order_service import OrderPlacementError
 
-from .states import CHECKOUT_CANCELLED
-from .states import ERROR_ADDRESS_NOT_FOUND
-from .states import ERROR_UNEXPECTED
-from .states import PROGRESS_PLACING_ORDER
-from .states import SUCCESS_ORDER_PLACED
 from .states import CheckoutFSM
 
 
@@ -40,7 +36,8 @@ async def fast_checkout_confirm_handler(
     callback_message: Message,
 ):
     """Handles the final confirmation for the fast path checkout."""
-    await callback_message.edit_text(PROGRESS_PLACING_ORDER)
+    progress_msg = manager.get_message("checkout", "progress_placing_order")
+    await callback_message.edit_text(progress_msg)
 
     state_data = await state.get_data()
     default_address_id = state_data.get("default_address_id")
@@ -52,7 +49,8 @@ async def fast_checkout_confirm_handler(
     )
 
     if not isinstance(default_address_obj, DeliveryAddress):
-        await callback_message.edit_text(ERROR_ADDRESS_NOT_FOUND)
+        error_msg = manager.get_message("checkout", "error_address_not_found")
+        await callback_message.edit_text(error_msg)
         await state.clear()
         return
 
@@ -60,15 +58,18 @@ async def fast_checkout_confirm_handler(
         order = await order_service.place_order(
             session=session, db_user=db_user, delivery_address=default_address_obj
         )
-        success_text = SUCCESS_ORDER_PLACED.format(order_number=order.order_number)
-        await callback_message.edit_text(success_text)
+        success_msg = manager.get_message(
+            "checkout", "success_order_placed", order_number=order.order_number
+        )
+        await callback_message.edit_text(success_msg)
     except OrderPlacementError as e:
         await callback_message.edit_text(f"⚠️ <b>Error:</b> {escape(str(e))}")
     except Exception as e:
         logger.error(
             f"Unexpected checkout error for user {db_user.id}: {e}", exc_info=True
         )
-        await callback_message.edit_text(ERROR_UNEXPECTED)
+        error_msg = manager.get_message("checkout", "error_unexpected")
+        await callback_message.edit_text(error_msg)
     finally:
         await state.clear()
         await query.answer()
@@ -81,7 +82,8 @@ async def fast_checkout_cancel_handler(
     query: CallbackQuery, state: FSMContext, callback_message: Message
 ):
     """Handles cancellation from the fast path confirmation."""
-    await callback_message.edit_text(CHECKOUT_CANCELLED)
+    cancel_msg = manager.get_message("checkout", "checkout_cancelled")
+    await callback_message.edit_text(cancel_msg)
     await state.clear()
     await query.answer()
 

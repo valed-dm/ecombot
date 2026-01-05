@@ -15,6 +15,7 @@ from ecombot.bot.callback_data import CheckoutCallbackFactory
 from ecombot.bot.keyboards.checkout import get_checkout_confirmation_keyboard
 from ecombot.bot.keyboards.checkout import get_request_contact_keyboard
 from ecombot.bot.middlewares import MessageInteractionMiddleware
+from ecombot.core import manager
 from ecombot.db.models import User
 from ecombot.logging_setup import logger
 from ecombot.services import cart_service
@@ -22,14 +23,6 @@ from ecombot.services import order_service
 from ecombot.services import user_service
 from ecombot.services.order_service import OrderPlacementError
 
-from .states import CHECKOUT_CANCELLED
-from .states import ERROR_EMPTY_ADDRESS
-from .states import ERROR_EMPTY_PHONE
-from .states import ERROR_UNEXPECTED
-from .states import PROGRESS_SAVING_DETAILS
-from .states import SLOW_PATH_ADDRESS
-from .states import SLOW_PATH_PHONE
-from .states import SUCCESS_ORDER_PLACED_SLOW
 from .states import CheckoutFSM
 from .utils import generate_slow_path_confirmation_text
 
@@ -42,8 +35,9 @@ router.callback_query.middleware(MessageInteractionMiddleware())
 async def get_name_handler(message: Message, state: FSMContext):
     """Slow Path Step 1: Receives name, asks for phone."""
     await state.update_data(name=message.text)
+    phone_msg = manager.get_message("checkout", "slow_path_phone")
     await message.answer(
-        SLOW_PATH_PHONE,
+        phone_msg,
         reply_markup=get_request_contact_keyboard(),
     )
     await state.set_state(CheckoutFSM.getting_phone)
@@ -55,12 +49,14 @@ async def get_phone_handler(message: Message, state: FSMContext):
     phone = message.contact.phone_number if message.contact else message.text
 
     if not phone or not phone.strip():
-        await message.answer(ERROR_EMPTY_PHONE)
+        error_msg = manager.get_message("checkout", "error_empty_phone")
+        await message.answer(error_msg)
         return
 
     await state.update_data(phone=phone.strip())
+    address_msg = manager.get_message("checkout", "slow_path_address")
     await message.answer(
-        SLOW_PATH_ADDRESS,
+        address_msg,
         reply_markup=ReplyKeyboardRemove(),
     )
     await state.set_state(CheckoutFSM.getting_address)
@@ -72,7 +68,8 @@ async def get_address_handler(
 ):
     """Slow Path Step 3: Receives address, shows final confirmation."""
     if not message.text or not message.text.strip():
-        await message.answer(ERROR_EMPTY_ADDRESS)
+        error_msg = manager.get_message("checkout", "error_empty_address")
+        await message.answer(error_msg)
         return
 
     await state.update_data(address=message.text.strip())
@@ -99,7 +96,8 @@ async def slow_path_confirm_handler(
     callback_message: Message,
 ):
     """Slow Path Step 4: Confirmed. Places order AND saves user info."""
-    await callback_message.edit_text(PROGRESS_SAVING_DETAILS)
+    progress_msg = manager.get_message("checkout", "progress_saving_details")
+    await callback_message.edit_text(progress_msg)
     user_data = await state.get_data()
 
     try:
@@ -132,8 +130,10 @@ async def slow_path_confirm_handler(
                 delivery_address=new_address_model,
             )
 
-        success_text = SUCCESS_ORDER_PLACED_SLOW.format(order_number=order.order_number)
-        await callback_message.edit_text(success_text)
+        success_msg = manager.get_message(
+            "checkout", "success_order_placed_slow", order_number=order.order_number
+        )
+        await callback_message.edit_text(success_msg)
 
     except OrderPlacementError as e:
         await callback_message.edit_text(f"⚠️ <b>Error:</b> {escape(str(e))}")
@@ -141,7 +141,8 @@ async def slow_path_confirm_handler(
         logger.error(
             f"Unexpected checkout error for user {db_user.id}: {e}", exc_info=True
         )
-        await callback_message.edit_text(ERROR_UNEXPECTED)
+        error_msg = manager.get_message("checkout", "error_unexpected")
+        await callback_message.edit_text(error_msg)
     finally:
         await state.clear()
         await query.answer()
@@ -154,6 +155,7 @@ async def slow_path_cancel_handler(
     query: CallbackQuery, state: FSMContext, callback_message: Message
 ):
     """Handles cancellation from the slow path confirmation."""
-    await callback_message.edit_text(CHECKOUT_CANCELLED)
+    cancel_msg = manager.get_message("checkout", "checkout_cancelled")
+    await callback_message.edit_text(cancel_msg)
     await state.clear()
     await query.answer()
