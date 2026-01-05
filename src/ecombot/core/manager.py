@@ -11,7 +11,7 @@ from .messages import Language
 class CentralizedManager:
     """Main manager that provides access to all centralized systems."""
 
-    def __init__(self, default_language: Language = Language.EN):
+    def __init__(self, default_language: Language = Language.RU):
         self.default_language = default_language
 
         # Initialize all managers
