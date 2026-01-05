@@ -10,17 +10,12 @@ from ecombot.bot.callback_data import AdminCallbackFactory
 from ecombot.bot.callback_data import OrderCallbackFactory
 from ecombot.bot.keyboards.admin import get_admin_order_filters_keyboard
 from ecombot.bot.keyboards.admin import get_admin_orders_list_keyboard
+from ecombot.core.manager import central_manager as manager
 from ecombot.db import crud
 from ecombot.schemas.dto import OrderDTO
 from ecombot.schemas.enums import OrderStatus
 from ecombot.services import order_service
 
-from .constants import ERROR_ORDER_NOT_FOUND
-from .constants import ERROR_QUERY_DATA_NONE
-from .constants import NO_ORDERS_FOUND
-from .constants import ORDERS_LIST_HEADER
-from .constants import PROGRESS_FETCHING_ORDERS
-from .constants import SELECT_STATUS_PROMPT
 from .utils import InvalidQueryDataError
 from .utils import send_order_details_view
 
@@ -32,7 +27,10 @@ router = Router()
 async def view_orders_start_handler(query: CallbackQuery, callback_message: Message):
     """Entry point for viewing orders. Displays the status filter keyboard."""
     keyboard = get_admin_order_filters_keyboard()
-    await callback_message.edit_text(SELECT_STATUS_PROMPT, reply_markup=keyboard)
+    await callback_message.edit_text(
+        manager.get_message("admin_orders", "select_status_prompt"),
+        reply_markup=keyboard,
+    )
     await query.answer()
 
 
@@ -42,20 +40,29 @@ async def filter_orders_by_status_handler(
 ):
     """Handle status filter button clicks. Fetch and display orders by status."""
     if query.data is None:
-        raise InvalidQueryDataError(ERROR_QUERY_DATA_NONE)
+        raise InvalidQueryDataError(
+            manager.get_message("admin_orders", "error_query_data_none")
+        )
 
     status_value = query.data.split(":")[1]
     status = OrderStatus(status_value)
 
     await callback_message.edit_text(
-        PROGRESS_FETCHING_ORDERS.format(status=status.name.lower())
+        manager.get_message(
+            "admin_orders", "progress_fetching_orders", status=status.name.lower()
+        )
     )
 
     orders = await order_service.get_orders_by_status_for_admin(session, status)
 
-    text = ORDERS_LIST_HEADER.format(status=status.name.capitalize(), count=len(orders))
+    text = manager.get_message(
+        "admin_orders",
+        "orders_list_header",
+        status=status.name.capitalize(),
+        count=len(orders),
+    )
     if not orders:
-        text += NO_ORDERS_FOUND
+        text += manager.get_message("admin_orders", "no_orders_found")
 
     keyboard = get_admin_orders_list_keyboard(orders)
     await callback_message.edit_text(text, reply_markup=keyboard)
@@ -76,7 +83,10 @@ async def admin_view_order_details_handler(
         order = await crud.get_order(session, order_id)
 
     if not order:
-        await query.answer(ERROR_ORDER_NOT_FOUND, show_alert=True)
+        await query.answer(
+            manager.get_message("admin_orders", "error_order_not_found"),
+            show_alert=True,
+        )
         return
 
     order_dto = OrderDTO.model_validate(order)

@@ -5,12 +5,9 @@ from html import escape
 from aiogram.types import Message
 
 from ecombot.bot.keyboards.admin import get_admin_order_details_keyboard
+from ecombot.core.manager import central_manager as manager
 from ecombot.logging_setup import log
 from ecombot.schemas.dto import OrderDTO
-
-from .constants import MAX_MESSAGE_LENGTH
-from .constants import TEXT_TRUNCATED_SUFFIX
-from .constants import TRUNCATE_THRESHOLD
 
 
 class InvalidQueryDataError(ValueError):
@@ -21,14 +18,30 @@ class InvalidQueryDataError(ValueError):
 
 def generate_order_details_text(order: OrderDTO) -> str:
     """Generate detailed text for a single order."""
+    not_available = manager.get_message("admin_orders", "not_available")
+
     text_parts = [
-        f"<b>Order Details: {escape(order.order_number)}</b>\n\n",
-        f"<b>Status:</b> <i>{order.status.capitalize()}</i>\n",
-        f"<b>Placed on:</b> {order.created_at.strftime('%Y-%m-%d %H:%M')}\n\n",
-        f"<b>Customer:</b> {escape(order.contact_name or 'N/A')}\n",
-        f"<b>Phone:</b> <code>{escape(order.phone or 'N/A')}</code>\n",
-        f"<b>Address:</b> <code>{escape(order.address or 'N/A')}</code>\n\n",
-        "<b>Items:</b>\n",
+        manager.get_message(
+            "admin_orders",
+            "order_details_header",
+            order_number=escape(order.order_number),
+        ),
+        manager.get_message(
+            "admin_orders", "order_status_field", status=order.status.capitalize()
+        ),
+        manager.get_message(
+            "admin_orders",
+            "order_date_field",
+            date=order.created_at.strftime("%Y-%m-%d %H:%M"),
+        ),
+        manager.get_message(
+            "admin_orders",
+            "customer_info_header",
+            name=escape(order.contact_name or not_available),
+            phone=escape(order.phone or not_available),
+            address=escape(order.address or not_available),
+        ),
+        manager.get_message("admin_orders", "items_header"),
     ]
 
     has_deleted_products = False
@@ -42,19 +55,25 @@ def generate_order_details_text(order: OrderDTO) -> str:
         is_deleted = item.product.deleted_at is not None
 
         if is_deleted:
-            product_status = " ⚠️ <i>(Deleted - Not Charged)</i>"
+            product_status = manager.get_message(
+                "admin_orders", "deleted_product_suffix"
+            )
             has_deleted_products = True
             deleted_total += item_total
         else:
             product_status = ""
             active_total += item_total
 
-        text_parts.extend(
-            [
-                f"  - <b>{escape(item.product.name)}</b>{product_status}\n",
-                f"    <code>{item.quantity} x ${item.price:.2f}",
-                f" = ${item_total:.2f}</code>\n",
-            ]
+        text_parts.append(
+            manager.get_message(
+                "admin_orders",
+                "item_template",
+                name=escape(item.product.name),
+                status=product_status,
+                quantity=item.quantity,
+                price=item.price,
+                total=item_total,
+            )
         )
 
     # Show totals breakdown
@@ -62,21 +81,31 @@ def generate_order_details_text(order: OrderDTO) -> str:
     if has_deleted_products:
         text_parts.extend(
             [
-                f"<b>Active Items Total: ${active_total:.2f}</b>\n",
-                f"<s>Deleted Items: ${deleted_total:.2f}</s>\n",
-                f"<b>Final Total: ${active_total:.2f}</b>\n\n",
-                "⚠️ <i>Deleted products are not charged. "
-                "Customer pays only for active items.</i>",
+                manager.get_message(
+                    "admin_orders", "active_items_total", total=active_total
+                ),
+                manager.get_message(
+                    "admin_orders", "deleted_items_total", total=deleted_total
+                ),
+                manager.get_message("admin_orders", "final_total", total=active_total),
+                manager.get_message("admin_orders", "deleted_items_notice"),
             ]
         )
     else:
-        text_parts.append(f"<b>Total: ${active_total:.2f}</b>")
+        text_parts.append(
+            manager.get_message("admin_orders", "order_total", total=active_total)
+        )
 
     text = "".join(text_parts)
 
     # Check Telegram's character limit
-    if len(text) > MAX_MESSAGE_LENGTH:
-        text = text[:TRUNCATE_THRESHOLD] + TEXT_TRUNCATED_SUFFIX
+    max_length = int(manager.get_message("admin_orders", "max_message_length"))
+    truncate_threshold = int(manager.get_message("admin_orders", "truncate_threshold"))
+
+    if len(text) > max_length:
+        text = text[:truncate_threshold] + manager.get_message(
+            "admin_orders", "text_truncated_suffix"
+        )
 
     return text
 
