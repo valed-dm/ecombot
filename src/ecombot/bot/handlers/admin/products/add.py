@@ -22,6 +22,7 @@ from ecombot.bot.callback_data import CatalogCallbackFactory
 from ecombot.bot.keyboards.catalog import get_catalog_categories_keyboard
 from ecombot.bot.keyboards.common import get_cancel_keyboard
 from ecombot.config import settings
+from ecombot.core.manager import central_manager as manager
 from ecombot.logging_setup import log
 from ecombot.services import catalog_service
 
@@ -43,24 +44,23 @@ async def add_product_start(
         categories = await catalog_service.get_all_categories(session)
     except Exception as e:
         log.error(f"Failed to fetch categories: {e}", exc_info=True)
-        text = "❌ Failed to load categories. Please try again."
-        if isinstance(event.message, Message):
-            await event.message.edit_text(text)
-            await event.answer()
-        return
-
-    if not categories:
-        text = (
-            "❌ No categories found. You need to create at least one category "
-            "before adding products. Please use 'Add Category' first."
+        text = manager.get_message(
+            "admin_products", "add_product_categories_load_error"
         )
         if isinstance(event.message, Message):
             await event.message.edit_text(text)
             await event.answer()
         return
 
+    if not categories:
+        text = manager.get_message("admin_products", "add_product_no_categories")
+        if isinstance(event.message, Message):
+            await event.message.edit_text(text)
+            await event.answer()
+        return
+
     keyboard = get_catalog_categories_keyboard(categories)
-    text = "Please choose the category for the new product:"
+    text = manager.get_message("admin_products", "add_product_choose_category")
 
     if isinstance(event.message, Message):
         await event.message.edit_text(text, reply_markup=keyboard)
@@ -83,13 +83,13 @@ async def add_product_choose_category(
     await state.update_data(category_id=callback_data.item_id)
     try:
         await callback_message.edit_text(
-            "Great. Now, what is the name of the product?",
+            manager.get_message("admin_products", "add_product_name_prompt"),
             reply_markup=get_cancel_keyboard(),
         )
     except TelegramBadRequest as e:
         log.warning(f"Failed to edit message: {e}")
         await callback_message.answer(
-            "Great. Now, what is the name of the product?",
+            manager.get_message("admin_products", "add_product_name_prompt"),
             reply_markup=get_cancel_keyboard(),
         )
     await state.set_state(AddProduct.name)
@@ -101,7 +101,7 @@ async def add_product_name(message: Message, state: FSMContext):
     """Step 3: Receives the product name and asks for the description."""
     if not message.text or not message.text.strip():
         await message.answer(
-            "Please enter a valid product name (cannot be empty).",
+            manager.get_message("admin_products", "add_product_name_empty"),
             reply_markup=get_cancel_keyboard(),
         )
         return
@@ -109,14 +109,14 @@ async def add_product_name(message: Message, state: FSMContext):
     product_name = message.text.strip()
     if len(product_name) > 255:
         await message.answer(
-            "Product name is too long (maximum 255 characters).",
+            manager.get_message("admin_products", "add_product_name_too_long"),
             reply_markup=get_cancel_keyboard(),
         )
         return
 
     await state.update_data(name=product_name)
     await message.answer(
-        "Got it. Now, please provide a description for the product.",
+        manager.get_message("admin_products", "add_product_description_prompt"),
         reply_markup=get_cancel_keyboard(),
     )
     await state.set_state(AddProduct.description)
@@ -127,7 +127,7 @@ async def add_product_description_step(message: Message, state: FSMContext):
     """Step 4: Receives the product description and asks for the price."""
     if not message.text or not message.text.strip():
         await message.answer(
-            "Please enter a valid product description (cannot be empty).",
+            manager.get_message("admin_products", "add_product_description_empty"),
             reply_markup=get_cancel_keyboard(),
         )
         return
@@ -135,14 +135,14 @@ async def add_product_description_step(message: Message, state: FSMContext):
     product_description = message.text.strip()
     if len(product_description) > 1000:
         await message.answer(
-            "Product description is too long (maximum 1000 characters).",
+            manager.get_message("admin_products", "add_product_description_too_long"),
             reply_markup=get_cancel_keyboard(),
         )
         return
 
     await state.update_data(description=product_description)
     await message.answer(
-        "Excellent. What is the price? (e.g., 25.99)",
+        manager.get_message("admin_products", "add_product_price_prompt"),
         reply_markup=get_cancel_keyboard(),
     )
     await state.set_state(AddProduct.price)
@@ -155,20 +155,20 @@ async def add_product_price_step(message: Message, state: FSMContext):
         price = Decimal(message.text)
         if price <= 0:
             await message.answer(
-                "Price must be a positive number. Please try again.",
+                manager.get_message("admin_products", "add_product_price_invalid"),
                 reply_markup=get_cancel_keyboard(),
             )
             return
     except decimal.InvalidOperation:
         await message.answer(
-            "Invalid price format. Please enter a number (e.g., 25.99).",
+            manager.get_message("admin_products", "add_product_price_format_error"),
             reply_markup=get_cancel_keyboard(),
         )
         return
 
     await state.update_data(price=price)
     await message.answer(
-        "Good. Now, how many units are in stock? (e.g., 50)",
+        manager.get_message("admin_products", "add_product_stock_prompt"),
         reply_markup=get_cancel_keyboard(),
     )
     await state.set_state(AddProduct.stock)
@@ -179,7 +179,7 @@ async def add_product_stock_step(message: Message, state: FSMContext):
     """Step 6: Receives the stock, validates it, and asks for the product image."""
     if not message.text:
         await message.answer(
-            "Please send the stock quantity as text, not a photo or sticker."
+            manager.get_message("admin_products", "add_product_stock_not_text")
         )
         return
 
@@ -187,20 +187,20 @@ async def add_product_stock_step(message: Message, state: FSMContext):
         stock = int(message.text)
         if stock < 0:
             await message.answer(
-                "Stock cannot be negative. Please enter a whole number.",
+                manager.get_message("admin_products", "add_product_stock_negative"),
                 reply_markup=get_cancel_keyboard(),
             )
             return
     except ValueError:
         await message.answer(
-            "Invalid format. Please enter a whole number.",
+            manager.get_message("admin_products", "add_product_stock_invalid"),
             reply_markup=get_cancel_keyboard(),
         )
         return
 
     await state.update_data(stock=stock)
     await message.answer(
-        "Excellent. Now, please upload a photo for the product (or send /skip).",
+        manager.get_message("admin_products", "add_product_image_prompt"),
         reply_markup=get_cancel_keyboard(),
     )
     await state.set_state(AddProduct.get_image)
@@ -236,7 +236,11 @@ async def add_product_get_image(
             category_id=product_data["category_id"],
             image_url=product_data["image_url"],
         )
-        await message.answer(f"✅ Product '{new_product.name}' created successfully!")
+        await message.answer(
+            manager.get_message(
+                "admin_products", "add_product_success", name=new_product.name
+            )
+        )
 
     except Exception as e:
         if image_path:
@@ -252,9 +256,6 @@ async def add_product_get_image(
             f"Failed to create product. Admin: {admin_id}. Error: {e}",
             exc_info=True,
         )
-        await message.answer(
-            "❌ An unexpected error occurred while creating the product. "
-            "Please check the logs for details."
-        )
+        await message.answer(manager.get_message("admin_products", "add_product_error"))
     finally:
         await state.clear()
