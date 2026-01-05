@@ -22,6 +22,7 @@ from ecombot.bot.keyboards.catalog import get_catalog_categories_keyboard
 from ecombot.bot.keyboards.catalog import get_catalog_products_keyboard
 from ecombot.bot.keyboards.common import get_cancel_keyboard
 from ecombot.config import settings
+from ecombot.core.manager import central_manager as manager
 from ecombot.logging_setup import log
 from ecombot.services import catalog_service
 
@@ -45,7 +46,7 @@ async def edit_product_start(
     except Exception as e:
         log.error(f"Failed to load categories for edit product: {e}", exc_info=True)
         await callback_message.edit_text(
-            "❌ An unexpected error occurred while loading categories.",
+            manager.get_message("admin_products", "edit_product_load_error"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await query.answer()
@@ -53,7 +54,7 @@ async def edit_product_start(
 
     if not categories:
         await callback_message.edit_text(
-            "❌ No categories found. Please create categories and products first.",
+            manager.get_message("admin_products", "edit_product_no_categories"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await query.answer()
@@ -61,7 +62,8 @@ async def edit_product_start(
 
     keyboard = get_catalog_categories_keyboard(categories)
     await callback_message.edit_text(
-        "Choose a category to edit products from:", reply_markup=keyboard
+        manager.get_message("admin_products", "edit_product_choose_category"),
+        reply_markup=keyboard,
     )
     await state.set_state(EditProduct.choose_category)
     await query.answer()
@@ -94,7 +96,7 @@ async def edit_product_choose_category(
 
     if not products:
         await callback_message.edit_text(
-            "❌ No products found in this category. Please add products first.",
+            manager.get_message("admin_products", "edit_product_no_products"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await state.clear()
@@ -102,7 +104,10 @@ async def edit_product_choose_category(
         return
 
     keyboard = get_catalog_products_keyboard(products)
-    await callback_message.edit_text("Choose a product to edit:", reply_markup=keyboard)
+    await callback_message.edit_text(
+        manager.get_message("admin_products", "edit_product_choose_product"),
+        reply_markup=keyboard,
+    )
     await state.set_state(EditProduct.choose_product)
     await query.answer()
 
@@ -127,7 +132,7 @@ async def edit_product_choose_product(
     except Exception as e:
         log.error(f"Failed to load product for edit: {e}", exc_info=True)
         await callback_message.edit_text(
-            "❌ An unexpected error occurred while loading product.",
+            manager.get_message("admin_products", "edit_product_load_details_error"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await state.clear()
@@ -136,7 +141,7 @@ async def edit_product_choose_product(
 
     if not product:
         await callback_message.edit_text(
-            "❌ Product not found.",
+            manager.get_message("admin_products", "edit_product_not_found"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await state.clear()
@@ -179,17 +184,19 @@ async def edit_product_choose_field(
 
     if field == "change_photo":
         await callback_message.edit_text(
-            "Please upload a new photo for the product:",
+            manager.get_message("admin_products", "edit_product_image_prompt"),
             reply_markup=get_cancel_keyboard(),
         )
         await state.update_data(edit_field="image_url")
         await state.set_state(EditProduct.get_new_image)
     else:
         field_prompts = {
-            "name": "Enter the new product name:",
-            "description": "Enter the new product description:",
-            "price": "Enter the new price (e.g., 25.99):",
-            "stock": "Enter the new stock quantity:",
+            "name": manager.get_message("admin_products", "edit_product_name_prompt"),
+            "description": manager.get_message(
+                "admin_products", "edit_product_description_prompt"
+            ),
+            "price": manager.get_message("admin_products", "edit_product_price_prompt"),
+            "stock": manager.get_message("admin_products", "edit_product_stock_prompt"),
         }
 
         await callback_message.edit_text(
@@ -216,7 +223,7 @@ async def edit_product_get_new_value(
 
     if not message.text or not message.text.strip():
         await message.answer(
-            "Please enter a valid value (cannot be empty).",
+            manager.get_message("admin_products", "edit_product_value_empty"),
             reply_markup=get_cancel_keyboard(),
         )
         return
@@ -229,7 +236,7 @@ async def edit_product_get_new_value(
             new_value = Decimal(new_value)
             if new_value <= 0:
                 await message.answer(
-                    "Price must be a positive number. Please try again.",
+                    manager.get_message("admin_products", "edit_product_price_invalid"),
                     reply_markup=get_cancel_keyboard(),
                 )
                 return
@@ -237,7 +244,9 @@ async def edit_product_get_new_value(
             new_value = int(new_value)
             if new_value < 0:
                 await message.answer(
-                    "Stock cannot be negative. Please try again.",
+                    manager.get_message(
+                        "admin_products", "edit_product_stock_negative"
+                    ),
                     reply_markup=get_cancel_keyboard(),
                 )
                 return
@@ -245,15 +254,22 @@ async def edit_product_get_new_value(
             max_length = 255 if field == "name" else 1000
             if len(new_value) > max_length:
                 await message.answer(
-                    f"{field.capitalize()} is too long "
-                    f"(maximum {max_length} characters).",
+                    manager.get_message(
+                        "admin_products",
+                        "edit_product_field_too_long",
+                        field=field.capitalize(),
+                        max_length=max_length,
+                    ),
                     reply_markup=get_cancel_keyboard(),
                 )
                 return
     except (ValueError, decimal.InvalidOperation):
-        field_type = "number" if field in ["price", "stock"] else "text"
         await message.answer(
-            f"Invalid {field_type} format. Please try again.",
+            manager.get_message(
+                "admin_products",
+                "edit_product_invalid_format",
+                field_type="number" if field in ["price", "stock"] else "text",
+            ),
             reply_markup=get_cancel_keyboard(),
         )
         return
@@ -264,13 +280,15 @@ async def edit_product_get_new_value(
             session, product_id, {field: new_value}
         )
         await message.answer(
-            f"✅ Product '{product_name}' {field} updated successfully!",
+            manager.get_message(
+                "admin_products", "edit_product_success", name=product_name, field=field
+            ),
             reply_markup=get_admin_panel_keyboard(),
         )
     except Exception as e:
         log.error(f"Failed to update product {product_id}: {e}", exc_info=True)
         await message.answer(
-            "❌ An unexpected error occurred while updating the product.",
+            manager.get_message("admin_products", "edit_product_error"),
             reply_markup=get_admin_panel_keyboard(),
         )
 
@@ -304,13 +322,15 @@ async def edit_product_get_new_image(
         )
 
         await message.answer(
-            f"✅ Product '{product_name}' image updated successfully!",
+            manager.get_message(
+                "admin_products", "edit_product_image_success", name=product_name
+            ),
             reply_markup=get_admin_panel_keyboard(),
         )
     except Exception as e:
         log.error(f"Failed to update product image {product_id}: {e}", exc_info=True)
         await message.answer(
-            "❌ An unexpected error occurred while updating the product image.",
+            manager.get_message("admin_products", "edit_product_image_error"),
             reply_markup=get_admin_panel_keyboard(),
         )
 

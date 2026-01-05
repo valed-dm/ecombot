@@ -67,7 +67,6 @@ class AdminProductsMessageManager(BaseMessageManager):
                 "❌ An unexpected error occurred while creating the product. "
                 "Please check the logs for details."
             ),
-            
             # Edit product messages
             "edit_product_load_error": (
                 "❌ Failed to load categories. Please try again."
@@ -76,9 +75,7 @@ class AdminProductsMessageManager(BaseMessageManager):
                 "❌ No categories found. You need to create at least one category "
                 "before editing products."
             ),
-            "edit_product_choose_category": (
-                "Choose a category to see its products:"
-            ),
+            "edit_product_choose_category": ("Choose a category to see its products:"),
             "edit_product_no_products": (
                 "❌ No products found in this category. "
                 "Please add products first or choose another category."
@@ -88,7 +85,6 @@ class AdminProductsMessageManager(BaseMessageManager):
             "edit_product_load_details_error": (
                 "❌ An unexpected error occurred while loading product details."
             ),
-            
             # Delete product messages
             "delete_product_confirm_prompt": (
                 "⚠️ Are you sure you want to delete the product '{name}'? "
@@ -103,7 +99,6 @@ class AdminProductsMessageManager(BaseMessageManager):
             "delete_product_error": (
                 "❌ An unexpected error occurred while deleting '{name}'."
             ),
-            
             # Restore product messages
             "restore_product_load_error": (
                 "❌ An unexpected error occurred while loading deleted products."
@@ -114,14 +109,40 @@ class AdminProductsMessageManager(BaseMessageManager):
             "restore_product_choose_prompt": (
                 "🔄 Choose a deleted product to restore:"
             ),
-            "restore_product_success": (
-                "✅ Product has been restored successfully!"
+            "restore_product_success": ("✅ Product has been restored successfully!"),
+            "restore_product_not_found": ("❌ Product not found or already active."),
+            # Edit field prompts
+            "edit_product_name_prompt": "Enter the new product name:",
+            "edit_product_description_prompt": "Enter the new product description:",
+            "edit_product_price_prompt": "Enter the new price (e.g., 25.99):",
+            "edit_product_stock_prompt": "Enter the new stock quantity:",
+            "edit_product_image_prompt": "Please upload a new photo for the product:",
+            "edit_product_value_empty": (
+                "Please enter a valid value (cannot be empty)."
             ),
-            "restore_product_not_found": (
-                "❌ Product not found or already active."
+            "edit_product_price_invalid": (
+                "Price must be a positive number. Please try again."
             ),
-            "restore_product_error": (
-                "❌ An unexpected error occurred while restoring the product."
+            "edit_product_stock_negative": (
+                "Stock cannot be negative. Please try again."
+            ),
+            "edit_product_field_too_long": (
+                "{field} is too long (maximum {max_length} characters)."
+            ),
+            "edit_product_invalid_format": (
+                "Invalid {field_type} format. Please try again."
+            ),
+            "edit_product_success": (
+                "✅ Product '{name}' {field} updated successfully!"
+            ),
+            "edit_product_error": (
+                "❌ An unexpected error occurred while updating the product."
+            ),
+            "edit_product_image_success": (
+                "✅ Product '{name}' image updated successfully!"
+            ),
+            "edit_product_image_error": (
+                "❌ An unexpected error occurred while updating the product image."
             ),
         }
 
@@ -159,9 +180,7 @@ class AdminProductsMessageManager(BaseMessageManager):
             "add_product_description_too_long": (
                 "La descripción del producto es muy larga (máximo 1000 caracteres)."
             ),
-            "add_product_price_prompt": (
-                "Excelente. ¿Cuál es el precio? (ej., 25.99)"
-            ),
+            "add_product_price_prompt": ("Excelente. ¿Cuál es el precio? (ej., 25.99)"),
             "add_product_price_invalid": (
                 "El precio debe ser un número positivo. Por favor inténtalo de nuevo."
             ),
@@ -190,7 +209,6 @@ class AdminProductsMessageManager(BaseMessageManager):
                 "❌ Ocurrió un error inesperado al crear el producto. "
                 "Por favor revisa los logs para más detalles."
             ),
-            
             # Edit product messages
             "edit_product_load_error": (
                 "❌ Error al cargar categorías. Por favor inténtalo de nuevo."
@@ -211,7 +229,6 @@ class AdminProductsMessageManager(BaseMessageManager):
             "edit_product_load_details_error": (
                 "❌ Ocurrió un error inesperado al cargar los detalles del producto."
             ),
-            
             # Delete product messages
             "delete_product_confirm_prompt": (
                 "⚠️ ¿Estás seguro de que quieres eliminar el producto '{name}'? "
@@ -227,7 +244,6 @@ class AdminProductsMessageManager(BaseMessageManager):
             "delete_product_error": (
                 "❌ Ocurrió un error inesperado al eliminar '{name}'."
             ),
-            
             # Restore product messages
             "restore_product_load_error": (
                 "❌ Ocurrió un error inesperado al cargar los productos eliminados."
@@ -245,8 +261,42 @@ class AdminProductsMessageManager(BaseMessageManager):
             "restore_product_not_found": (
                 "❌ Producto no encontrado o ya está activo."
             ),
-            "restore_product_error": (
-                "❌ Ocurrió un error inesperado al restaurar el producto."
+            # Edit field prompts
+            "edit_product_name_prompt": "Ingresa el nuevo nombre del producto:",
+            "edit_product_description_prompt": (
+                "Ingresa la nueva descripción del producto:"
+            ),
+            "edit_product_price_prompt": "Ingresa el nuevo precio (ej., 25.99):",
+            "edit_product_stock_prompt": "Ingresa la nueva cantidad de stock:",
+            "edit_product_image_prompt": (
+                "Por favor sube una nueva foto para el producto:"
+            ),
+            "edit_product_value_empty": (
+                "Por favor ingresa un valor válido (no puede estar vacío)."
+            ),
+            "edit_product_price_invalid": (
+                "El precio debe ser un número positivo. Por favor inténtalo de nuevo."
+            ),
+            "edit_product_stock_negative": (
+                "El stock no puede ser negativo. Por favor inténtalo de nuevo."
+            ),
+            "edit_product_field_too_long": (
+                "{field} es muy largo (máximo {max_length} caracteres)."
+            ),
+            "edit_product_invalid_format": (
+                "Formato de {field_type} inválido. Por favor inténtalo de nuevo."
+            ),
+            "edit_product_success": (
+                "✅ ¡{field} del producto '{name}' actualizado exitosamente!"
+            ),
+            "edit_product_error": (
+                "❌ Ocurrió un error inesperado al actualizar el producto."
+            ),
+            "edit_product_image_success": (
+                "✅ ¡Imagen del producto '{name}' actualizada exitosamente!"
+            ),
+            "edit_product_image_error": (
+                "❌ Ocurrió un error inesperado al actualizar la imagen del producto."
             ),
         }
 
@@ -264,9 +314,7 @@ class AdminProductsMessageManager(BaseMessageManager):
             "add_product_choose_category": (
                 "Пожалуйста, выберите категорию для нового товара:"
             ),
-            "add_product_name_prompt": (
-                "Отлично. Теперь, как называется товар?"
-            ),
+            "add_product_name_prompt": ("Отлично. Теперь, как называется товар?"),
             "add_product_name_empty": (
                 "Пожалуйста, введите корректное название товара "
                 "(не может быть пустым)."
@@ -284,9 +332,7 @@ class AdminProductsMessageManager(BaseMessageManager):
             "add_product_description_too_long": (
                 "Описание товара слишком длинное (максимум 1000 символов)."
             ),
-            "add_product_price_prompt": (
-                "Отлично. Какая цена? (например, 25.99)"
-            ),
+            "add_product_price_prompt": ("Отлично. Какая цена? (например, 25.99)"),
             "add_product_price_invalid": (
                 "Цена должна быть положительным числом. "
                 "Пожалуйста, попробуйте снова."
@@ -317,7 +363,6 @@ class AdminProductsMessageManager(BaseMessageManager):
                 "❌ Произошла неожиданная ошибка при создании товара. "
                 "Пожалуйста, проверьте логи для подробностей."
             ),
-            
             # Edit product messages
             "edit_product_load_error": (
                 "❌ Не удалось загрузить категории. Пожалуйста, попробуйте снова."
@@ -338,7 +383,6 @@ class AdminProductsMessageManager(BaseMessageManager):
             "edit_product_load_details_error": (
                 "❌ Произошла неожиданная ошибка при загрузке деталей товара."
             ),
-            
             # Delete product messages
             "delete_product_confirm_prompt": (
                 "⚠️ Вы уверены, что хотите удалить товар '{name}'? "
@@ -353,7 +397,6 @@ class AdminProductsMessageManager(BaseMessageManager):
             "delete_product_error": (
                 "❌ Произошла неожиданная ошибка при удалении '{name}'."
             ),
-            
             # Restore product messages
             "restore_product_load_error": (
                 "❌ Произошла неожиданная ошибка при загрузке удаленных товаров."
@@ -364,14 +407,40 @@ class AdminProductsMessageManager(BaseMessageManager):
             "restore_product_choose_prompt": (
                 "🔄 Выберите удаленный товар для восстановления:"
             ),
-            "restore_product_success": (
-                "✅ Товар успешно восстановлен!"
+            "restore_product_success": ("✅ Товар успешно восстановлен!"),
+            "restore_product_not_found": ("❌ Товар не найден или уже активен."),
+            # Edit field prompts
+            "edit_product_name_prompt": "Введите новое название товара:",
+            "edit_product_description_prompt": "Введите новое описание товара:",
+            "edit_product_price_prompt": "Введите новую цену (например, 25.99):",
+            "edit_product_stock_prompt": "Введите новое количество на складе:",
+            "edit_product_image_prompt": "Пожалуйста, загрузите новое фото товара:",
+            "edit_product_value_empty": (
+                "Пожалуйста, введите корректное значение " "(не может быть пустым)."
             ),
-            "restore_product_not_found": (
-                "❌ Товар не найден или уже активен."
+            "edit_product_price_invalid": (
+                "Цена должна быть положительным числом. "
+                "Пожалуйста, попробуйте снова."
             ),
-            "restore_product_error": (
-                "❌ Произошла неожиданная ошибка при восстановлении товара."
+            "edit_product_stock_negative": (
+                "Количество на складе не может быть отрицательным. "
+                "Пожалуйста, попробуйте снова."
+            ),
+            "edit_product_field_too_long": (
+                "{field} слишком длинное (максимум {max_length} символов)."
+            ),
+            "edit_product_invalid_format": (
+                "Неверный формат {field_type}. Пожалуйста, попробуйте снова."
+            ),
+            "edit_product_success": ("✅ {field} товара '{name}' успешно обновлен!"),
+            "edit_product_error": (
+                "❌ Произошла неожиданная ошибка при обновлении товара."
+            ),
+            "edit_product_image_success": (
+                "✅ Фото товара '{name}' успешно обновлено!"
+            ),
+            "edit_product_image_error": (
+                "❌ Произошла неожиданная ошибка при обновлении фото товара."
             ),
         }
 
