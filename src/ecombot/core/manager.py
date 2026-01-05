@@ -2,6 +2,7 @@
 
 from typing import Optional
 
+from ..messages.catalog import CatalogMessageManager
 from ..messages.common import CommonMessageManager
 from .commands import EcomBotCommandManager
 from .logging import EcomBotLogManager
@@ -19,6 +20,7 @@ class CentralizedManager:
         self.logs = EcomBotLogManager(default_language)
         self.messages = {
             "common": CommonMessageManager(default_language),
+            "catalog": CatalogMessageManager(default_language),
         }
 
     def get_message(

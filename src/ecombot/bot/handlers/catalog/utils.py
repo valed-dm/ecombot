@@ -7,12 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.keyboards.catalog import get_catalog_categories_keyboard
 from ecombot.bot.keyboards.catalog import get_product_details_keyboard
+from ecombot.core import manager
 from ecombot.logging_setup import log
 from ecombot.schemas.dto import ProductDTO
 from ecombot.services import catalog_service
-
-from .constants import PRODUCT_DETAILS_TEMPLATE
-from .constants import WELCOME_MESSAGE
 
 
 async def show_main_catalog(
@@ -23,11 +21,12 @@ async def show_main_catalog(
     """
     categories = await catalog_service.get_all_categories(session)
     keyboard = get_catalog_categories_keyboard(categories)
+    welcome_message = manager.get_message("catalog", "welcome_message")
 
     if is_edit and isinstance(event_target, Message):
-        await event_target.edit_text(WELCOME_MESSAGE, reply_markup=keyboard)
+        await event_target.edit_text(welcome_message, reply_markup=keyboard)
     elif isinstance(event_target, Message):
-        await event_target.answer(WELCOME_MESSAGE, reply_markup=keyboard)
+        await event_target.answer(welcome_message, reply_markup=keyboard)
 
 
 async def handle_message_with_photo_transition(
@@ -47,8 +46,12 @@ async def send_product_with_photo(
     callback_message: Message, bot: Bot, product: ProductDTO
 ):
     """Send product details with photo if available, fallback to text."""
-    text = PRODUCT_DETAILS_TEMPLATE.format(
-        name=product.name, description=product.description, price=product.price
+    text = manager.get_message(
+        "catalog",
+        "product_details_template",
+        name=product.name,
+        description=product.description,
+        price=product.price,
     )
     keyboard = get_product_details_keyboard(product)
 

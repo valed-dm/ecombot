@@ -9,10 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.callback_data import CatalogCallbackFactory
 from ecombot.bot.keyboards.catalog import get_catalog_products_keyboard
+from ecombot.core import manager
 from ecombot.services import catalog_service
 
-from .constants import CATEGORY_PRODUCTS_MESSAGE
-from .constants import ERROR_PRODUCT_NOT_FOUND
 from .utils import handle_message_with_photo_transition
 from .utils import send_product_with_photo
 
@@ -36,8 +35,11 @@ async def view_category_handler(
     products = await catalog_service.get_products_in_category(session, category_id)
     keyboard = get_catalog_products_keyboard(products)
 
+    category_products_message = manager.get_message(
+        "catalog", "category_products_message"
+    )
     await handle_message_with_photo_transition(
-        callback_message, bot, CATEGORY_PRODUCTS_MESSAGE, keyboard
+        callback_message, bot, category_products_message, keyboard
     )
     await query.answer()
 
@@ -58,7 +60,8 @@ async def view_product_handler(
     product = await catalog_service.get_single_product_details(session, product_id)
 
     if not product:
-        await query.answer(ERROR_PRODUCT_NOT_FOUND, show_alert=True)
+        error_message = manager.get_message("catalog", "error_product_not_found")
+        await query.answer(error_message, show_alert=True)
         return
 
     await send_product_with_photo(callback_message, bot, product)
