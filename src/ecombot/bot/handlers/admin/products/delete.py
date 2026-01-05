@@ -14,10 +14,15 @@ from ecombot.bot.keyboards.admin import get_admin_panel_keyboard
 from ecombot.bot.keyboards.catalog import get_catalog_categories_keyboard
 from ecombot.bot.keyboards.catalog import get_catalog_products_keyboard
 from ecombot.bot.keyboards.common import get_delete_confirmation_keyboard
+from ecombot.core.manager import central_manager
 from ecombot.logging_setup import log
 from ecombot.services import catalog_service
 
 from ..states import DeleteProduct
+
+
+# Get manager once at module level
+manager = central_manager.get_manager("admin_products")
 
 
 router = Router()
@@ -37,7 +42,9 @@ async def delete_product_start(
     except Exception as e:
         log.error(f"Failed to load categories for delete product: {e}", exc_info=True)
         await callback_message.edit_text(
-            "❌ An unexpected error occurred while loading categories.",
+            manager.get_message(
+                "admin_products", "delete_product_load_categories_error"
+            ),
             reply_markup=get_admin_panel_keyboard(),
         )
         await query.answer()
@@ -45,7 +52,7 @@ async def delete_product_start(
 
     if not categories:
         await callback_message.edit_text(
-            "❌ No categories found. Please create categories and products first.",
+            manager.get_message("admin_products", "delete_product_no_categories"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await query.answer()
@@ -53,7 +60,8 @@ async def delete_product_start(
 
     keyboard = get_catalog_categories_keyboard(categories)
     await callback_message.edit_text(
-        "Choose a category to delete products from:", reply_markup=keyboard
+        manager.get_message("admin_products", "delete_product_choose_category"),
+        reply_markup=keyboard,
     )
     await state.set_state(DeleteProduct.choose_category)
     await query.answer()
@@ -77,7 +85,7 @@ async def delete_product_choose_category(
     except Exception as e:
         log.error(f"Failed to load products for delete: {e}", exc_info=True)
         await callback_message.edit_text(
-            "❌ An unexpected error occurred while loading products.",
+            manager.get_message("admin_products", "delete_product_load_products_error"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await state.clear()
@@ -86,7 +94,7 @@ async def delete_product_choose_category(
 
     if not products:
         await callback_message.edit_text(
-            "❌ No products found in this category.",
+            manager.get_message("admin_products", "delete_product_no_products"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await state.clear()
@@ -95,7 +103,8 @@ async def delete_product_choose_category(
 
     keyboard = get_catalog_products_keyboard(products)
     await callback_message.edit_text(
-        "Choose a product to delete:", reply_markup=keyboard
+        manager.get_message("admin_products", "delete_product_choose_product"),
+        reply_markup=keyboard,
     )
     await state.set_state(DeleteProduct.choose_product)
     await query.answer()
@@ -121,7 +130,7 @@ async def delete_product_choose_product(
     except Exception as e:
         log.error(f"Failed to load product for delete: {e}", exc_info=True)
         await callback_message.edit_text(
-            "❌ An unexpected error occurred while loading product.",
+            manager.get_message("admin_products", "delete_product_load_product_error"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await state.clear()
@@ -130,7 +139,7 @@ async def delete_product_choose_product(
 
     if not product:
         await callback_message.edit_text(
-            "❌ Product not found.",
+            manager.get_message("admin_products", "delete_product_not_found"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await state.clear()
@@ -142,13 +151,11 @@ async def delete_product_choose_product(
         action="delete_product", item_id=product_id
     )
 
-    text = (
-        f"⚠️ Are you sure you want to delete this product?\n\n"
-        f"<b>{product.name}</b>\n"
-        f"<i>{product.description}</i>\n\n"
-        f"<b>Price:</b> ${product.price:.2f}\n"
-        f"<b>Stock:</b> {product.stock} units\n\n"
-        "The product will be hidden from the catalog but preserved in order history."
+    text = manager.get_message("admin_products", "delete_product_confirmation").format(
+        product_name=product.name,
+        product_description=product.description,
+        product_price=product.price,
+        product_stock=product.stock,
     )
 
     await callback_message.edit_text(text, reply_markup=keyboard)
@@ -170,7 +177,7 @@ async def delete_product_final(
     """Step 4 (Delete Product): Processes the final confirmation."""
     if not callback_data.confirm:
         await callback_message.edit_text(
-            "Deletion cancelled.",
+            manager.get_message("admin_products", "delete_product_cancelled"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await state.clear()
@@ -185,19 +192,22 @@ async def delete_product_final(
         success = await catalog_service.delete_product_by_id(session, product_id)
         if success:
             await callback_message.edit_text(
-                f"✅ Product '{product_name}' has been deleted.",
+                manager.get_message("admin_products", "delete_product_success").format(
+                    product_name=product_name
+                ),
                 reply_markup=get_admin_panel_keyboard(),
             )
         else:
             await callback_message.edit_text(
-                f"❌ Error: Could not delete '{product_name}'. "
-                f"It may have already been removed.",
+                manager.get_message("admin_products", "delete_product_error").format(
+                    product_name=product_name
+                ),
                 reply_markup=get_admin_panel_keyboard(),
             )
     except Exception as e:
         log.error(f"Error deleting product {product_id}: {e}", exc_info=True)
         await callback_message.edit_text(
-            "An unexpected error occurred while deleting the product.",
+            manager.get_message("admin_products", "delete_product_unexpected_error"),
             reply_markup=get_admin_panel_keyboard(),
         )
 

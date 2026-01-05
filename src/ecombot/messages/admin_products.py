@@ -86,19 +86,42 @@ class AdminProductsMessageManager(BaseMessageManager):
                 "❌ An unexpected error occurred while loading product details."
             ),
             # Delete product messages
-            "delete_product_confirm_prompt": (
-                "⚠️ Are you sure you want to delete the product '{name}'? "
-                "It will be hidden from the catalog but preserved in order history."
+            "delete_product_choose_category": (
+                "Choose a category to delete products from:"
+            ),
+            "delete_product_choose_product": "Choose a product to delete:",
+            "delete_product_confirmation": (
+                "⚠️ Are you sure you want to delete this product?\n\n"
+                "<b>{product_name}</b>\n"
+                "<i>{product_description}</i>\n\n"
+                "<b>Price:</b> ${product_price:.2f}\n"
+                "<b>Stock:</b> {product_stock} units\n\n"
+                "The product will be hidden from the catalog but preserved "
+                "in order history."
             ),
             "delete_product_cancelled": "Deletion cancelled.",
-            "delete_product_success": "✅ Product '{name}' has been deleted.",
-            "delete_product_not_found_error": (
-                "❌ Error: Could not delete '{name}'. "
+            "delete_product_success": "✅ Product '{product_name}' has been deleted.",
+            "delete_product_error": (
+                "❌ Error: Could not delete '{product_name}'. "
                 "It may have already been removed."
             ),
-            "delete_product_error": (
-                "❌ An unexpected error occurred while deleting '{name}'."
+            "delete_product_unexpected_error": (
+                "An unexpected error occurred while deleting the product."
             ),
+            "delete_product_load_categories_error": (
+                "❌ An unexpected error occurred while loading categories."
+            ),
+            "delete_product_no_categories": (
+                "❌ No categories found. Please create categories and products first."
+            ),
+            "delete_product_load_products_error": (
+                "❌ An unexpected error occurred while loading products."
+            ),
+            "delete_product_no_products": "❌ No products found in this category.",
+            "delete_product_load_product_error": (
+                "❌ An unexpected error occurred while loading product."
+            ),
+            "delete_product_not_found": "❌ Product not found.",
             # Restore product messages
             "restore_product_load_error": (
                 "❌ An unexpected error occurred while loading deleted products."
@@ -230,20 +253,47 @@ class AdminProductsMessageManager(BaseMessageManager):
                 "❌ Ocurrió un error inesperado al cargar los detalles del producto."
             ),
             # Delete product messages
-            "delete_product_confirm_prompt": (
-                "⚠️ ¿Estás seguro de que quieres eliminar el producto '{name}'? "
-                "Se ocultará del catálogo pero se preservará en el historial "
-                "de pedidos."
+            "delete_product_choose_category": (
+                "Elige una categoría para eliminar productos:"
+            ),
+            "delete_product_choose_product": "Elige un producto para eliminar:",
+            "delete_product_confirmation": (
+                "⚠️ ¿Estás seguro de que quieres eliminar este producto?\n\n"
+                "<b>{product_name}</b>\n"
+                "<i>{product_description}</i>\n\n"
+                "<b>Precio:</b> ${product_price:.2f}\n"
+                "<b>Stock:</b> {product_stock} unidades\n\n"
+                "El producto se ocultará del catálogo pero se conservará "
+                "en el historial de pedidos."
             ),
             "delete_product_cancelled": "Eliminación cancelada.",
-            "delete_product_success": "✅ El producto '{name}' ha sido eliminado.",
-            "delete_product_not_found_error": (
-                "❌ Error: No se pudo eliminar '{name}'. "
-                "Puede que ya haya sido eliminado."
+            "delete_product_success": (
+                "✅ El producto '{product_name}' ha sido eliminado."
             ),
             "delete_product_error": (
-                "❌ Ocurrió un error inesperado al eliminar '{name}'."
+                "❌ Error: No se pudo eliminar '{product_name}'. "
+                "Puede que ya haya sido eliminado."
             ),
+            "delete_product_unexpected_error": (
+                "Ocurrió un error inesperado al eliminar el producto."
+            ),
+            "delete_product_load_categories_error": (
+                "❌ Ocurrió un error inesperado al cargar las categorías."
+            ),
+            "delete_product_no_categories": (
+                "❌ No se encontraron categorías. Por favor crea categorías y "
+                "productos primero."
+            ),
+            "delete_product_load_products_error": (
+                "❌ Ocurrió un error inesperado al cargar los productos."
+            ),
+            "delete_product_no_products": (
+                "❌ No se encontraron productos en esta categoría."
+            ),
+            "delete_product_load_product_error": (
+                "❌ Ocurrió un error inesperado al cargar el producto."
+            ),
+            "delete_product_not_found": "❌ Producto no encontrado.",
             # Restore product messages
             "restore_product_load_error": (
                 "❌ Ocurrió un error inesperado al cargar los productos eliminados."
@@ -384,19 +434,41 @@ class AdminProductsMessageManager(BaseMessageManager):
                 "❌ Произошла неожиданная ошибка при загрузке деталей товара."
             ),
             # Delete product messages
-            "delete_product_confirm_prompt": (
-                "⚠️ Вы уверены, что хотите удалить товар '{name}'? "
-                "Он будет скрыт из каталога, но сохранен в истории заказов."
+            "delete_product_choose_category": (
+                "Выберите категорию для удаления товаров:"
+            ),
+            "delete_product_choose_product": "Выберите товар для удаления:",
+            "delete_product_confirmation": (
+                "⚠️ Вы уверены, что хотите удалить этот товар?\n\n"
+                "<b>{product_name}</b>\n"
+                "<i>{product_description}</i>\n\n"
+                "<b>Цена:</b> ${product_price:.2f}\n"
+                "<b>Остаток:</b> {product_stock} шт.\n\n"
+                "Товар будет скрыт из каталога, но сохранится в истории заказов."
             ),
             "delete_product_cancelled": "Удаление отменено.",
-            "delete_product_success": "✅ Товар '{name}' был удален.",
-            "delete_product_not_found_error": (
-                "❌ Ошибка: Не удалось удалить '{name}'. "
+            "delete_product_success": "✅ Товар '{product_name}' был удален.",
+            "delete_product_error": (
+                "❌ Ошибка: Не удалось удалить '{product_name}'. "
                 "Возможно, он уже был удален."
             ),
-            "delete_product_error": (
-                "❌ Произошла неожиданная ошибка при удалении '{name}'."
+            "delete_product_unexpected_error": (
+                "Произошла неожиданная ошибка при удалении товара."
             ),
+            "delete_product_load_categories_error": (
+                "❌ Произошла неожиданная ошибка при загрузке категорий."
+            ),
+            "delete_product_no_categories": (
+                "❌ Категории не найдены. Сначала создайте категории и товары."
+            ),
+            "delete_product_load_products_error": (
+                "❌ Произошла неожиданная ошибка при загрузке товаров."
+            ),
+            "delete_product_no_products": "❌ В этой категории товары не найдены.",
+            "delete_product_load_product_error": (
+                "❌ Произошла неожиданная ошибка при загрузке товара."
+            ),
+            "delete_product_not_found": "❌ Товар не найден.",
             # Restore product messages
             "restore_product_load_error": (
                 "❌ Произошла неожиданная ошибка при загрузке удаленных товаров."
