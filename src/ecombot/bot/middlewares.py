@@ -14,7 +14,6 @@ from typing import Dict
 
 from aiogram import BaseMiddleware
 from aiogram import Bot
-from aiogram.types import BotCommand
 from aiogram.types import CallbackQuery
 from aiogram.types import Message
 from aiogram.types import TelegramObject
@@ -22,6 +21,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from ecombot.config import settings
+from ecombot.core import manager
 from ecombot.db import crud
 from ecombot.db.models import User
 
@@ -127,20 +127,10 @@ class UserMiddleware(BaseMiddleware):
 
     async def _set_user_commands(self, bot: Bot, user_id: int) -> None:
         """Set role-based commands for the user."""
-        common_commands = [
-            BotCommand(command="start", description="🛍️ Browse catalog"),
-            BotCommand(command="cart", description="🛒 View shopping cart"),
-            BotCommand(command="orders", description="📦 Order history"),
-            BotCommand(command="profile", description="👤 Manage profile"),
-        ]
-
-        admin_commands = [
-            BotCommand(command="admin", description="⚙️ Admin panel"),
-            BotCommand(command="cancel", description="❌ Cancel operation"),
-        ]
-
         is_admin = user_id in settings.ADMIN_IDS
-        commands = common_commands + (admin_commands if is_admin else [])
+        role = "admin" if is_admin else "user"
+
+        commands = manager.get_commands(role)
 
         with contextlib.suppress(Exception):
             await bot.set_my_commands(

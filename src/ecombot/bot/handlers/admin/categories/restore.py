@@ -14,6 +14,7 @@ from ecombot.db import crud
 from ecombot.logging_setup import log
 from ecombot.schemas.dto import CategoryDTO
 
+
 router = Router()
 
 
@@ -46,7 +47,7 @@ async def restore_category_start(
 
     # Convert to DTOs for keyboard
     category_dtos = [CategoryDTO.model_validate(cat) for cat in deleted_categories]
-    
+
     # Create custom keyboard for restore selection
     builder = InlineKeyboardBuilder()
     for category in category_dtos:
@@ -62,15 +63,16 @@ async def restore_category_start(
     )
     builder.adjust(1)
     keyboard = builder.as_markup()
-    
+
     await callback_message.edit_text(
-        "🔄 Choose a deleted category to restore:", 
-        reply_markup=keyboard
+        "🔄 Choose a deleted category to restore:", reply_markup=keyboard
     )
     await query.answer()
 
 
-@router.callback_query(ConfirmationCallbackFactory.filter(F.action == "restore_category"))
+@router.callback_query(
+    ConfirmationCallbackFactory.filter(F.action == "restore_category")
+)
 async def restore_category_confirm(
     query: CallbackQuery,
     callback_data: ConfirmationCallbackFactory,
@@ -79,10 +81,10 @@ async def restore_category_confirm(
 ):
     """Restores the selected category."""
     category_id = callback_data.item_id
-    
+
     try:
         success = await crud.restore_category(session, category_id)
-        
+
         if success:
             await callback_message.edit_text(
                 "✅ Category and all its content have been restored successfully!",
@@ -99,5 +101,5 @@ async def restore_category_confirm(
             "❌ An unexpected error occurred while restoring the category.",
             reply_markup=get_admin_panel_keyboard(),
         )
-    
+
     await query.answer()

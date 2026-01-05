@@ -14,6 +14,7 @@ from ecombot.db import crud
 from ecombot.logging_setup import log
 from ecombot.schemas.dto import ProductDTO
 
+
 router = Router()
 
 
@@ -46,7 +47,7 @@ async def restore_product_start(
 
     # Convert to DTOs for keyboard
     product_dtos = [ProductDTO.model_validate(prod) for prod in deleted_products]
-    
+
     # Create custom keyboard for restore selection
     builder = InlineKeyboardBuilder()
     for product in product_dtos:
@@ -62,15 +63,16 @@ async def restore_product_start(
     )
     builder.adjust(1)
     keyboard = builder.as_markup()
-    
+
     await callback_message.edit_text(
-        "🔄 Choose a deleted product to restore:", 
-        reply_markup=keyboard
+        "🔄 Choose a deleted product to restore:", reply_markup=keyboard
     )
     await query.answer()
 
 
-@router.callback_query(ConfirmationCallbackFactory.filter(F.action == "restore_product"))
+@router.callback_query(
+    ConfirmationCallbackFactory.filter(F.action == "restore_product")
+)
 async def restore_product_confirm(
     query: CallbackQuery,
     callback_data: ConfirmationCallbackFactory,
@@ -79,10 +81,10 @@ async def restore_product_confirm(
 ):
     """Restores the selected product."""
     product_id = callback_data.item_id
-    
+
     try:
         success = await crud.restore_product(session, product_id)
-        
+
         if success:
             await callback_message.edit_text(
                 "✅ Product has been restored successfully!",
@@ -99,5 +101,5 @@ async def restore_product_confirm(
             "❌ An unexpected error occurred while restoring the product.",
             reply_markup=get_admin_panel_keyboard(),
         )
-    
+
     await query.answer()
