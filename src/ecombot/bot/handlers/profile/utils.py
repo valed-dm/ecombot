@@ -7,17 +7,10 @@ from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.keyboards.profile import get_address_management_keyboard
+from ecombot.core.manager import central_manager as manager
 from ecombot.db.models import User
 from ecombot.logging_setup import log
 from ecombot.services import user_service
-
-from .states import ADDRESS_MANAGEMENT_HEADER
-from .states import DEFAULT_ADDRESS_NOT_SET
-from .states import ERROR_ADDRESSES_LOAD_FAILED
-from .states import NO_ADDRESSES_MESSAGE
-from .states import NOT_SET_TEXT
-from .states import PROFILE_HEADER
-from .states import PROFILE_TEMPLATE
 
 
 def format_profile_text(user_profile) -> str:
@@ -26,26 +19,38 @@ def format_profile_text(user_profile) -> str:
         (addr for addr in user_profile.addresses if addr.is_default), None
     )
 
-    phone_text = escape(user_profile.phone) if user_profile.phone else NOT_SET_TEXT
-    email_text = escape(user_profile.email) if user_profile.email else NOT_SET_TEXT
+    phone_text = (
+        escape(user_profile.phone)
+        if user_profile.phone
+        else manager.get_message("profile", "not_set_text")
+    )
+    email_text = (
+        escape(user_profile.email)
+        if user_profile.email
+        else manager.get_message("profile", "not_set_text")
+    )
 
-    text = PROFILE_HEADER + PROFILE_TEMPLATE.format(
-        name=escape(user_profile.first_name), phone=phone_text, email=email_text
+    text = manager.get_message("profile", "profile_header") + manager.get_message(
+        "profile",
+        "profile_template",
+        name=escape(user_profile.first_name),
+        phone=phone_text,
+        email=email_text,
     )
 
     if default_address:
         text += f"<code>{escape(default_address.full_address)}</code>"
     else:
-        text += DEFAULT_ADDRESS_NOT_SET
+        text += manager.get_message("profile", "default_address_not_set")
 
     return text
 
 
 def format_address_management_text(addresses) -> str:
     """Format the address management view text."""
-    text = ADDRESS_MANAGEMENT_HEADER
+    text = manager.get_message("profile", "address_management_header")
     if not addresses:
-        text += NO_ADDRESSES_MESSAGE
+        text += manager.get_message("profile", "no_addresses_message")
     else:
         for addr in addresses:
             text += (
@@ -81,4 +86,6 @@ async def send_address_management_view(
                 raise fallback_e from e
     except Exception as e:
         log.error(f"Failed to load addresses for user {db_user.id}: {e}", exc_info=True)
-        await message.answer(ERROR_ADDRESSES_LOAD_FAILED)
+        await message.answer(
+            manager.get_message("profile", "error_addresses_load_failed")
+        )

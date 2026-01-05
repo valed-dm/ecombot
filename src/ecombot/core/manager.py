@@ -7,6 +7,7 @@ from ..messages.catalog import CatalogMessageManager
 from ..messages.checkout import CheckoutMessageManager
 from ..messages.common import CommonMessageManager
 from ..messages.orders import OrdersMessageManager
+from ..messages.profile import ProfileMessageManager
 from .commands import EcomBotCommandManager
 from .logging import EcomBotLogManager
 from .messages import Language
@@ -27,6 +28,7 @@ class CentralizedManager:
             "cart": CartMessageManager(default_language),
             "checkout": CheckoutMessageManager(default_language),
             "orders": OrdersMessageManager(default_language),
+            "profile": ProfileMessageManager(default_language),
         }
 
     def get_message(
@@ -59,4 +61,4 @@ class CentralizedManager:
 
 
 # Global instance
-manager = CentralizedManager()
+central_manager = CentralizedManager()

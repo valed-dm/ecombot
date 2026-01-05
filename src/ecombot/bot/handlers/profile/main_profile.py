@@ -11,17 +11,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ecombot.bot.callback_data import ProfileCallbackFactory
 from ecombot.bot.keyboards.common import get_cancel_keyboard
 from ecombot.bot.keyboards.profile import get_profile_keyboard
+from ecombot.core.manager import central_manager as manager
 from ecombot.db.models import User
 from ecombot.logging_setup import log
 from ecombot.services import user_service
 
-from .states import EDIT_EMAIL_PROMPT
-from .states import EDIT_PHONE_PROMPT
-from .states import ERROR_EMAIL_UPDATE_FAILED
-from .states import ERROR_PHONE_UPDATE_FAILED
-from .states import ERROR_PROFILE_LOAD_FAILED
-from .states import SUCCESS_EMAIL_UPDATED
-from .states import SUCCESS_PHONE_UPDATED
 from .states import EditProfile
 from .utils import format_profile_text
 
@@ -36,7 +30,9 @@ async def profile_handler(message: Message, session: AsyncSession, db_user: User
         user_profile = await user_service.get_user_profile(session, db_user)
     except Exception as e:
         log.error(f"Failed to load profile for user {db_user.id}: {e}", exc_info=True)
-        await message.answer(ERROR_PROFILE_LOAD_FAILED)
+        await message.answer(
+            manager.get_message("profile", "error_profile_load_failed")
+        )
         return
 
     text = format_profile_text(user_profile)
@@ -59,7 +55,9 @@ async def back_to_profile_handler(
         await callback_message.edit_text(text, reply_markup=keyboard)
     except Exception as e:
         log.error(f"Failed to load profile for user {db_user.id}: {e}", exc_info=True)
-        await callback_message.edit_text(ERROR_PROFILE_LOAD_FAILED)
+        await callback_message.edit_text(
+            manager.get_message("profile", "error_profile_load_failed")
+        )
 
     await query.answer()
 
@@ -72,7 +70,7 @@ async def edit_phone_start(
 ):
     """Start the FSM to edit the user's phone number."""
     await callback_message.edit_text(
-        EDIT_PHONE_PROMPT,
+        manager.get_message("profile", "edit_phone_prompt"),
         reply_markup=get_cancel_keyboard(),
     )
     await state.set_state(EditProfile.getting_phone)
@@ -90,7 +88,7 @@ async def edit_phone_get_phone(
         await user_service.update_profile_details(
             session=session, user_id=db_user.id, update_data={"phone": new_phone}
         )
-        await message.answer(SUCCESS_PHONE_UPDATED)
+        await message.answer(manager.get_message("profile", "success_phone_updated"))
 
         await session.refresh(db_user)
         await message.delete()  # Delete the "new phone number" message
@@ -98,7 +96,9 @@ async def edit_phone_get_phone(
 
     except Exception as e:
         log.error(f"Failed to update phone for user {db_user.id}: {e}", exc_info=True)
-        await message.answer(ERROR_PHONE_UPDATE_FAILED)
+        await message.answer(
+            manager.get_message("profile", "error_phone_update_failed")
+        )
     finally:
         await state.clear()
 
@@ -111,7 +111,7 @@ async def edit_email_start(
 ):
     """Start the FSM to edit the user's email address."""
     await callback_message.edit_text(
-        EDIT_EMAIL_PROMPT,
+        manager.get_message("profile", "edit_email_prompt"),
         reply_markup=get_cancel_keyboard(),
     )
     await state.set_state(EditProfile.getting_email)
@@ -130,7 +130,7 @@ async def edit_email_get_email(
         await user_service.update_profile_details(
             session=session, user_id=db_user.id, update_data={"email": new_email}
         )
-        await message.answer(SUCCESS_EMAIL_UPDATED)
+        await message.answer(manager.get_message("profile", "success_email_updated"))
 
         await session.refresh(db_user)
         await message.delete()  # Clean up the user's "new email" message
@@ -138,6 +138,8 @@ async def edit_email_get_email(
 
     except Exception as e:
         log.error(f"Failed to update email for user {db_user.id}: {e}", exc_info=True)
-        await message.answer(ERROR_EMAIL_UPDATE_FAILED)
+        await message.answer(
+            manager.get_message("profile", "error_email_update_failed")
+        )
     finally:
         await state.clear()
