@@ -13,6 +13,7 @@ from ecombot.bot.callback_data import ConfirmationCallbackFactory
 from ecombot.bot.keyboards.admin import get_admin_panel_keyboard
 from ecombot.bot.keyboards.catalog import get_catalog_categories_keyboard
 from ecombot.bot.keyboards.common import get_delete_confirmation_keyboard
+from ecombot.core.manager import central_manager as manager
 from ecombot.db.models import Category
 from ecombot.logging_setup import log
 from ecombot.services import catalog_service
@@ -37,7 +38,7 @@ async def delete_category_start(
     except Exception as e:
         log.error(f"Failed to load categories for delete: {e}", exc_info=True)
         await callback_message.edit_text(
-            "❌ An unexpected error occurred while loading categories.",
+            manager.get_message("admin_categories", "delete_category_load_error"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await state.clear()
@@ -46,8 +47,7 @@ async def delete_category_start(
 
     if not categories:
         await callback_message.edit_text(
-            "❌ No categories found. You need to create at least one category "
-            "before deleting categories. Please use 'Add Category' first.",
+            manager.get_message("admin_categories", "delete_category_no_categories"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await query.answer()
@@ -55,7 +55,8 @@ async def delete_category_start(
 
     keyboard = get_catalog_categories_keyboard(categories)
     await callback_message.edit_text(
-        "Choose the category you want to delete:", reply_markup=keyboard
+        manager.get_message("admin_categories", "delete_category_choose_prompt"),
+        reply_markup=keyboard,
     )
     await state.set_state(DeleteCategory.choose_category)
     await query.answer()
@@ -78,7 +79,7 @@ async def delete_category_confirm(
         category = await session.get(Category, category_id)
         if not category:
             await callback_message.edit_text(
-                "Error: Category not found.",
+                manager.get_message("admin_categories", "delete_category_not_found"),
                 reply_markup=get_admin_panel_keyboard(),
             )
             await state.clear()
@@ -90,9 +91,9 @@ async def delete_category_confirm(
             action="delete_category", item_id=category_id
         )
         await callback_message.edit_text(
-            f"⚠️ Are you sure you want to delete the category "
-            f"'{category.name}'? It will be hidden from the catalog "
-            f"but preserved in order history.",
+            manager.get_message(
+                "admin_categories", "delete_category_confirm_prompt", name=category.name
+            ),
             reply_markup=keyboard,
         )
         await state.set_state(DeleteCategory.confirm_deletion)
@@ -100,7 +101,7 @@ async def delete_category_confirm(
     except Exception as e:
         log.error(f"Failed to load category details for deletion: {e}", exc_info=True)
         await callback_message.edit_text(
-            "❌ An unexpected error occurred while loading category details.",
+            manager.get_message("admin_categories", "delete_category_details_error"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await state.clear()
@@ -121,7 +122,7 @@ async def delete_category_final(
     """Step 3 (Delete Cat): Processes the final confirmation."""
     if not callback_data.confirm:
         await callback_message.edit_text(
-            "Deletion cancelled.",
+            manager.get_message("admin_categories", "delete_category_cancelled"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await state.clear()
@@ -138,13 +139,18 @@ async def delete_category_final(
 
         if success:
             await callback_message.edit_text(
-                f"✅ Category '{category_name}' has been deleted.",
+                manager.get_message(
+                    "admin_categories", "delete_category_success", name=category_name
+                ),
                 reply_markup=get_admin_panel_keyboard(),
             )
         else:
             await callback_message.edit_text(
-                f"❌ Error: Could not delete '{category_name}'."
-                f" It may have already been removed.",
+                manager.get_message(
+                    "admin_categories",
+                    "delete_category_not_found_error",
+                    name=category_name,
+                ),
                 reply_markup=get_admin_panel_keyboard(),
             )
     except Exception as e:
@@ -152,7 +158,9 @@ async def delete_category_final(
             f"Error deleting category {callback_data.item_id}: {e}", exc_info=True
         )
         await callback_message.edit_text(
-            f"❌ An unexpected error occurred while deleting '{category_name}'.",
+            manager.get_message(
+                "admin_categories", "delete_category_error", name=category_name
+            ),
             reply_markup=get_admin_panel_keyboard(),
         )
     finally:

@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.callback_data import AdminCallbackFactory
 from ecombot.bot.keyboards.common import get_cancel_keyboard
+from ecombot.core.manager import central_manager as manager
 from ecombot.logging_setup import log
 from ecombot.services import catalog_service
 from ecombot.services.catalog_service import CategoryAlreadyExistsError
@@ -32,13 +33,13 @@ async def add_category_start(
     """Step 1: Starts the Add Category FSM. Asks for the category name."""
     try:
         await callback_message.edit_text(
-            "Please enter the name for the new category:",
+            manager.get_message("admin_categories", "add_category_name_prompt"),
             reply_markup=get_cancel_keyboard(),
         )
     except TelegramBadRequest as e:
         log.warning(f"Failed to edit message: {e}")
         await callback_message.answer(
-            "Please enter the name for the new category:",
+            manager.get_message("admin_categories", "add_category_name_prompt"),
             reply_markup=get_cancel_keyboard(),
         )
     await state.set_state(AddCategory.name)
@@ -50,7 +51,7 @@ async def add_category_name(message: Message, state: FSMContext):
     """Step 2: Receives the category name and asks for the description."""
     if not message.text or not message.text.strip():
         await message.answer(
-            "Please enter a valid category name (cannot be empty).",
+            manager.get_message("admin_categories", "add_category_name_empty"),
             reply_markup=get_cancel_keyboard(),
         )
         return
@@ -58,14 +59,14 @@ async def add_category_name(message: Message, state: FSMContext):
     category_name = message.text.strip()
     if len(category_name) > 255:
         await message.answer(
-            "Category name is too long (maximum 255 characters).",
+            manager.get_message("admin_categories", "add_category_name_too_long"),
             reply_markup=get_cancel_keyboard(),
         )
         return
 
     await state.update_data(name=category_name)
     await message.answer(
-        "Great. Now enter a description for the category (or send /skip):",
+        manager.get_message("admin_categories", "add_category_description_prompt"),
         reply_markup=get_cancel_keyboard(),
     )
     await state.set_state(AddCategory.description)
@@ -85,7 +86,9 @@ async def add_category_description(
             description = None
         elif len(description) > 1000:
             await message.answer(
-                "Description is too long (maximum 1000 characters).",
+                manager.get_message(
+                    "admin_categories", "add_category_description_too_long"
+                ),
                 reply_markup=get_cancel_keyboard(),
             )
             return
@@ -94,13 +97,21 @@ async def add_category_description(
         new_category = await catalog_service.add_new_category(
             session=session, name=category_data["name"], description=description
         )
-        await message.answer(f"✅ Category '{new_category.name}' created successfully!")
+        await message.answer(
+            manager.get_message(
+                "admin_categories", "add_category_success", name=new_category.name
+            )
+        )
     except CategoryAlreadyExistsError as e:
-        await message.answer(f"⚠️ Error: {e}")
+        await message.answer(
+            manager.get_message(
+                "admin_categories", "add_category_already_exists", error=e
+            )
+        )
     except Exception as e:
         log.error(f"Failed to create category: {e}", exc_info=True)
         await message.answer(
-            "❌ An unexpected error occurred while creating the category."
+            manager.get_message("admin_categories", "add_category_error")
         )
     finally:
         await state.clear()

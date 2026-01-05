@@ -2,6 +2,7 @@
 
 from typing import Optional
 
+from ..messages.admin_categories import AdminCategoriesMessageManager
 from ..messages.admin_orders import AdminOrdersMessageManager
 from ..messages.cart import CartMessageManager
 from ..messages.catalog import CatalogMessageManager
@@ -25,6 +26,7 @@ class CentralizedManager:
         self.commands = EcomBotCommandManager(default_language)
         self.logs = EcomBotLogManager(default_language)
         self.messages = {
+            "admin_categories": AdminCategoriesMessageManager(default_language),
             "admin_orders": AdminOrdersMessageManager(default_language),
             "common": CommonMessageManager(default_language),
             "catalog": CatalogMessageManager(default_language),

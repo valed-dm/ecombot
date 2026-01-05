@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ecombot.bot.callback_data import AdminCallbackFactory
 from ecombot.bot.callback_data import ConfirmationCallbackFactory
 from ecombot.bot.keyboards.admin import get_admin_panel_keyboard
+from ecombot.core.manager import central_manager as manager
 from ecombot.db import crud
 from ecombot.logging_setup import log
 from ecombot.schemas.dto import CategoryDTO
@@ -31,7 +32,7 @@ async def restore_category_start(
     except Exception as e:
         log.error(f"Failed to load deleted categories: {e}", exc_info=True)
         await callback_message.edit_text(
-            "❌ An unexpected error occurred while loading deleted categories.",
+            manager.get_message("admin_categories", "restore_category_load_error"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await query.answer()
@@ -39,7 +40,7 @@ async def restore_category_start(
 
     if not deleted_categories:
         await callback_message.edit_text(
-            "✅ No deleted categories found. All categories are active.",
+            manager.get_message("admin_categories", "restore_category_none_found"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await query.answer()
@@ -58,14 +59,15 @@ async def restore_category_start(
             ),
         )
     builder.button(
-        text="⬅️ Back to Admin Panel",
+        text=manager.get_message("keyboards", "back_to_admin_panel"),
         callback_data=AdminCallbackFactory(action="back_main"),
     )
     builder.adjust(1)
     keyboard = builder.as_markup()
 
     await callback_message.edit_text(
-        "🔄 Choose a deleted category to restore:", reply_markup=keyboard
+        manager.get_message("admin_categories", "restore_category_choose_prompt"),
+        reply_markup=keyboard,
     )
     await query.answer()
 
@@ -87,18 +89,18 @@ async def restore_category_confirm(
 
         if success:
             await callback_message.edit_text(
-                "✅ Category and all its content have been restored successfully!",
+                manager.get_message("admin_categories", "restore_category_success"),
                 reply_markup=get_admin_panel_keyboard(),
             )
         else:
             await callback_message.edit_text(
-                "❌ Category not found or already active.",
+                manager.get_message("admin_categories", "restore_category_not_found"),
                 reply_markup=get_admin_panel_keyboard(),
             )
     except Exception as e:
         log.error(f"Error restoring category {category_id}: {e}", exc_info=True)
         await callback_message.edit_text(
-            "❌ An unexpected error occurred while restoring the category.",
+            manager.get_message("admin_categories", "restore_category_error"),
             reply_markup=get_admin_panel_keyboard(),
         )
 
