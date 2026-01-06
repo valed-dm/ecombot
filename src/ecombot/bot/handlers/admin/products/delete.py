@@ -14,15 +14,11 @@ from ecombot.bot.keyboards.admin import get_admin_panel_keyboard
 from ecombot.bot.keyboards.catalog import get_catalog_categories_keyboard
 from ecombot.bot.keyboards.catalog import get_catalog_products_keyboard
 from ecombot.bot.keyboards.common import get_delete_confirmation_keyboard
-from ecombot.core.manager import central_manager
+from ecombot.core.manager import central_manager as manager
 from ecombot.logging_setup import log
 from ecombot.services import catalog_service
 
 from ..states import DeleteProduct
-
-
-# Get manager once at module level
-manager = central_manager.get_manager("admin_products")
 
 
 router = Router()
