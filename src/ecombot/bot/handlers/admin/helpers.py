@@ -11,19 +11,25 @@ from aiogram.types import PhotoSize
 from ecombot.bot.keyboards.admin import get_admin_panel_keyboard
 from ecombot.bot.keyboards.admin import get_edit_product_menu_keyboard
 from ecombot.config import settings
+from ecombot.core.manager import central_manager as manager
 from ecombot.logging_setup import log
 from ecombot.schemas.dto import AdminProductDTO
 
 
 def get_product_edit_menu_text(product: AdminProductDTO) -> str:
     """Generates the text for the product editing menu."""
+    admin_manager = manager.get_manager("admin_products")
+    price_label = admin_manager.get_message("edit_menu_price_label")
+    stock_label = admin_manager.get_message("edit_menu_stock_label")
+    stock_units = admin_manager.get_message("edit_menu_stock_units")
+
     return (
-        "You are editing:\n\n"
+        f"{admin_manager.get_message('edit_menu_header')}\n\n"
         f"<b>{product.name}</b>\n"
         f"<i>{product.description}</i>\n\n"
-        f"<b>Price:</b> {settings.CURRENCY}{product.price:.2f}\n"
-        f"<b>Stock:</b> {product.stock} units\n\n"
-        "Choose a field to edit:"
+        f"<b>{price_label}</b> {settings.CURRENCY}{product.price:.2f}\n"
+        f"<b>{stock_label}</b> {product.stock} {stock_units}\n\n"
+        f"{admin_manager.get_message('edit_menu_choose_field')}"
     )
 
 
@@ -76,7 +82,7 @@ async def send_product_edit_menu(
 async def send_main_admin_panel(message: Message) -> None:
     """A helper function to generate and send the main admin panel view."""
     keyboard = get_admin_panel_keyboard()
-    text = "Welcome to the Admin Panel! Please choose an action:"
+    text = manager.get_message("common", "admin_panel_welcome")
 
     # Try to edit first (works for callback query messages)
     try:

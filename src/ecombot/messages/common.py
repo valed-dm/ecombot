@@ -29,6 +29,9 @@ class CommonMessageManager(BaseMessageManager):
             "no": "❌ No",
             # Generic messages
             "welcome": "👋 Welcome to EcomBot!",
+            "admin_panel_welcome": (
+                "Welcome to the Admin Panel! Please choose an action:"
+            ),
             "goodbye": "👋 Goodbye! Thank you for using EcomBot.",
             "invalid_input": "❌ Invalid input. Please try again.",
             "operation_cancelled": "❌ Operation cancelled.",
@@ -53,6 +56,9 @@ class CommonMessageManager(BaseMessageManager):
             "no": "❌ No",
             # Generic messages
             "welcome": "👋 ¡Bienvenido a EcomBot!",
+            "admin_panel_welcome": (
+                "¡Bienvenido al Panel de Administración! Por favor elige una acción:"
+            ),
             "goodbye": "👋 ¡Adiós! Gracias por usar EcomBot.",
             "invalid_input": "❌ Entrada inválida. Por favor, inténtalo de nuevo.",
             "operation_cancelled": "❌ Operación cancelada.",
@@ -77,6 +83,10 @@ class CommonMessageManager(BaseMessageManager):
             "no": "❌ Нет",
             # Generic messages
             "welcome": "👋 Добро пожаловать в EcomBot!",
+            "admin_panel_welcome": (
+                "Добро пожаловать в Панель Администратора! "
+                "Пожалуйста, выберите действие:"
+            ),
             "goodbye": "👋 До свидания! Спасибо за использование EcomBot.",
             "invalid_input": "❌ Неверный ввод. Пожалуйста, попробуйте снова.",
             "operation_cancelled": "❌ Операция отменена.",

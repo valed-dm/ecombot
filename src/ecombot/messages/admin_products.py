@@ -85,6 +85,9 @@ class AdminProductsMessageManager(BaseMessageManager):
             "edit_product_load_details_error": (
                 "❌ An unexpected error occurred while loading product details."
             ),
+            "edit_product_load_products_error": (
+                "❌ An unexpected error occurred while loading products."
+            ),
             # Delete product messages
             "delete_product_choose_category": (
                 "Choose a category to delete products from:"
@@ -137,9 +140,14 @@ class AdminProductsMessageManager(BaseMessageManager):
             "restore_product_unexpected_error": (
                 "❌ An unexpected error occurred while restoring the product."
             ),
-            # Edit field prompts
+            # Product edit menu messages
+            "edit_menu_header": "You are editing:",
+            "edit_menu_price_label": "Price:",
+            "edit_menu_stock_label": "Stock:",
+            "edit_menu_stock_units": "units",
+            "edit_menu_choose_field": "Choose a field to edit:",
+            "edit_product_fallback_prompt": "Enter the new value:",
             "edit_product_name_prompt": "Enter the new product name:",
-            "edit_product_description_prompt": "Enter the new product description:",
             "edit_product_price_prompt": "Enter the new price (e.g., 25.99):",
             "edit_product_stock_prompt": "Enter the new stock quantity:",
             "edit_product_image_prompt": "Please upload a new photo for the product:",
@@ -255,6 +263,9 @@ class AdminProductsMessageManager(BaseMessageManager):
             "edit_product_load_details_error": (
                 "❌ Ocurrió un error inesperado al cargar los detalles del producto."
             ),
+            "edit_product_load_products_error": (
+                "❌ Ocurrió un error inesperado al cargar los productos."
+            ),
             # Delete product messages
             "delete_product_choose_category": (
                 "Elige una categoría para eliminar productos:"
@@ -317,11 +328,14 @@ class AdminProductsMessageManager(BaseMessageManager):
             "restore_product_unexpected_error": (
                 "❌ Ocurrió un error inesperado al restaurar el producto."
             ),
-            # Edit field prompts
+            # Product edit menu messages
+            "edit_menu_header": "Estás editando:",
+            "edit_menu_price_label": "Precio:",
+            "edit_menu_stock_label": "Stock:",
+            "edit_menu_stock_units": "unidades",
+            "edit_menu_choose_field": "Elige un campo para editar:",
+            "edit_product_fallback_prompt": "Ingresa el nuevo valor:",
             "edit_product_name_prompt": "Ingresa el nuevo nombre del producto:",
-            "edit_product_description_prompt": (
-                "Ingresa la nueva descripción del producto:"
-            ),
             "edit_product_price_prompt": "Ingresa el nuevo precio (ej., 25.99):",
             "edit_product_stock_prompt": "Ingresa la nueva cantidad de stock:",
             "edit_product_image_prompt": (
@@ -439,6 +453,9 @@ class AdminProductsMessageManager(BaseMessageManager):
             "edit_product_load_details_error": (
                 "❌ Произошла неожиданная ошибка при загрузке деталей товара."
             ),
+            "edit_product_load_products_error": (
+                "❌ Произошла неожиданная ошибка при загрузке товаров."
+            ),
             # Delete product messages
             "delete_product_choose_category": (
                 "Выберите категорию для удаления товаров:"
@@ -490,9 +507,14 @@ class AdminProductsMessageManager(BaseMessageManager):
             "restore_product_unexpected_error": (
                 "❌ Произошла неожиданная ошибка при восстановлении товара."
             ),
-            # Edit field prompts
+            # Product edit menu messages
+            "edit_menu_header": "Вы редактируете:",
+            "edit_menu_price_label": "Цена:",
+            "edit_menu_stock_label": "Остаток:",
+            "edit_menu_stock_units": "шт.",
+            "edit_menu_choose_field": "Выберите поле для редактирования:",
+            "edit_product_fallback_prompt": "Введите новое значение:",
             "edit_product_name_prompt": "Введите новое название товара:",
-            "edit_product_description_prompt": "Введите новое описание товара:",
             "edit_product_price_prompt": "Введите новую цену (например, 25.99):",
             "edit_product_stock_prompt": "Введите новое количество на складе:",
             "edit_product_image_prompt": "Пожалуйста, загрузите новое фото товара:",

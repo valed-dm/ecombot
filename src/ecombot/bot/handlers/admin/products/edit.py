@@ -87,7 +87,7 @@ async def edit_product_choose_category(
     except Exception as e:
         log.error(f"Failed to load products for edit: {e}", exc_info=True)
         await callback_message.edit_text(
-            "❌ An unexpected error occurred while loading products.",
+            manager.get_message("admin_products", "edit_product_load_products_error"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await state.clear()
@@ -155,13 +155,18 @@ async def edit_product_choose_product(
         category_id=product.category.id,
     )
 
+    admin_manager = manager.get_manager("admin_products")
+    price_label = admin_manager.get_message("edit_menu_price_label")
+    stock_label = admin_manager.get_message("edit_menu_stock_label")
+    stock_units = admin_manager.get_message("edit_menu_stock_units")
+
     text = (
-        f"You are editing:\n\n"
+        f"{admin_manager.get_message('edit_menu_header')}\n\n"
         f"<b>{product.name}</b>\n"
         f"<i>{product.description}</i>\n\n"
-        f"<b>Price:</b> ${product.price:.2f}\n"
-        f"<b>Stock:</b> {product.stock} units\n\n"
-        "Choose a field to edit:"
+        f"<b>{price_label}</b> ${product.price:.2f}\n"
+        f"<b>{stock_label}</b> {product.stock} {stock_units}\n\n"
+        f"{admin_manager.get_message('edit_menu_choose_field')}"
     )
 
     await callback_message.edit_text(text, reply_markup=keyboard)
@@ -200,7 +205,10 @@ async def edit_product_choose_field(
         }
 
         await callback_message.edit_text(
-            field_prompts.get(field, "Enter the new value:"),
+            field_prompts.get(
+                field,
+                manager.get_message("admin_products", "edit_product_fallback_prompt"),
+            ),
             reply_markup=get_cancel_keyboard(),
         )
         await state.update_data(edit_field=field)
