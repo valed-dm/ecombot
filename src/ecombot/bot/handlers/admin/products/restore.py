@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ecombot.bot.callback_data import AdminCallbackFactory
 from ecombot.bot.callback_data import ConfirmationCallbackFactory
 from ecombot.bot.keyboards.admin import get_admin_panel_keyboard
+from ecombot.core.manager import central_manager as manager
 from ecombot.db import crud
 from ecombot.logging_setup import log
 from ecombot.schemas.dto import ProductDTO
@@ -31,7 +32,7 @@ async def restore_product_start(
     except Exception as e:
         log.error(f"Failed to load deleted products: {e}", exc_info=True)
         await callback_message.edit_text(
-            "❌ An unexpected error occurred while loading deleted products.",
+            manager.get_message("admin_products", "restore_product_load_error"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await query.answer()
@@ -39,7 +40,7 @@ async def restore_product_start(
 
     if not deleted_products:
         await callback_message.edit_text(
-            "✅ No deleted products found. All products are active.",
+            manager.get_message("admin_products", "restore_product_none_found"),
             reply_markup=get_admin_panel_keyboard(),
         )
         await query.answer()
@@ -65,7 +66,8 @@ async def restore_product_start(
     keyboard = builder.as_markup()
 
     await callback_message.edit_text(
-        "🔄 Choose a deleted product to restore:", reply_markup=keyboard
+        manager.get_message("admin_products", "restore_product_choose_prompt"),
+        reply_markup=keyboard,
     )
     await query.answer()
 
@@ -87,18 +89,18 @@ async def restore_product_confirm(
 
         if success:
             await callback_message.edit_text(
-                "✅ Product has been restored successfully!",
+                manager.get_message("admin_products", "restore_product_success"),
                 reply_markup=get_admin_panel_keyboard(),
             )
         else:
             await callback_message.edit_text(
-                "❌ Product not found or already active.",
+                manager.get_message("admin_products", "restore_product_not_found"),
                 reply_markup=get_admin_panel_keyboard(),
             )
     except Exception as e:
         log.error(f"Error restoring product {product_id}: {e}", exc_info=True)
         await callback_message.edit_text(
-            "❌ An unexpected error occurred while restoring the product.",
+            manager.get_message("admin_products", "restore_product_unexpected_error"),
             reply_markup=get_admin_panel_keyboard(),
         )
 

@@ -134,6 +134,9 @@ class AdminProductsMessageManager(BaseMessageManager):
             ),
             "restore_product_success": ("✅ Product has been restored successfully!"),
             "restore_product_not_found": ("❌ Product not found or already active."),
+            "restore_product_unexpected_error": (
+                "❌ An unexpected error occurred while restoring the product."
+            ),
             # Edit field prompts
             "edit_product_name_prompt": "Enter the new product name:",
             "edit_product_description_prompt": "Enter the new product description:",
@@ -311,6 +314,9 @@ class AdminProductsMessageManager(BaseMessageManager):
             "restore_product_not_found": (
                 "❌ Producto no encontrado o ya está activo."
             ),
+            "restore_product_unexpected_error": (
+                "❌ Ocurrió un error inesperado al restaurar el producto."
+            ),
             # Edit field prompts
             "edit_product_name_prompt": "Ingresa el nuevo nombre del producto:",
             "edit_product_description_prompt": (
@@ -481,6 +487,9 @@ class AdminProductsMessageManager(BaseMessageManager):
             ),
             "restore_product_success": ("✅ Товар успешно восстановлен!"),
             "restore_product_not_found": ("❌ Товар не найден или уже активен."),
+            "restore_product_unexpected_error": (
+                "❌ Произошла неожиданная ошибка при восстановлении товара."
+            ),
             # Edit field prompts
             "edit_product_name_prompt": "Введите новое название товара:",
             "edit_product_description_prompt": "Введите новое описание товара:",
