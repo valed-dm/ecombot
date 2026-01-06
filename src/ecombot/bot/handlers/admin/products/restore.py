@@ -59,7 +59,7 @@ async def restore_product_start(
             ),
         )
     builder.button(
-        text="⬅️ Back to Admin Panel",
+        text=manager.get_message("common", "back_to_admin"),
         callback_data=AdminCallbackFactory(action="back_main"),
     )
     builder.adjust(1)

@@ -57,6 +57,8 @@ class KeyboardMessageManager(BaseMessageManager):
             "decrease_quantity": "➖",
             "remove_item": "❌",
             # Catalog buttons
+            "catalog": "🛍️ Catalog",
+            "go_to_catalog": "🛍️ Go to Catalog",
             "back_to_catalog": "⬅️ Back to Catalog",
             "back_to_categories": "⬅️ Back to Categories",
             # Profile buttons
@@ -123,6 +125,8 @@ class KeyboardMessageManager(BaseMessageManager):
             "decrease_quantity": "➖",
             "remove_item": "❌",
             # Catalog buttons
+            "catalog": "🛍️ Catálogo",
+            "go_to_catalog": "🛍️ Ir al Catálogo",
             "back_to_catalog": "⬅️ Volver al Catálogo",
             "back_to_categories": "⬅️ Volver a Categorías",
             # Profile buttons
@@ -189,6 +193,8 @@ class KeyboardMessageManager(BaseMessageManager):
             "decrease_quantity": "➖",
             "remove_item": "❌",
             # Catalog buttons
+            "catalog": "🛍️ Каталог",
+            "go_to_catalog": "🛍️ Перейти к Каталогу",
             "back_to_catalog": "⬅️ Назад к Каталогу",
             "back_to_categories": "⬅️ Назад к Категориям",
             # Profile buttons

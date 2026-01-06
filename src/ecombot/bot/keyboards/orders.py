@@ -3,6 +3,7 @@
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from ecombot.core.manager import central_manager as manager
 from ecombot.schemas.dto import OrderDTO
 
 from ..callback_data import CatalogCallbackFactory
@@ -18,7 +19,7 @@ def get_orders_list_keyboard(orders: list[OrderDTO]) -> InlineKeyboardMarkup:
 
     if not orders:
         builder.button(
-            text="🛍️ Go to Catalog",
+            text=manager.get_message("keyboards", "go_to_catalog"),
             callback_data=CatalogCallbackFactory(action="back_to_main", item_id=0),
         )
     else:

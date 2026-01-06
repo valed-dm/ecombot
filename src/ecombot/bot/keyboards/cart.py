@@ -4,6 +4,7 @@ from aiogram.types import InlineKeyboardButton
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from ecombot.core.manager import central_manager as manager
 from ecombot.schemas.dto import CartDTO
 
 from ..callback_data import CartCallbackFactory
@@ -56,7 +57,7 @@ def get_cart_keyboard(cart: CartDTO) -> InlineKeyboardMarkup:
         )
     action_buttons.append(
         InlineKeyboardButton(
-            text="🛍️ Catalog",
+            text=manager.get_message("keyboards", "catalog"),
             callback_data=CatalogCallbackFactory(
                 action="back_to_main", item_id=0
             ).pack(),
