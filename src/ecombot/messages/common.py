@@ -25,6 +25,7 @@ class CommonMessageManager(BaseMessageManager):
             "status_completed": "Completed",
             "status_cancelled": "Cancelled",
             # Common actions
+            "restore_item_template": "🔄 {name}",
             "loading": "⏳ Loading...",
             "processing": "⚙️ Processing...",
             "success": "✅ Success!",
@@ -60,6 +61,7 @@ class CommonMessageManager(BaseMessageManager):
             "status_completed": "Completado",
             "status_cancelled": "Cancelado",
             # Common actions
+            "restore_item_template": "🔄 {name}",
             "loading": "⏳ Cargando...",
             "processing": "⚙️ Procesando...",
             "success": "✅ ¡Éxito!",
@@ -95,6 +97,7 @@ class CommonMessageManager(BaseMessageManager):
             "status_completed": "Выполнен",
             "status_cancelled": "Отменен",
             # Common actions
+            "restore_item_template": "🔄 {name}",
             "loading": "⏳ Загрузка...",
             "processing": "⚙️ Обработка...",
             "success": "✅ Успешно!",

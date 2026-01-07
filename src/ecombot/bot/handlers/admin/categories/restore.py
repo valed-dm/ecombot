@@ -53,7 +53,9 @@ async def restore_category_start(
     builder = InlineKeyboardBuilder()
     for category in category_dtos:
         builder.button(
-            text=f"🔄 {category.name}",
+            text=manager.get_message(
+                "common", "restore_item_template", name=category.name
+            ),
             callback_data=ConfirmationCallbackFactory(
                 action="restore_category", item_id=category.id, confirm=True
             ),
