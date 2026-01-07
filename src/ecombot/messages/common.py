@@ -18,6 +18,12 @@ class CommonMessageManager(BaseMessageManager):
             "cancel_operation": "❌ Cancel",
             # Currency
             "currency_symbol": "$",
+            # Order Statuses
+            "status_pending": "Pending",
+            "status_processing": "Processing",
+            "status_shipped": "Shipped",
+            "status_completed": "Completed",
+            "status_cancelled": "Cancelled",
             # Common actions
             "loading": "⏳ Loading...",
             "processing": "⚙️ Processing...",
@@ -47,6 +53,12 @@ class CommonMessageManager(BaseMessageManager):
             "cancel_operation": "❌ Cancelar",
             # Currency
             "currency_symbol": "€",
+            # Order Statuses
+            "status_pending": "Pendiente",
+            "status_processing": "Procesando",
+            "status_shipped": "Enviado",
+            "status_completed": "Completado",
+            "status_cancelled": "Cancelado",
             # Common actions
             "loading": "⏳ Cargando...",
             "processing": "⚙️ Procesando...",
@@ -76,6 +88,12 @@ class CommonMessageManager(BaseMessageManager):
             "cancel_operation": "❌ Отменить",
             # Currency
             "currency_symbol": "₽",
+            # Order Statuses
+            "status_pending": "Ожидает",
+            "status_processing": "В обработке",
+            "status_shipped": "Отправлен",
+            "status_completed": "Выполнен",
+            "status_cancelled": "Отменен",
             # Common actions
             "loading": "⏳ Загрузка...",
             "processing": "⚙️ Обработка...",

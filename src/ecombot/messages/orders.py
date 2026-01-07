@@ -17,6 +17,7 @@ class OrdersMessageManager(BaseMessageManager):
             "order_details_header": "<b>Details for Order #{order_id}</b>\n",
             "order_items_header": "<b>Items:</b>\n",
             # Status and content messages
+            "status_line": "Status: <i>{status}</i>\n\n",
             "no_orders_message": "You have not placed any orders yet.",
             "order_status_updated": "Order status has been updated to: {status}",
             # Order display templates
@@ -29,6 +30,11 @@ class OrdersMessageManager(BaseMessageManager):
                 "  - <b>{name}</b>\n"
                 "    <code>{quantity} x ${price:.2f} = ${total:.2f}</code>\n"
             ),
+            "deleted_product_suffix": " ⚠️ <i>(Deleted)</i>",
+            "active_items_total": "<b>Active Items: ${total:.2f}</b>\n",
+            "deleted_items_total": "<s>Deleted Items: ${total:.2f}</s>\n",
+            "total_paid": "<b>Total Paid: ${total:.2f}</b>",
+            "total_label": "<b>Total: ${total:.2f}</b>",
             # Actions
             "view_details": "📋 View Details",
             "back_to_orders": "⬅️ Back to Orders",
@@ -46,6 +52,7 @@ class OrdersMessageManager(BaseMessageManager):
             "order_details_header": "<b>Detalles del Pedido #{order_id}</b>\n",
             "order_items_header": "<b>Artículos:</b>\n",
             # Status and content messages
+            "status_line": "Estado: <i>{status}</i>\n\n",
             "no_orders_message": "Aún no has realizado ningún pedido.",
             "order_status_updated": (
                 "El estado del pedido se ha actualizado a: {status}"
@@ -60,6 +67,11 @@ class OrdersMessageManager(BaseMessageManager):
                 "  - <b>{name}</b>\n"
                 "    <code>{quantity} x €{price:.2f} = €{total:.2f}</code>\n"
             ),
+            "deleted_product_suffix": " ⚠️ <i>(Eliminado)</i>",
+            "active_items_total": "<b>Artículos Activos: €{total:.2f}</b>\n",
+            "deleted_items_total": "<s>Artículos Eliminados: €{total:.2f}</s>\n",
+            "total_paid": "<b>Total Pagado: €{total:.2f}</b>",
+            "total_label": "<b>Total: €{total:.2f}</b>",
             # Actions
             "view_details": "📋 Ver Detalles",
             "back_to_orders": "⬅️ Volver a Pedidos",
@@ -79,6 +91,7 @@ class OrdersMessageManager(BaseMessageManager):
             "order_details_header": "<b>Детали Заказа #{order_id}</b>\n",
             "order_items_header": "<b>Товары:</b>\n",
             # Status and content messages
+            "status_line": "Статус: <i>{status}</i>\n\n",
             "no_orders_message": "Вы еще не сделали ни одного заказа.",
             "order_status_updated": "Статус заказа обновлен на: {status}",
             # Order display templates
@@ -91,6 +104,11 @@ class OrdersMessageManager(BaseMessageManager):
                 "  - <b>{name}</b>\n"
                 "    <code>{quantity} x ₽{price:.2f} = ₽{total:.2f}</code>\n"
             ),
+            "deleted_product_suffix": " ⚠️ <i>(Удален)</i>",
+            "active_items_total": "<b>Активные Товары: ₽{total:.2f}</b>\n",
+            "deleted_items_total": "<s>Удаленные Товары: ₽{total:.2f}</s>\n",
+            "total_paid": "<b>Итого Оплачено: ₽{total:.2f}</b>",
+            "total_label": "<b>Итого: ₽{total:.2f}</b>",
             # Actions
             "view_details": "📋 Посмотреть Детали",
             "back_to_orders": "⬅️ Назад к Заказам",

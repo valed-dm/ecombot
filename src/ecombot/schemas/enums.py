@@ -20,3 +20,8 @@ class OrderStatus(str, enum.Enum):
     SHIPPED = "shipped"
     COMPLETED = "completed"
     CANCELLED = "cancelled"
+
+    @property
+    def message_key(self) -> str:
+        """Returns the message key for internationalization."""
+        return f"status_{self.value}"

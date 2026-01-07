@@ -26,11 +26,12 @@ def format_order_list_text(user_orders: list[OrderDTO]) -> str:
 
     date_format = manager.get_message("orders", "date_format")
     for order in user_orders:
+        status_text = manager.get_message("common", order.status.message_key)
         order_item = manager.get_message(
             "orders",
             "order_list_item",
             order_number=escape(order.order_number),
-            status=order.status.capitalize(),
+            status=status_text,
             date=order.created_at.strftime(date_format),
             total=order.total_price,
         )
@@ -46,16 +47,16 @@ def format_order_details_text(order_details: OrderDTO) -> str:
     )
     items_header = manager.get_message("orders", "order_items_header")
 
+    status_text = manager.get_message("common", order_details.status.message_key)
     text_parts = [
         header,
-        f"Status: <i>{order_details.status.capitalize()}</i>\n\n",
+        manager.get_message("orders", "status_line", status=status_text),
         items_header,
     ]
 
     has_deleted_products = False
     active_total = 0.0
     deleted_total = 0.0
-    currency = manager.get_message("common", "currency_symbol")
 
     for item in order_details.items:
         item_total = float(item.price * item.quantity)
@@ -64,7 +65,7 @@ def format_order_details_text(order_details: OrderDTO) -> str:
         is_deleted = item.product.deleted_at is not None
 
         if is_deleted:
-            product_status = " ⚠️ <i>(Deleted)</i>"
+            product_status = manager.get_message("orders", "deleted_product_suffix")
             has_deleted_products = True
             deleted_total += item_total
         else:
@@ -86,13 +87,17 @@ def format_order_details_text(order_details: OrderDTO) -> str:
     if has_deleted_products:
         text_parts.extend(
             [
-                f"<b>Active Items: {currency}{active_total:.2f}</b>\n",
-                f"<s>Deleted Items: {currency}{deleted_total:.2f}</s>\n",
-                f"<b>Total Paid: {currency}{active_total:.2f}</b>",
+                manager.get_message("orders", "active_items_total", total=active_total),
+                manager.get_message(
+                    "orders", "deleted_items_total", total=deleted_total
+                ),
+                manager.get_message("orders", "total_paid", total=active_total),
             ]
         )
     else:
-        text_parts.append(f"<b>Total: {currency}{active_total:.2f}</b>")
+        text_parts.append(
+            manager.get_message("orders", "total_label", total=active_total)
+        )
 
     return "".join(text_parts)
 
