@@ -51,10 +51,14 @@ async def restore_product_start(
 
     # Create custom keyboard for restore selection
     builder = InlineKeyboardBuilder()
-    currency = manager.get_message("common", "currency_symbol")
     for product in product_dtos:
         builder.button(
-            text=f"🔄 {product.name} - {currency}{product.price:.2f}",
+            text=manager.get_message(
+                "common",
+                "restore_product_template",
+                name=product.name,
+                price=product.price,
+            ),
             callback_data=ConfirmationCallbackFactory(
                 action="restore_product", item_id=product.id, confirm=True
             ),

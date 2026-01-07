@@ -26,6 +26,7 @@ class CommonMessageManager(BaseMessageManager):
             "status_cancelled": "Cancelled",
             # Common actions
             "restore_item_template": "🔄 {name}",
+            "restore_product_template": "🔄 {name} - ${price:.2f}",
             "loading": "⏳ Loading...",
             "processing": "⚙️ Processing...",
             "success": "✅ Success!",
@@ -62,6 +63,7 @@ class CommonMessageManager(BaseMessageManager):
             "status_cancelled": "Cancelado",
             # Common actions
             "restore_item_template": "🔄 {name}",
+            "restore_product_template": "🔄 {name} - €{price:.2f}",
             "loading": "⏳ Cargando...",
             "processing": "⚙️ Procesando...",
             "success": "✅ ¡Éxito!",
@@ -98,6 +100,7 @@ class CommonMessageManager(BaseMessageManager):
             "status_cancelled": "Отменен",
             # Common actions
             "restore_item_template": "🔄 {name}",
+            "restore_product_template": "🔄 {name} - ₽{price:.2f}",
             "loading": "⏳ Загрузка...",
             "processing": "⚙️ Обработка...",
             "success": "✅ Успешно!",
