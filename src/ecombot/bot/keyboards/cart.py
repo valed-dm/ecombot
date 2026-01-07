@@ -21,7 +21,7 @@ def get_cart_keyboard(cart: CartDTO) -> InlineKeyboardMarkup:
     for item in cart.items:
         builder.row(
             InlineKeyboardButton(
-                text="➖",
+                text=manager.get_message("cart", "decrease_quantity"),
                 callback_data=CartCallbackFactory(
                     action="decrease", item_id=item.id
                 ).pack(),
@@ -37,13 +37,13 @@ def get_cart_keyboard(cart: CartDTO) -> InlineKeyboardMarkup:
                 ).pack(),
             ),
             InlineKeyboardButton(
-                text="➕",
+                text=manager.get_message("cart", "increase_quantity"),
                 callback_data=CartCallbackFactory(
                     action="increase", item_id=item.id
                 ).pack(),
             ),
             InlineKeyboardButton(
-                text="❌",
+                text=manager.get_message("cart", "remove_item"),
                 callback_data=CartCallbackFactory(
                     action="remove", item_id=item.id
                 ).pack(),
@@ -53,7 +53,10 @@ def get_cart_keyboard(cart: CartDTO) -> InlineKeyboardMarkup:
     action_buttons = []
     if cart.items:
         action_buttons.append(
-            InlineKeyboardButton(text="✅ Checkout", callback_data="checkout_start")
+            InlineKeyboardButton(
+                text=manager.get_message("cart", "checkout_button"),
+                callback_data="checkout_start",
+            )
         )
     action_buttons.append(
         InlineKeyboardButton(
