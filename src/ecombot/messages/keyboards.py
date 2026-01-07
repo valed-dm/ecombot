@@ -69,6 +69,7 @@ class KeyboardMessageManager(BaseMessageManager):
             "set_as_default": "⭐ Set as Default",
             "delete_address": "🗑️ Delete",
             "back_to_profile": "⬅️ Back to Profile",
+            "back_to_addresses": "⬅️ Back to Addresses",
             # Orders buttons
             "view_details": "📋 View Details",
             "back_to_orders": "⬅️ Back to Orders",
@@ -137,6 +138,7 @@ class KeyboardMessageManager(BaseMessageManager):
             "set_as_default": "⭐ Establecer por Defecto",
             "delete_address": "🗑️ Eliminar",
             "back_to_profile": "⬅️ Volver al Perfil",
+            "back_to_addresses": "⬅️ Volver a Direcciones",
             # Orders buttons
             "view_details": "📋 Ver Detalles",
             "back_to_orders": "⬅️ Volver a Pedidos",
@@ -205,6 +207,7 @@ class KeyboardMessageManager(BaseMessageManager):
             "set_as_default": "⭐ Установить по Умолчанию",
             "delete_address": "🗑️ Удалить",
             "back_to_profile": "⬅️ Назад к Профилю",
+            "back_to_addresses": "⬅️ Назад к Адресам",
             # Orders buttons
             "view_details": "📋 Посмотреть Детали",
             "back_to_orders": "⬅️ Назад к Заказам",
