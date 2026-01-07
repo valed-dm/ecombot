@@ -5,6 +5,8 @@ from aiogram.types import KeyboardButton
 from aiogram.types import ReplyKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from ecombot.core.manager import central_manager as manager
+
 from ..callback_data import CheckoutCallbackFactory
 
 
@@ -14,7 +16,14 @@ def get_request_contact_keyboard() -> ReplyKeyboardMarkup:
     This is a special button type that prompts the user to share their phone number.
     """
     return ReplyKeyboardMarkup(
-        keyboard=[[KeyboardButton(text="Share My Phone Number", request_contact=True)]],
+        keyboard=[
+            [
+                KeyboardButton(
+                    text=manager.get_message("keyboards", "share_phone"),
+                    request_contact=True,
+                )
+            ]
+        ],
         resize_keyboard=True,
         one_time_keyboard=True,
     )
@@ -27,11 +36,11 @@ def get_checkout_confirmation_keyboard() -> InlineKeyboardMarkup:
     """
     builder = InlineKeyboardBuilder()
     builder.button(
-        text="✅",
+        text=manager.get_message("keyboards", "confirm"),
         callback_data=CheckoutCallbackFactory(action="confirm"),
     )
     builder.button(
-        text="❌",
+        text=manager.get_message("keyboards", "cancel_short"),
         callback_data=CheckoutCallbackFactory(action="cancel"),
     )
     builder.adjust(2)
@@ -42,15 +51,15 @@ def get_fast_checkout_confirmation_keyboard() -> InlineKeyboardMarkup:
     """Builds the keyboard for the 'fast path' checkout confirmation."""
     builder = InlineKeyboardBuilder()
     builder.button(
-        text="✅ Confirm & Place Order",
+        text=manager.get_message("keyboards", "confirm_order"),
         callback_data=CheckoutCallbackFactory(action="confirm"),
     )
     builder.button(
-        text="✏️ Edit Details",
+        text=manager.get_message("keyboards", "edit_details"),
         callback_data=CheckoutCallbackFactory(action="edit_details"),
     )
     builder.button(
-        text="❌ Cancel",
+        text=manager.get_message("keyboards", "cancel"),
         callback_data=CheckoutCallbackFactory(action="cancel"),
     )
     builder.adjust(1)

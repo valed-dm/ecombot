@@ -17,6 +17,8 @@ class KeyboardMessageManager(BaseMessageManager):
             "back": "⬅️ Back",
             "yes_delete": "✅ Yes, delete it",
             "no_go_back": "❌ No, go back",
+            "confirm": "✅",
+            "cancel_short": "❌",
             # Admin panel buttons
             "add_category": "➕ Add Category",
             "delete_category": "❌ Delete Category",
@@ -78,6 +80,7 @@ class KeyboardMessageManager(BaseMessageManager):
             "confirm_order": "✅ Confirm Order",
             "edit_details": "📝 Edit Details",
             "change_address": "📍 Change Address",
+            "share_phone": "📱 Share My Phone Number",
         }
 
         # Spanish messages
@@ -87,6 +90,8 @@ class KeyboardMessageManager(BaseMessageManager):
             "back": "⬅️ Atrás",
             "yes_delete": "✅ Sí, eliminarlo",
             "no_go_back": "❌ No, volver",
+            "confirm": "✅",
+            "cancel_short": "❌",
             # Admin panel buttons
             "add_category": "➕ Agregar Categoría",
             "delete_category": "❌ Eliminar Categoría",
@@ -148,6 +153,7 @@ class KeyboardMessageManager(BaseMessageManager):
             "confirm_order": "✅ Confirmar Pedido",
             "edit_details": "📝 Editar Detalles",
             "change_address": "📍 Cambiar Dirección",
+            "share_phone": "📱 Compartir mi número",
         }
 
         # Russian messages
@@ -157,6 +163,8 @@ class KeyboardMessageManager(BaseMessageManager):
             "back": "⬅️ Назад",
             "yes_delete": "✅ Да, удалить",
             "no_go_back": "❌ Нет, вернуться",
+            "confirm": "✅",
+            "cancel_short": "❌",
             # Admin panel buttons
             "add_category": "➕ Добавить Категорию",
             "delete_category": "❌ Удалить Категорию",
@@ -218,6 +226,7 @@ class KeyboardMessageManager(BaseMessageManager):
             "confirm_order": "✅ Подтвердить Заказ",
             "edit_details": "📝 Редактировать Детали",
             "change_address": "📍 Изменить Адрес",
+            "share_phone": "📱 Поделиться номером",
         }
 
         self._messages = {
