@@ -39,7 +39,7 @@ def get_catalog_products_keyboard(products: list[ProductDTO]) -> InlineKeyboardM
             ),
         )
     builder.button(
-        text="⬅️ Back to Categories",
+        text=manager.get_message("catalog", "back_to_categories"),
         callback_data=CatalogCallbackFactory(action="back_to_main", item_id=0),
     )
     builder.adjust(1)
@@ -50,11 +50,11 @@ def get_product_details_keyboard(product: ProductDTO) -> InlineKeyboardMarkup:
     """Builds a keyboard for a single product view."""
     builder = InlineKeyboardBuilder()
     builder.button(
-        text="➕ Add to Cart",
+        text=manager.get_message("catalog", "add_to_cart"),
         callback_data=CartCallbackFactory(action="add", item_id=product.id),
     )
     builder.button(
-        text="⬅️ Back to Products",
+        text=manager.get_message("keyboards", "back_to_products"),
         callback_data=CatalogCallbackFactory(
             action="view_category", item_id=product.category.id
         ),
