@@ -55,10 +55,11 @@ def get_admin_panel_keyboard() -> InlineKeyboardMarkup:
 def get_admin_orders_list_keyboard(orders: list[OrderDTO]) -> InlineKeyboardMarkup:
     """Builds a keyboard for the admin orders list with back to filters button."""
     builder = InlineKeyboardBuilder()
+    currency = manager.get_message("common", "currency_symbol")
     for order in orders:
         builder.button(
             text=f"{order.order_number} - {order.contact_name}"
-            f" (${order.total_price:.2f})",
+            f" ({currency}{order.total_price:.2f})",
             callback_data=OrderCallbackFactory(action="view_details", item_id=order.id),
         )
 

@@ -3,6 +3,7 @@
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from ecombot.core.manager import central_manager as manager
 from ecombot.schemas.dto import CategoryDTO
 from ecombot.schemas.dto import ProductDTO
 
@@ -29,9 +30,10 @@ def get_catalog_categories_keyboard(
 def get_catalog_products_keyboard(products: list[ProductDTO]) -> InlineKeyboardMarkup:
     """Builds a keyboard for the list of products in a category."""
     builder = InlineKeyboardBuilder()
+    currency = manager.get_message("common", "currency_symbol")
     for product in products:
         builder.button(
-            text=f"{product.name} - ${product.price:.2f}",
+            text=f"{product.name} - {currency}{product.price:.2f}",
             callback_data=CatalogCallbackFactory(
                 action="view_product", item_id=product.id
             ),

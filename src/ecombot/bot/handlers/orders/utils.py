@@ -55,6 +55,7 @@ def format_order_details_text(order_details: OrderDTO) -> str:
     has_deleted_products = False
     active_total = 0.0
     deleted_total = 0.0
+    currency = manager.get_message("common", "currency_symbol")
 
     for item in order_details.items:
         item_total = float(item.price * item.quantity)
@@ -85,13 +86,13 @@ def format_order_details_text(order_details: OrderDTO) -> str:
     if has_deleted_products:
         text_parts.extend(
             [
-                f"<b>Active Items: ${active_total:.2f}</b>\n",
-                f"<s>Deleted Items: ${deleted_total:.2f}</s>\n",
-                f"<b>Total Paid: ${active_total:.2f}</b>",
+                f"<b>Active Items: {currency}{active_total:.2f}</b>\n",
+                f"<s>Deleted Items: {currency}{deleted_total:.2f}</s>\n",
+                f"<b>Total Paid: {currency}{active_total:.2f}</b>",
             ]
         )
     else:
-        text_parts.append(f"<b>Total: ${active_total:.2f}</b>")
+        text_parts.append(f"<b>Total: {currency}{active_total:.2f}</b>")
 
     return "".join(text_parts)
 

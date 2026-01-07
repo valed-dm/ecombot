@@ -90,16 +90,16 @@ class AdminOrdersMessageManager(BaseMessageManager):
             "deleted_product_suffix": " ⚠️ <i>(Eliminado - No Cobrado)</i>",
             "item_template": (
                 "  - <b>{name}</b>{status}\n"
-                "    <code>{quantity} x ${price:.2f} = ${total:.2f}</code>\n"
+                "    <code>{quantity} x €{price:.2f} = €{total:.2f}</code>\n"
             ),
-            "active_items_total": "<b>Total Artículos Activos: ${total:.2f}</b>\n",
-            "deleted_items_total": "<s>Artículos Eliminados: ${total:.2f}</s>\n",
-            "final_total": "<b>Total Final: ${total:.2f}</b>\n\n",
+            "active_items_total": "<b>Total Artículos Activos: €{total:.2f}</b>\n",
+            "deleted_items_total": "<s>Artículos Eliminados: €{total:.2f}</s>\n",
+            "final_total": "<b>Total Final: €{total:.2f}</b>\n\n",
             "deleted_items_notice": (
                 "⚠️ <i>Los productos eliminados no se cobran. "
                 "El cliente paga solo por los artículos activos.</i>"
             ),
-            "order_total": "<b>Total: ${total:.2f}</b>",
+            "order_total": "<b>Total: €{total:.2f}</b>",
             "not_available": "N/D",
             # Technical constants
             "max_message_length": "4096",
@@ -139,16 +139,16 @@ class AdminOrdersMessageManager(BaseMessageManager):
             "deleted_product_suffix": " ⚠️ <i>(Удален - Не Оплачивается)</i>",
             "item_template": (
                 "  - <b>{name}</b>{status}\n"
-                "    <code>{quantity} x ${price:.2f} = ${total:.2f}</code>\n"
+                "    <code>{quantity} x ₽{price:.2f} = ₽{total:.2f}</code>\n"
             ),
-            "active_items_total": "<b>Итого Активных Товаров: ${total:.2f}</b>\n",
-            "deleted_items_total": "<s>Удаленные Товары: ${total:.2f}</s>\n",
-            "final_total": "<b>Итоговая Сумма: ${total:.2f}</b>\n\n",
+            "active_items_total": "<b>Итого Активных Товаров: ₽{total:.2f}</b>\n",
+            "deleted_items_total": "<s>Удаленные Товары: ₽{total:.2f}</s>\n",
+            "final_total": "<b>Итоговая Сумма: ₽{total:.2f}</b>\n\n",
             "deleted_items_notice": (
                 "⚠️ <i>Удаленные товары не оплачиваются. "
                 "Клиент платит только за активные товары.</i>"
             ),
-            "order_total": "<b>Итого: ${total:.2f}</b>",
+            "order_total": "<b>Итого: ₽{total:.2f}</b>",
             "not_available": "Н/Д",
             # Technical constants
             "max_message_length": "4096",

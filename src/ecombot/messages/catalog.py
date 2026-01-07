@@ -43,7 +43,7 @@ class CatalogMessageManager(BaseMessageManager):
             "back_to_categories": "⬅️ Volver a Categorías",
             # Product display
             "product_details_template": (
-                "<b>{name}</b>\n\n{description}\n\n<b>Precio:</b> ${price:.2f}"
+                "<b>{name}</b>\n\n{description}\n\n<b>Precio:</b> €{price:.2f}"
             ),
             "add_to_cart": "🛒 Añadir al Carrito",
             "out_of_stock": "❌ Sin Stock",
@@ -69,7 +69,7 @@ class CatalogMessageManager(BaseMessageManager):
             "back_to_categories": "⬅️ Назад к Категориям",
             # Product display
             "product_details_template": (
-                "<b>{name}</b>\n\n{description}\n\n<b>Цена:</b> ${price:.2f}"
+                "<b>{name}</b>\n\n{description}\n\n<b>Цена:</b> ₽{price:.2f}"
             ),
             "add_to_cart": "🛒 Добавить в Корзину",
             "out_of_stock": "❌ Нет в Наличии",

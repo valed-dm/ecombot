@@ -275,7 +275,7 @@ class AdminProductsMessageManager(BaseMessageManager):
                 "⚠️ ¿Estás seguro de que quieres eliminar este producto?\n\n"
                 "<b>{product_name}</b>\n"
                 "<i>{product_description}</i>\n\n"
-                "<b>Precio:</b> ${product_price:.2f}\n"
+                "<b>Precio:</b> €{product_price:.2f}\n"
                 "<b>Stock:</b> {product_stock} unidades\n\n"
                 "El producto se ocultará del catálogo pero se conservará "
                 "en el historial de pedidos."
@@ -465,7 +465,7 @@ class AdminProductsMessageManager(BaseMessageManager):
                 "⚠️ Вы уверены, что хотите удалить этот товар?\n\n"
                 "<b>{product_name}</b>\n"
                 "<i>{product_description}</i>\n\n"
-                "<b>Цена:</b> ${product_price:.2f}\n"
+                "<b>Цена:</b> ₽{product_price:.2f}\n"
                 "<b>Остаток:</b> {product_stock} шт.\n\n"
                 "Товар будет скрыт из каталога, но сохранится в истории заказов."
             ),

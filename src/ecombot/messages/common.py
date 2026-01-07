@@ -16,6 +16,8 @@ class CommonMessageManager(BaseMessageManager):
             "back_to_main": "⬅️ Back to Main Menu",
             "back_to_admin": "⬅️ Back to Admin Panel",
             "cancel_operation": "❌ Cancel",
+            # Currency
+            "currency_symbol": "$",
             # Common actions
             "loading": "⏳ Loading...",
             "processing": "⚙️ Processing...",
@@ -43,6 +45,8 @@ class CommonMessageManager(BaseMessageManager):
             "back_to_main": "⬅️ Volver al Menú Principal",
             "back_to_admin": "⬅️ Volver al Panel de Administración",
             "cancel_operation": "❌ Cancelar",
+            # Currency
+            "currency_symbol": "€",
             # Common actions
             "loading": "⏳ Cargando...",
             "processing": "⚙️ Procesando...",
@@ -70,6 +74,8 @@ class CommonMessageManager(BaseMessageManager):
             "back_to_main": "⬅️ Назад в Главное Меню",
             "back_to_admin": "⬅️ Назад в Панель Администратора",
             "cancel_operation": "❌ Отменить",
+            # Currency
+            "currency_symbol": "₽",
             # Common actions
             "loading": "⏳ Загрузка...",
             "processing": "⚙️ Обработка...",

@@ -59,9 +59,9 @@ class CartMessageManager(BaseMessageManager):
             "cart_empty_message": (
                 "🛒 <b>Tu Carrito de Compras</b>\n\nTu carrito está actualmente vacío."
             ),
-            "cart_total": "<b>Total: ${total:.2f}</b>",
+            "cart_total": "<b>Total: €{total:.2f}</b>",
             "cart_item_template": (
-                "• <b>{name}</b>\n  ${price:.2f} x {quantity} = ${subtotal:.2f}"
+                "• <b>{name}</b>\n  €{price:.2f} x {quantity} = €{subtotal:.2f}"
             ),
             # Actions
             "checkout_button": "✅ Finalizar Compra",
@@ -95,9 +95,9 @@ class CartMessageManager(BaseMessageManager):
             # Cart display
             "cart_header": "🛒 Ваша Корзина",
             "cart_empty_message": "🛒 <b>Ваша Корзина</b>\n\nВаша корзина пуста.",
-            "cart_total": "<b>Итого: ${total:.2f}</b>",
+            "cart_total": "<b>Итого: ₽{total:.2f}</b>",
             "cart_item_template": (
-                "• <b>{name}</b>\n  ${price:.2f} x {quantity} = ${subtotal:.2f}"
+                "• <b>{name}</b>\n  ₽{price:.2f} x {quantity} = ₽{subtotal:.2f}"
             ),
             # Actions
             "checkout_button": "✅ Оформить Заказ",

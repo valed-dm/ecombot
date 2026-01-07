@@ -54,11 +54,11 @@ class OrdersMessageManager(BaseMessageManager):
             "order_list_item": (
                 "📦 <b>Pedido #{order_number}</b> - <i>{status}</i>\n"
                 "Realizado el: {date}\n"
-                "Total: ${total:.2f}\n\n"
+                "Total: €{total:.2f}\n\n"
             ),
             "order_item_template": (
                 "  - <b>{name}</b>\n"
-                "    <code>{quantity} x ${price:.2f} = ${total:.2f}</code>\n"
+                "    <code>{quantity} x €{price:.2f} = €{total:.2f}</code>\n"
             ),
             # Actions
             "view_details": "📋 Ver Detalles",
@@ -85,11 +85,11 @@ class OrdersMessageManager(BaseMessageManager):
             "order_list_item": (
                 "📦 <b>Заказ #{order_number}</b> - <i>{status}</i>\n"
                 "Размещен: {date}\n"
-                "Итого: ${total:.2f}\n\n"
+                "Итого: ₽{total:.2f}\n\n"
             ),
             "order_item_template": (
                 "  - <b>{name}</b>\n"
-                "    <code>{quantity} x ${price:.2f} = ${total:.2f}</code>\n"
+                "    <code>{quantity} x ₽{price:.2f} = ₽{total:.2f}</code>\n"
             ),
             # Actions
             "view_details": "📋 Посмотреть Детали",
