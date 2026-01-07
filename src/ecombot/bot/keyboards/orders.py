@@ -25,7 +25,11 @@ def get_orders_list_keyboard(orders: list[OrderDTO]) -> InlineKeyboardMarkup:
     else:
         for order in orders:
             builder.button(
-                text=f"🔎 View Order #{order.order_number}",
+                text=manager.get_message(
+                    "keyboards",
+                    "view_order_number",
+                    order_number=order.order_number,
+                ),
                 callback_data=OrderCallbackFactory(
                     action="view_details", item_id=order.id
                 ),
@@ -39,7 +43,7 @@ def get_order_details_keyboard() -> InlineKeyboardMarkup:
     """Builds a simple keyboard with a 'Back to Orders' button."""
     builder = InlineKeyboardBuilder()
     builder.button(
-        text="⬅️ Back to Order History",
+        text=manager.get_message("keyboards", "back_to_orders"),
         callback_data=OrderCallbackFactory(action="back_to_list"),
     )
     return builder.as_markup()

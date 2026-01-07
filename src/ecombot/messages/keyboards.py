@@ -71,6 +71,7 @@ class KeyboardMessageManager(BaseMessageManager):
             "back_to_profile": "⬅️ Back to Profile",
             "back_to_addresses": "⬅️ Back to Addresses",
             # Orders buttons
+            "view_order_number": "🔎 View Order #{order_number}",
             "view_details": "📋 View Details",
             "back_to_orders": "⬅️ Back to Orders",
             # Checkout buttons
@@ -140,6 +141,7 @@ class KeyboardMessageManager(BaseMessageManager):
             "back_to_profile": "⬅️ Volver al Perfil",
             "back_to_addresses": "⬅️ Volver a Direcciones",
             # Orders buttons
+            "view_order_number": "🔎 Ver Pedido #{order_number}",
             "view_details": "📋 Ver Detalles",
             "back_to_orders": "⬅️ Volver a Pedidos",
             # Checkout buttons
@@ -209,6 +211,7 @@ class KeyboardMessageManager(BaseMessageManager):
             "back_to_profile": "⬅️ Назад к Профилю",
             "back_to_addresses": "⬅️ Назад к Адресам",
             # Orders buttons
+            "view_order_number": "🔎 Посмотреть заказ №{order_number}",
             "view_details": "📋 Посмотреть Детали",
             "back_to_orders": "⬅️ Назад к Заказам",
             # Checkout buttons
