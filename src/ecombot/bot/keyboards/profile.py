@@ -87,4 +87,5 @@ def get_address_management_keyboard(
         text=manager.get_message("keyboards", "back_to_profile"),
         callback_data=ProfileCallbackFactory(action="profile_back_main"),
     )
+    builder.adjust(1, 2, 1)
     return builder.as_markup()
