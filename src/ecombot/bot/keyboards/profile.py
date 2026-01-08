@@ -58,26 +58,23 @@ def get_address_management_keyboard(
                 ).pack(),
             )
         )
-        action_row = (
-            [
+        if not addr.is_default:
+            builder.row(
                 InlineKeyboardButton(
                     text=manager.get_message("keyboards", "set_as_default"),
                     callback_data=ProfileCallbackFactory(
                         action="set_default_addr", address_id=addr.id
                     ).pack(),
                 )
-            ]
-            if not addr.is_default
-            else []
-        ) + [
+            )
+        builder.row(
             InlineKeyboardButton(
                 text=manager.get_message("keyboards", "delete_address"),
                 callback_data=ProfileCallbackFactory(
                     action="delete_addr", address_id=addr.id
                 ).pack(),
             )
-        ]
-        builder.row(*action_row)
+        )
 
     builder.button(
         text=manager.get_message("keyboards", "add_address"),
@@ -87,5 +84,5 @@ def get_address_management_keyboard(
         text=manager.get_message("keyboards", "back_to_profile"),
         callback_data=ProfileCallbackFactory(action="profile_back_main"),
     )
-    builder.adjust(1, 2, 1)
+    builder.adjust(1)
     return builder.as_markup()
