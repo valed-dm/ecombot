@@ -8,8 +8,9 @@ from aiogram import Router
 
 from ecombot.bot.middlewares import MessageInteractionMiddleware
 
-from . import address_management
 from . import main_profile
+from .main_profile import profile_handler
+from . import address_management
 from . import navigation
 from .states import AddAddress
 from .states import EditProfile
@@ -23,4 +24,4 @@ router.include_router(main_profile.router)
 router.include_router(address_management.router)
 router.include_router(navigation.router)
 
-__all__ = ["router", "EditProfile", "AddAddress"]
+__all__ = ["router", "EditProfile", "AddAddress", "profile_handler"]
