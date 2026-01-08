@@ -40,7 +40,7 @@ async def profile_handler(message: Message, session: AsyncSession, db_user: User
     await message.answer(text, reply_markup=keyboard)
 
 
-@router.callback_query(F.data == "profile_back_main")
+@router.callback_query(ProfileCallbackFactory.filter(F.action == "profile_back_main"))  # type: ignore[arg-type]
 async def back_to_profile_handler(
     query: CallbackQuery,
     session: AsyncSession,
