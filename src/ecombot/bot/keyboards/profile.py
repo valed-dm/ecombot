@@ -55,7 +55,7 @@ def get_address_management_keyboard(
                 text=f"{prefix} {addr.address_label}",
                 callback_data=ProfileCallbackFactory(
                     action="view_addr", address_id=addr.id
-                ),
+                ).pack(),
             )
         )
         action_row = (
@@ -64,7 +64,7 @@ def get_address_management_keyboard(
                     text=manager.get_message("keyboards", "set_as_default"),
                     callback_data=ProfileCallbackFactory(
                         action="set_default_addr", address_id=addr.id
-                    ),
+                    ).pack(),
                 )
             ]
             if not addr.is_default
@@ -74,7 +74,7 @@ def get_address_management_keyboard(
                 text=manager.get_message("keyboards", "delete_address"),
                 callback_data=ProfileCallbackFactory(
                     action="delete_addr", address_id=addr.id
-                ),
+                ).pack(),
             )
         ]
         builder.row(*action_row)
