@@ -8,10 +8,10 @@ from aiogram import Router
 
 from ecombot.bot.middlewares import MessageInteractionMiddleware
 
-from . import main_profile
-from .main_profile import profile_handler
 from . import address_management
+from . import main_profile
 from . import navigation
+from .main_profile import profile_handler
 from .states import AddAddress
 from .states import EditProfile
 
