@@ -30,6 +30,7 @@ class OrdersMessageManager(BaseMessageManager):
                 "Placed on: {date}\n"
                 "Total: ${total:.2f}\n\n"
             ),
+            "order_list_button": "📦 #{order_id} - {status} (${total:.2f})",
             "order_item_template": (
                 "  - <b>{name}</b>\n"
                 "    <code>{quantity} x ${price:.2f} = ${total:.2f}</code>\n"
@@ -71,6 +72,7 @@ class OrdersMessageManager(BaseMessageManager):
                 "Realizado el: {date}\n"
                 "Total: €{total:.2f}\n\n"
             ),
+            "order_list_button": "📦 #{order_id} - {status} (€{total:.2f})",
             "order_item_template": (
                 "  - <b>{name}</b>\n"
                 "    <code>{quantity} x €{price:.2f} = €{total:.2f}</code>\n"
@@ -110,6 +112,7 @@ class OrdersMessageManager(BaseMessageManager):
                 "Размещен: {date}\n"
                 "Итого: ₽{total:.2f}\n\n"
             ),
+            "order_list_button": "📦 #{order_id} - {status} (₽{total:.2f})",
             "order_item_template": (
                 "  - <b>{name}</b>\n"
                 "    <code>{quantity} x ₽{price:.2f} = ₽{total:.2f}</code>\n"

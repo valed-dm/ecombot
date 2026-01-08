@@ -5,9 +5,10 @@ from html import escape
 
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ecombot.bot.keyboards.orders import get_orders_list_keyboard
+from ecombot.bot.callback_data import OrderCallbackFactory
 from ecombot.core.manager import central_manager as manager
 from ecombot.db.models import User
 from ecombot.schemas.dto import OrderDTO
@@ -23,19 +24,6 @@ def format_order_list_text(user_orders: list[OrderDTO]) -> str:
         no_orders_msg = manager.get_message("orders", "no_orders_message")
         text_parts.append(no_orders_msg)
         return "".join(text_parts)
-
-    date_format = manager.get_message("orders", "date_format")
-    for order in user_orders:
-        status_text = manager.get_message("common", order.status.message_key)
-        order_item = manager.get_message(
-            "orders",
-            "order_list_item",
-            order_number=escape(order.order_number),
-            status=status_text,
-            date=order.created_at.strftime(date_format),
-            total=order.total_price,
-        )
-        text_parts.append(order_item)
 
     return "".join(text_parts)
 
@@ -123,7 +111,23 @@ async def send_orders_view(message: Message, session: AsyncSession, db_user: Use
         await message.answer(text)
         return
 
-    keyboard = get_orders_list_keyboard(user_orders)
+    builder = InlineKeyboardBuilder()
+
+    for order in user_orders:
+        status_text = manager.get_message("common", order.status.message_key)
+        button_text = manager.get_message(
+            "orders",
+            "order_list_button",
+            order_id=order.id,
+            status=status_text,
+            total=order.total_price,
+        )
+        builder.button(
+            text=button_text,
+            callback_data=OrderCallbackFactory(action="view_details", item_id=order.id),
+        )
+    builder.adjust(1)
+    keyboard = builder.as_markup()
 
     try:
         await message.edit_text(text, reply_markup=keyboard)
