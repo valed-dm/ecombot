@@ -59,4 +59,5 @@ def get_product_details_keyboard(product: ProductDTO) -> InlineKeyboardMarkup:
             action="view_category", item_id=product.category.id
         ),
     )
+    builder.adjust(1)
     return builder.as_markup()
