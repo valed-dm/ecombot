@@ -121,6 +121,11 @@ class OrderDTO(BaseDTO):
     created_at: datetime
 
     @property
+    def shipping_address(self) -> str:
+        """Alias for address."""
+        return self.address
+
+    @property
     def total_price(self) -> Decimal:
         """Calculates the total price of a confirmed order."""
         if not self.items:

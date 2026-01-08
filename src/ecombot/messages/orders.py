@@ -18,6 +18,10 @@ class OrdersMessageManager(BaseMessageManager):
             "order_items_header": "<b>Items:</b>\n",
             # Status and content messages
             "status_line": "Status: <i>{status}</i>\n\n",
+            "order_date_line": "<b>Placed on:</b> {date}\n",
+            "order_address_line": (
+                "<b>Shipping Address:</b>\n<code>{address}</code>\n\n"
+            ),
             "no_orders_message": "You have not placed any orders yet.",
             "order_status_updated": "Order status has been updated to: {status}",
             # Order display templates
@@ -53,6 +57,10 @@ class OrdersMessageManager(BaseMessageManager):
             "order_items_header": "<b>Artículos:</b>\n",
             # Status and content messages
             "status_line": "Estado: <i>{status}</i>\n\n",
+            "order_date_line": "<b>Realizado el:</b> {date}\n",
+            "order_address_line": (
+                "<b>Dirección de Envío:</b>\n<code>{address}</code>\n\n"
+            ),
             "no_orders_message": "Aún no has realizado ningún pedido.",
             "order_status_updated": (
                 "El estado del pedido se ha actualizado a: {status}"
@@ -92,6 +100,8 @@ class OrdersMessageManager(BaseMessageManager):
             "order_items_header": "<b>Товары:</b>\n",
             # Status and content messages
             "status_line": "Статус: <i>{status}</i>\n\n",
+            "order_date_line": "<b>Дата заказа:</b> {date}\n",
+            "order_address_line": "<b>Адрес доставки:</b>\n<code>{address}</code>\n\n",
             "no_orders_message": "Вы еще не сделали ни одного заказа.",
             "order_status_updated": "Статус заказа обновлен на: {status}",
             # Order display templates

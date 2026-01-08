@@ -48,8 +48,20 @@ def format_order_details_text(order_details: OrderDTO) -> str:
     items_header = manager.get_message("orders", "order_items_header")
 
     status_text = manager.get_message("common", order_details.status.message_key)
+    date_format = manager.get_message("orders", "date_format")
+
     text_parts = [
         header,
+        manager.get_message(
+            "orders",
+            "order_date_line",
+            date=order_details.created_at.strftime(date_format),
+        ),
+        manager.get_message(
+            "orders",
+            "order_address_line",
+            address=escape(order_details.shipping_address),
+        ),
         manager.get_message("orders", "status_line", status=status_text),
         items_header,
     ]
