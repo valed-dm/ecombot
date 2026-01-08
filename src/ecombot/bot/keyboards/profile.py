@@ -24,7 +24,7 @@ def get_profile_keyboard() -> InlineKeyboardMarkup:
         text=manager.get_message("keyboards", "manage_addresses"),
         callback_data=ProfileCallbackFactory(action="manage_addr"),
     )
-    builder.adjust(2, 1)
+    builder.adjust(1)
     return builder.as_markup()
 
 
