@@ -1,7 +1,7 @@
 """Helper functions and utilities for admin handlers."""
 
-import uuid
 from typing import Optional
+import uuid
 
 from aiogram import Bot
 from aiogram.exceptions import TelegramBadRequest

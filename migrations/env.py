@@ -1,5 +1,5 @@
-import os
 from logging.config import fileConfig
+import os
 
 from alembic import context
 from sqlalchemy import Connection

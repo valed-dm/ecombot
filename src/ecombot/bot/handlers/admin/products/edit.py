@@ -1,8 +1,8 @@
 """Edit product workflow handlers."""
 
 import decimal
-import uuid
 from decimal import Decimal
+import uuid
 
 from aiogram import Bot
 from aiogram import F
