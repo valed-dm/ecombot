@@ -50,7 +50,7 @@ line-length = 88
 target-version = "py312"
 
 [tool.ruff.lint]
-select = [
+ select = [
   "E", # pycodestyle errors
   "F", # pyflakes
   "W", # pycodestyle warnings
@@ -65,6 +65,7 @@ ignore = []
 [tool.ruff.lint.isort]
 force-single-line = true
 lines-after-imports = 2
+force-sort-within-sections = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
