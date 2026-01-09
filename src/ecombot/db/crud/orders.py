@@ -18,6 +18,12 @@ from ..models import OrderItem
 from ..models import Product
 
 
+class InsufficientStockError(Exception):
+    """Raised when trying to order more items than are in stock."""
+
+    pass
+
+
 async def create_order_with_items(
     session: AsyncSession,
     user_id: int,
@@ -52,7 +58,7 @@ async def create_order_with_items(
         if product is None:
             raise ValueError(f"Product with ID {product_id} not found during checkout.")
         if product.stock < quantity:
-            raise ValueError(
+            raise InsufficientStockError(
                 f"Not enough stock for '{product.name}'. "
                 f"You requested {quantity}, but only {product.stock} are available."
             )

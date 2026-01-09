@@ -16,12 +16,6 @@ class ProductNotFoundError(Exception):
     pass
 
 
-class InsufficientStockError(Exception):
-    """Raised when trying to add more items to a cart than are in stock."""
-
-    pass
-
-
 class CartItemNotFoundError(Exception):
     """Raised when a cart item is not found or does not belong to the user."""
 
