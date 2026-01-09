@@ -43,22 +43,22 @@
         "**/venv": true,
         "**/env": true,
         "**/.env": true,
-    
+
         // Python cache files
         "**/*.pyc": true,
         "**/*.pyo": true,
         "**/*.pyd": true,
         "**/*.so": true,
-    
+
         // IDE/Editor folders
         "**/.vscode": false,  // Keep .vscode folder visible
         "**/.idea": true,
-    
+
         // OS files
         "**/.DS_Store": true,
         "**/Thumbs.db": true
     },
-  
+
   // Also exclude from search results
   "search.exclude": {
         "**/__pycache__": true,
