@@ -53,9 +53,7 @@ def test_generate_order_details_text_standard(mock_manager):
     mock_manager.get_message.side_effect = lambda s, k, **kw: (
         "4096"
         if k == "max_message_length"
-        else "4000"
-        if k == "truncate_threshold"
-        else f"[{k}]"
+        else "4000" if k == "truncate_threshold" else f"[{k}]"
     )
 
     # Mock OrderDTO
@@ -155,8 +153,8 @@ async def test_send_order_details_view_success(mock_manager, mock_keyboards):
     order = MagicMock()
 
     # Ensure get_message returns valid ints for limits
-    mock_manager.get_message.side_effect = (
-        lambda s, k, **kw: "4096" if "length" in k or "threshold" in k else ""
+    mock_manager.get_message.side_effect = lambda s, k, **kw: (
+        "4096" if "length" in k or "threshold" in k else ""
     )
 
     await utils.send_order_details_view(message, order)
@@ -170,8 +168,8 @@ async def test_send_order_details_view_fallback(mock_manager, mock_keyboards):
     message = AsyncMock()
     message.edit_text.side_effect = Exception("Edit failed")
     order = MagicMock()
-    mock_manager.get_message.side_effect = (
-        lambda s, k, **kw: "4096" if "length" in k or "threshold" in k else ""
+    mock_manager.get_message.side_effect = lambda s, k, **kw: (
+        "4096" if "length" in k or "threshold" in k else ""
     )
 
     await utils.send_order_details_view(message, order)
