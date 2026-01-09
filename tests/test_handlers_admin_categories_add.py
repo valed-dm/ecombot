@@ -1,13 +1,14 @@
 """
 Unit tests for the 'Add Category' admin handler.
 
-This module verifies the Finite State Machine (FSM) flow for adding new product categories,
-ensuring that:
+This module verifies the Finite State Machine (FSM) flow for adding new product
+categories, ensuring that:
 - The conversation starts correctly and handles message editing failures.
 - Category names are validated for length and emptiness.
 - Descriptions are validated and can be skipped.
 - The catalog service is called with the correct parameters.
-- Exceptions like `CategoryAlreadyExistsError` are handled gracefully with user feedback.
+- Exceptions like `CategoryAlreadyExistsError` are handled gracefully with user
+  feedback.
 """
 
 from unittest.mock import AsyncMock
