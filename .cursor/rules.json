@@ -1,0 +1,21 @@
+{
+  "rules": [
+    {
+      "name": "ecombot-telegram-service",
+      "description": "Telegram Bot for e-commerce with admin panel, built with Aiogram 3, SQLAlchemy (async), and Poetry.",
+      "globs": ["*.py", "pyproject.toml", "alembic.ini"],
+      "commands": [
+        "Target Python 3.12 or newer",
+        "Enforce PEP 8 style guidelines",
+        "Require type hints throughout the codebase",
+        "Manage dependencies using Poetry",
+        "Use Aiogram 3.x for Telegram bot interactions (handlers, keyboards, middlewares)",
+        "Use SQLAlchemy with asyncpg for asynchronous database operations",
+        "Follow layered architecture: bot (presentation), services (business logic), db (data access), core (infrastructure)",
+        "Use Pydantic for data validation and configuration management",
+        "Implement centralized message management for i18n support",
+        "Ensure database sessions are managed via middleware or context managers"
+      ]
+    }
+  ]
+}
