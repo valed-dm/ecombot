@@ -3,7 +3,8 @@ Unit tests for the main checkout handler.
 
 This module verifies the logic for starting the checkout process, including:
 - Handling empty carts.
-- Determining whether to use the "fast path" (returning users) or "slow path" (new users).
+- Determining whether to use the "fast path" (returning users) or "slow path"
+  (new users).
 """
 
 from unittest.mock import AsyncMock
