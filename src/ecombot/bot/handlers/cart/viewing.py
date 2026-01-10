@@ -12,7 +12,6 @@ from ecombot.bot.keyboards.cart import get_cart_keyboard
 from ecombot.core.manager import central_manager as manager
 from ecombot.logging_setup import log
 from ecombot.services import cart_service
-from ecombot.services.cart_service import InsufficientStockError
 from ecombot.services.cart_service import ProductNotFoundError
 
 from .utils import format_cart_text
@@ -59,7 +58,7 @@ async def add_to_cart_handler(
         success_msg = manager.get_message("cart", "success_added_to_cart")
         await query.answer(success_msg, show_alert=False)
 
-    except (InsufficientStockError, ProductNotFoundError) as e:
+    except ProductNotFoundError as e:
         await query.answer(str(e), show_alert=True)
     except Exception as e:
         log.error("Error adding to cart: {}", e)
