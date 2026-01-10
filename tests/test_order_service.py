@@ -61,7 +61,8 @@ async def test_place_order_insufficient_stock(
         new_callable=AsyncMock,
         return_value=mock_cart,
     )
-    # Simulate CRUD raising the specific stock error (or ValueError which service catches)
+    # Simulate CRUD raising the specific stock error (or ValueError which service
+    # catches)
     mocker.patch(
         "ecombot.services.order_service.crud.create_order_with_items",
         new_callable=AsyncMock,

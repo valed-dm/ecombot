@@ -4,7 +4,8 @@ Unit tests for profile keyboards.
 This module verifies:
 - Generation of the main profile keyboard.
 - Generation of the address details keyboard.
-- Generation of the address management keyboard (handling default vs non-default addresses).
+- Generation of the address management keyboard (handling default vs non-default
+  addresses).
 """
 
 from unittest.mock import MagicMock
