@@ -46,7 +46,7 @@ class Settings(BaseSettings):
 
     DEBUG: Annotated[bool, Field(default=True)]
 
-    PGDATABASE: Annotated[str, Field(default="ecombot")]
+    PGDATABASE: Annotated[str, Field(default="bread")]
     PGUSER: Annotated[str, Field(default="postgres")]
     PGPASSWORD: Annotated[str, Field(default="postgres_default")]
     PGHOST: Annotated[str, Field(default="localhost")]
