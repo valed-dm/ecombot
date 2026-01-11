@@ -20,9 +20,9 @@ def determine_missing_info(
     """Determine what information is missing for checkout."""
     missing_info = []
     if not user.phone:
-        missing_info.append("phone number")
+        missing_info.append(manager.get_message("checkout", "missing_phone"))
     if not default_address:
-        missing_info.append("default address")
+        missing_info.append(manager.get_message("checkout", "missing_address"))
     return missing_info
 
 
@@ -44,10 +44,14 @@ def generate_fast_path_confirmation_text(
 
 def generate_slow_path_confirmation_text(user_data: dict, cart: CartDTO) -> str:
     """Generate confirmation text for slow path checkout."""
-    currency = manager.get_message("common", "currency_symbol")
     return (
-        "<b>Please confirm your details:</b>\n\n"
-        f"<b>Contact:</b> {escape(user_data['name'])}, {escape(user_data['phone'])}\n"
-        f"<b>Shipping to:</b>\n<code>{escape(user_data['address'])}</code>\n\n"
-        f"<b>Total Price: {currency}{cart.total_price:.2f}</b>"
+        manager.get_message(
+            "checkout",
+            "slow_path_confirm",
+            name=escape(user_data.get("name", "")),
+            phone=escape(user_data.get("phone", "")),
+            address=escape(user_data.get("address", "")),
+        )
+        + "\n\n"
+        + manager.get_message("checkout", "total_price_line", total=cart.total_price)
     )

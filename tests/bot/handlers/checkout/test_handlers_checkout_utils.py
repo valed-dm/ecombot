@@ -29,6 +29,15 @@ def mock_manager(mocker: MockerFixture):
             return "$"
         if key == "fast_path_confirm":
             return f"Confirm: {kwargs.get('address')}, {kwargs.get('phone')}"
+        if key == "slow_path_confirm":
+            return (
+                f"Confirm Slow: {kwargs.get('name')}, {kwargs.get('phone')}, "
+                f"{kwargs.get('address')}"
+            )
+        if key == "total_price_line":
+            return f"Total: ${kwargs.get('total'):.2f}"
+        if key.startswith("missing_"):
+            return f"[{key}]"
         return f"[{key}]"
 
     manager.get_message.side_effect = get_message_side_effect
@@ -61,7 +70,7 @@ def test_get_default_address_no_addresses():
     assert result is None
 
 
-def test_determine_missing_info_none():
+def test_determine_missing_info_none(mock_manager):
     """Test when all info is present."""
     user = MagicMock(spec=User, phone="123")
     address = MagicMock(spec=DeliveryAddress)
@@ -70,32 +79,32 @@ def test_determine_missing_info_none():
     assert result == []
 
 
-def test_determine_missing_info_phone():
+def test_determine_missing_info_phone(mock_manager):
     """Test when phone is missing."""
     user = MagicMock(spec=User, phone=None)
     address = MagicMock(spec=DeliveryAddress)
 
     result = utils.determine_missing_info(user, address)
-    assert "phone number" in result
-    assert "default address" not in result
+    assert "[missing_phone]" in result
+    assert "[missing_address]" not in result
 
 
-def test_determine_missing_info_address():
+def test_determine_missing_info_address(mock_manager):
     """Test when address is missing."""
     user = MagicMock(spec=User, phone="123")
 
     result = utils.determine_missing_info(user, None)
-    assert "default address" in result
-    assert "phone number" not in result
+    assert "[missing_address]" in result
+    assert "[missing_phone]" not in result
 
 
-def test_determine_missing_info_both():
+def test_determine_missing_info_both(mock_manager):
     """Test when both are missing."""
     user = MagicMock(spec=User, phone=None)
 
     result = utils.determine_missing_info(user, None)
-    assert "phone number" in result
-    assert "default address" in result
+    assert "[missing_phone]" in result
+    assert "[missing_address]" in result
 
 
 def test_generate_fast_path_confirmation_text(mock_manager):
@@ -119,8 +128,5 @@ def test_generate_slow_path_confirmation_text(mock_manager):
 
     text = utils.generate_slow_path_confirmation_text(user_data, cart)
 
-    assert "John Doe" in text
-    assert "555-9876" in text
-    assert "456 Elm St" in text
-    assert "50.00" in text
-    assert "$" in text
+    assert "Confirm Slow: John Doe, 555-9876, 456 Elm St" in text
+    assert "Total: $50.00" in text

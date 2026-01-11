@@ -23,6 +23,8 @@ class CheckoutMessageManager(BaseMessageManager):
             "error_empty_address": (
                 "Please enter a valid shipping address (cannot be empty)."
             ),
+            "missing_phone": "phone number",
+            "missing_address": "default address",
             # Success messages
             "success_order_placed": (
                 "✅ <b>Thank you! Your order #{order_number} has been placed!</b>"
@@ -44,6 +46,12 @@ class CheckoutMessageManager(BaseMessageManager):
             ),
             "slow_path_phone": "Thank you. Now, please share your phone number.",
             "slow_path_address": "Great. Finally, what is the full shipping address?",
+            "slow_path_confirm": (
+                "<b>Please confirm your details:</b>\n\n"
+                "<b>Contact:</b> {name}, {phone}\n"
+                "<b>Shipping to:</b>\n<code>{address}</code>"
+            ),
+            "total_price_line": "<b>Total Price: ${total:.2f}</b>",
             # Fast path messages
             "fast_path_confirm": (
                 "Ready to place your order?\n\n"
@@ -76,6 +84,8 @@ class CheckoutMessageManager(BaseMessageManager):
                 "Por favor, ingresa una dirección de envío válida "
                 "(no puede estar vacía)."
             ),
+            "missing_phone": "número de teléfono",
+            "missing_address": "dirección predeterminada",
             # Success messages
             "success_order_placed": (
                 "✅ <b>¡Gracias! ¡Tu pedido #{order_number} ha sido realizado!</b>"
@@ -104,6 +114,12 @@ class CheckoutMessageManager(BaseMessageManager):
             "slow_path_address": (
                 "Perfecto. Finalmente, ¿cuál es la dirección de envío completa?"
             ),
+            "slow_path_confirm": (
+                "<b>Por favor confirma tus detalles:</b>\n\n"
+                "<b>Contacto:</b> {name}, {phone}\n"
+                "<b>Envío a:</b>\n<code>{address}</code>"
+            ),
+            "total_price_line": "<b>Precio Total: €{total:.2f}</b>",
             # Fast path messages
             "fast_path_confirm": (
                 "¿Listo para realizar tu pedido?\n\n"
@@ -136,6 +152,8 @@ class CheckoutMessageManager(BaseMessageManager):
                 "Пожалуйста, введите действительный адрес доставки "
                 "(не может быть пустым)."
             ),
+            "missing_phone": "номер телефона",
+            "missing_address": "адрес по умолчанию",
             # Success messages
             "success_order_placed": (
                 "✅ <b>Спасибо! Ваш заказ #{order_number} оформлен!</b>"
@@ -162,6 +180,12 @@ class CheckoutMessageManager(BaseMessageManager):
                 "Спасибо. Теперь, пожалуйста, поделитесь номером телефона."
             ),
             "slow_path_address": ("Отлично. И наконец, какой полный адрес доставки?"),
+            "slow_path_confirm": (
+                "<b>Пожалуйста, подтвердите ваши данные:</b>\n\n"
+                "<b>Контакт:</b> {name}, {phone}\n"
+                "<b>Доставка по адресу:</b>\n<code>{address}</code>"
+            ),
+            "total_price_line": "<b>Итоговая цена: ₽{total:.2f}</b>",
             # Fast path messages
             "fast_path_confirm": (
                 "Готовы оформить заказ?\n\n"
