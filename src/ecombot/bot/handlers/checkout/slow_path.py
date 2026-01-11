@@ -101,34 +101,33 @@ async def slow_path_confirm_handler(
     user_data = await state.get_data()
 
     try:
-        async with session.begin():
-            # --- Save user info for next time ---
-            # 1. Update their profile (e.g., phone)
-            await user_service.update_profile_details(
-                session, db_user.id, {"phone": user_data["phone"]}
-            )
-            # 2. Add the new address and set it as default
-            new_address_model = await user_service.add_new_address(
-                session, db_user.id, "Default", user_data["address"]
-            )
-            await user_service.set_user_default_address(
-                session,
-                db_user.id,
-                new_address_model.id,
+        # --- Save user info for next time ---
+        # 1. Update their profile (e.g., phone)
+        await user_service.update_profile_details(
+            session, db_user.id, {"phone": user_data["phone"]}
+        )
+        # 2. Add the new address and set it as default
+        new_address_model = await user_service.add_new_address(
+            session, db_user.id, "Default", user_data["address"]
+        )
+        await user_service.set_user_default_address(
+            session,
+            db_user.id,
+            new_address_model.id,
+        )
+
+        refreshed_user_obj = await session.get(User, db_user.id)
+        if refreshed_user_obj is None:
+            raise OrderPlacementError(
+                "Could not retrieve your user profile after saving."
+                " Please contact support."
             )
 
-            refreshed_user_obj = await session.get(User, db_user.id)
-            if refreshed_user_obj is None:
-                raise OrderPlacementError(
-                    "Could not retrieve your user profile after saving."
-                    " Please contact support."
-                )
-
-            order = await order_service.place_order(
-                session=session,
-                db_user=refreshed_user_obj,
-                delivery_address=new_address_model,
-            )
+        order = await order_service.place_order(
+            session=session,
+            db_user=refreshed_user_obj,
+            delivery_address=new_address_model,
+        )
 
         success_msg = manager.get_message(
             "checkout", "success_order_placed_slow", order_number=order.order_number
@@ -149,7 +148,8 @@ async def slow_path_confirm_handler(
 
 
 @router.callback_query(
-    CheckoutFSM.confirm_slow_path, CheckoutCallbackFactory.filter(F.action == "cancel")  # type: ignore[arg-type]
+    CheckoutFSM.confirm_slow_path,
+    CheckoutCallbackFactory.filter(F.action == "cancel"),  # type: ignore[arg-type]
 )
 async def slow_path_cancel_handler(
     query: CallbackQuery, state: FSMContext, callback_message: Message
