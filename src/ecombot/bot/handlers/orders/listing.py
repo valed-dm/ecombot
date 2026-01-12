@@ -32,3 +32,17 @@ async def back_to_orders_handler(
     """Handle the 'Back to Order History' button click."""
     await send_orders_view(callback_message, session, db_user)
     await query.answer()
+
+
+@router.callback_query(OrderCallbackFactory.filter(F.action == "list"))  # type: ignore[arg-type]
+async def orders_pagination_handler(
+    query: CallbackQuery,
+    callback_data: OrderCallbackFactory,
+    session: AsyncSession,
+    db_user: User,
+    callback_message: Message,
+):
+    """Handle pagination for the order history list."""
+    page = callback_data.item_id or 1
+    await send_orders_view(callback_message, session, db_user, page=page)
+    await query.answer()

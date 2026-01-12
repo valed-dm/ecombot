@@ -102,8 +102,11 @@ def format_order_details_text(order_details: OrderDTO) -> str:
     return "".join(text_parts)
 
 
-async def send_orders_view(message: Message, session: AsyncSession, db_user: User):
+async def send_orders_view(
+    message: Message, session: AsyncSession, db_user: User, page: int = 1
+):
     """Generate and send the main order history view."""
+    items_per_page = 5
     user_orders = await order_service.list_user_orders(session, db_user.id)
     text = format_order_list_text(user_orders)
 
@@ -111,9 +114,14 @@ async def send_orders_view(message: Message, session: AsyncSession, db_user: Use
         await message.answer(text)
         return
 
-    builder = InlineKeyboardBuilder()
+    # Pagination logic
+    total_pages = (len(user_orders) + items_per_page - 1) // items_per_page
+    start_idx = (page - 1) * items_per_page
+    end_idx = start_idx + items_per_page
+    current_page_orders = user_orders[start_idx:end_idx]
 
-    for order in user_orders:
+    builder = InlineKeyboardBuilder()
+    for order in current_page_orders:
         status_text = manager.get_message("common", order.status.message_key)
         button_text = manager.get_message(
             "orders",
@@ -125,6 +133,23 @@ async def send_orders_view(message: Message, session: AsyncSession, db_user: Use
         builder.button(
             text=button_text,
             callback_data=OrderCallbackFactory(action="view_details", item_id=order.id),
+        )
+
+    # Navigation buttons
+    nav_buttons = []
+    if page > 1:
+        nav_buttons.append(
+            builder.button(
+                text="⬅️",
+                callback_data=OrderCallbackFactory(action="list", item_id=page - 1),
+            )
+        )
+    if page < total_pages:
+        nav_buttons.append(
+            builder.button(
+                text="➡️",
+                callback_data=OrderCallbackFactory(action="list", item_id=page + 1),
+            )
         )
     builder.adjust(1)
     keyboard = builder.as_markup()
