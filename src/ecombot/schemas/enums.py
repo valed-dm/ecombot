@@ -18,10 +18,13 @@ class OrderStatus(str, enum.Enum):
 
     PENDING = "pending"
     PROCESSING = "processing"
-    PAID = "paid"
+    PICKUP_READY = "pickup_ready"
     SHIPPED = "shipped"
+    PAID = "paid"
     COMPLETED = "completed"
     CANCELLED = "cancelled"
+    REFUNDED = "refunded"
+    FAILED = "failed"
 
     @property
     def message_key(self) -> str:
