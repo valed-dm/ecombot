@@ -195,8 +195,18 @@ async def change_order_status(
     if not order_to_update:
         raise OrderPlacementError("Order not found.")
 
-    if new_status == OrderStatus.CANCELLED:
-        if order_to_update.status in [OrderStatus.COMPLETED, OrderStatus.CANCELLED]:
+    if new_status in [
+        OrderStatus.CANCELLED,
+        OrderStatus.REFUNDED,
+        OrderStatus.FAILED,
+    ]:
+        # If moving TO a cancelled-like state, check if we are already in a
+        # terminal state
+        if order_to_update.status in [
+            OrderStatus.CANCELLED,
+            OrderStatus.REFUNDED,
+            OrderStatus.FAILED,
+        ]:
             raise OrderPlacementError(
                 f"Cannot cancel a {order_to_update.status.value} order."
             )
