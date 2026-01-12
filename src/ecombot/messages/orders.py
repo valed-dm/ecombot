@@ -32,8 +32,16 @@ class OrdersMessageManager(BaseMessageManager):
             # Notifications
             "notification_processing": (
                 "✅ <b>Order Status Updated: {status}</b>\n\n"
-                "Your order <code>{order_number}</code> is now being processed. "
+                "Your order <code>{order_number}</code> has been accepted. "
                 "We'll notify you again once it has shipped."
+            ),
+            "notification_pickup_ready": (
+                "📦 <b>Order Status Updated: {status}</b>\n\n"
+                "Your order <code>{order_number}</code> is ready for pickup!"
+            ),
+            "notification_paid": (
+                "💰 <b>Order Status Updated: {status}</b>\n\n"
+                "Payment received for order <code>{order_number}</code>."
             ),
             "notification_shipped": (
                 "🚚 <b>Order Status Updated: {status}</b>\n\n"
@@ -48,6 +56,14 @@ class OrdersMessageManager(BaseMessageManager):
                 "❌ <b>Order Status Updated: {status}</b>\n\n"
                 "Your order <code>{order_number}</code> has been successfully "
                 "cancelled."
+            ),
+            "notification_refunded": (
+                "💸 <b>Order Status Updated: {status}</b>\n\n"
+                "Your order <code>{order_number}</code> has been refunded."
+            ),
+            "notification_failed": (
+                "⚠️ <b>Order Status Updated: {status}</b>\n\n"
+                "Processing for order <code>{order_number}</code> has failed."
             ),
         }
 
@@ -77,8 +93,16 @@ class OrdersMessageManager(BaseMessageManager):
             # Notifications
             "notification_processing": (
                 "✅ <b>Estado del Pedido Actualizado: {status}</b>\n\n"
-                "Tu pedido <code>{order_number}</code> está siendo procesado. "
+                "Tu pedido <code>{order_number}</code> ha sido aceptado. "
                 "Te notificaremos nuevamente cuando haya sido enviado."
+            ),
+            "notification_pickup_ready": (
+                "📦 <b>Estado del Pedido Actualizado: {status}</b>\n\n"
+                "¡Tu pedido <code>{order_number}</code> está listo para recoger!"
+            ),
+            "notification_paid": (
+                "💰 <b>Estado del Pedido Actualizado: {status}</b>\n\n"
+                "Pago recibido para el pedido <code>{order_number}</code>."
             ),
             "notification_shipped": (
                 "🚚 <b>Estado del Pedido Actualizado: {status}</b>\n\n"
@@ -92,6 +116,14 @@ class OrdersMessageManager(BaseMessageManager):
             "notification_cancelled": (
                 "❌ <b>Estado del Pedido Actualizado: {status}</b>\n\n"
                 "Tu pedido <code>{order_number}</code> ha sido cancelado exitosamente."
+            ),
+            "notification_refunded": (
+                "💸 <b>Estado del Pedido Actualizado: {status}</b>\n\n"
+                "Tu pedido <code>{order_number}</code> ha sido reembolsado."
+            ),
+            "notification_failed": (
+                "⚠️ <b>Estado del Pedido Actualizado: {status}</b>\n\n"
+                "El procesamiento del pedido <code>{order_number}</code> ha fallado."
             ),
         }
 
@@ -117,7 +149,15 @@ class OrdersMessageManager(BaseMessageManager):
             "date_format": "%d.%m.%Y %H:%M",
             "notification_processing": (
                 "✅ <b>Статус заказа обновлен: {status}</b>\n\n"
-                "Ваш заказ <code>{order_number}</code> обрабатывается."
+                "Ваш заказ <code>{order_number}</code> принят."
+            ),
+            "notification_pickup_ready": (
+                "📦 <b>Статус заказа обновлен: {status}</b>\n\n"
+                "Ваш заказ <code>{order_number}</code> готов к выдаче!"
+            ),
+            "notification_paid": (
+                "💰 <b>Статус заказа обновлен: {status}</b>\n\n"
+                "Оплата получена для заказа <code>{order_number}</code>."
             ),
             "notification_shipped": (
                 "🚚 <b>Статус заказа обновлен: {status}</b>\n\n"
@@ -130,6 +170,14 @@ class OrdersMessageManager(BaseMessageManager):
             "notification_cancelled": (
                 "❌ <b>Статус заказа обновлен: {status}</b>\n\n"
                 "Ваш заказ <code>{order_number}</code> отменен."
+            ),
+            "notification_refunded": (
+                "💸 <b>Статус заказа обновлен: {status}</b>\n\n"
+                "Ваш заказ <code>{order_number}</code> был возвращен."
+            ),
+            "notification_failed": (
+                "⚠️ <b>Статус заказа обновлен: {status}</b>\n\n"
+                "Ошибка обработки заказа <code>{order_number}</code>."
             ),
         }
 
