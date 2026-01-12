@@ -15,6 +15,7 @@ from ecombot.core.manager import central_manager as manager
 from ecombot.db.models import DeliveryAddress
 from ecombot.db.models import User
 from ecombot.logging_setup import logger
+from ecombot.schemas.dto import OrderDTO
 from ecombot.services import order_service
 from ecombot.services.order_service import OrderPlacementError
 
@@ -26,7 +27,8 @@ router.callback_query.middleware(MessageInteractionMiddleware())
 
 
 @router.callback_query(
-    CheckoutFSM.confirm_fast_path, CheckoutCallbackFactory.filter(F.action == "confirm")  # type: ignore[arg-type]
+    CheckoutFSM.confirm_fast_path,
+    CheckoutCallbackFactory.filter(F.action == "confirm"),  # type: ignore[arg-type]
 )
 async def fast_checkout_confirm_handler(
     query: CallbackQuery,
@@ -58,8 +60,13 @@ async def fast_checkout_confirm_handler(
         order = await order_service.place_order(
             session=session, db_user=db_user, delivery_address=default_address_obj
         )
+
+        order_dto = OrderDTO.model_validate(order)
+
         success_msg = manager.get_message(
-            "checkout", "success_order_placed", order_number=order.order_number
+            "checkout",
+            "success_order_placed",
+            order_number=order_dto.display_order_number,
         )
         await callback_message.edit_text(success_msg)
     except OrderPlacementError as e:
@@ -76,7 +83,8 @@ async def fast_checkout_confirm_handler(
 
 
 @router.callback_query(
-    CheckoutFSM.confirm_fast_path, CheckoutCallbackFactory.filter(F.action == "cancel")  # type: ignore[arg-type]
+    CheckoutFSM.confirm_fast_path,
+    CheckoutCallbackFactory.filter(F.action == "cancel"),  # type: ignore[arg-type]
 )
 async def fast_checkout_cancel_handler(
     query: CallbackQuery, state: FSMContext, callback_message: Message

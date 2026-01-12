@@ -118,7 +118,7 @@ async def send_orders_view(message: Message, session: AsyncSession, db_user: Use
         button_text = manager.get_message(
             "orders",
             "order_list_button",
-            order_id=order.id,
+            order_id=order.display_order_number,
             status=status_text,
             total=order.total_price,
         )

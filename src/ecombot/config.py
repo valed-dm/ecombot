@@ -13,6 +13,7 @@ Attributes:
 
 from pathlib import Path
 from typing import Annotated
+from zoneinfo import ZoneInfo
 
 from pydantic import Field
 from pydantic_settings import BaseSettings
@@ -56,6 +57,10 @@ class Settings(BaseSettings):
     LOG_FILE: Annotated[Path, Field(default=OUTPUT_DIR / "ecombot.log")]
 
     CURRENCY: Annotated[str, Field(default="₽")]
+    TIMEZONE: Annotated[str, Field(default="Europe/Moscow")]
+
+    def get_zoneinfo(self) -> ZoneInfo:
+        return ZoneInfo(self.TIMEZONE)
 
 
 settings = Settings()

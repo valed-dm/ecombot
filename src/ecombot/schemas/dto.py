@@ -134,6 +134,17 @@ class OrderDTO(BaseDTO):
             (item.price * item.quantity for item in self.items), start=Decimal("0.00")
         )
 
+    @property
+    def display_order_number(self) -> str:
+        """
+        Returns the truncated order number (JJJ-HHMMSS) for display to the user.
+        Removes the random suffix.
+        """
+        parts = self.order_number.split("-")
+        if len(parts) >= 2:
+            return f"{parts[0]}-{parts[1]}"
+        return self.order_number
+
 
 # --- Admin DTOs (can be extended) ---
 

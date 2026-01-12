@@ -18,6 +18,7 @@ from ecombot.bot.middlewares import MessageInteractionMiddleware
 from ecombot.core.manager import central_manager as manager
 from ecombot.db.models import User
 from ecombot.logging_setup import logger
+from ecombot.schemas.dto import OrderDTO
 from ecombot.services import cart_service
 from ecombot.services import order_service
 from ecombot.services import user_service
@@ -129,8 +130,12 @@ async def slow_path_confirm_handler(
             delivery_address=new_address_model,
         )
 
+        order_dto = OrderDTO.model_validate(order)
+
         success_msg = manager.get_message(
-            "checkout", "success_order_placed_slow", order_number=order.order_number
+            "checkout",
+            "success_order_placed_slow",
+            order_number=order_dto.display_order_number,
         )
         await callback_message.edit_text(success_msg)
 
