@@ -127,6 +127,7 @@ async def send_orders_view(
     builder = InlineKeyboardBuilder()
     for order in current_page_orders:
         status_text = manager.get_message("common", order.status.message_key)
+        status_text = f"{status_text: <12}"
         button_text = manager.get_message(
             "orders",
             "order_list_button",
