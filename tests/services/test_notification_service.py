@@ -22,52 +22,68 @@ def mock_order():
     order = MagicMock(spec=OrderDTO)
     order.user = user
     order.order_number = "ORD-123"
+    order.display_order_number = "ORD-123"
     return order
 
 
-async def test_send_order_status_update_processing(mock_bot, mock_order):
+@pytest.fixture
+def mock_manager(mocker):
+    """Mocks the central manager used in notification service."""
+    # We patch the manager instance imported in the service module
+    manager = mocker.patch("ecombot.services.notification_service.manager")
+    # Configure get_message to return a predictable string
+    manager.get_message.side_effect = lambda section, key, **kwargs: f"[{key}]"
+    return manager
+
+
+async def test_send_order_status_update_processing(mock_bot, mock_order, mock_manager):
     """Test notification for PROCESSING status."""
     mock_order.status = OrderStatus.PROCESSING
+    # Mock the status name lookup
+    mock_manager.get_message.side_effect = lambda s, k, **kw: f"[{k}]"
 
     await notification_service.send_order_status_update(mock_bot, mock_order)
 
     mock_bot.send_message.assert_awaited_once()
     args, kwargs = mock_bot.send_message.call_args
     assert kwargs["chat_id"] == 12345
-    assert "Processing" in kwargs["text"]
+    assert "[notification_processing]" in kwargs["text"]
 
 
-async def test_send_order_status_update_shipped(mock_bot, mock_order):
+async def test_send_order_status_update_shipped(mock_bot, mock_order, mock_manager):
     """Test notification for SHIPPED status."""
     mock_order.status = OrderStatus.SHIPPED
+    mock_manager.get_message.side_effect = lambda s, k, **kw: f"[{k}]"
 
     await notification_service.send_order_status_update(mock_bot, mock_order)
 
     mock_bot.send_message.assert_awaited_once()
     args, kwargs = mock_bot.send_message.call_args
-    assert "shipped" in kwargs["text"]
+    assert "[notification_shipped]" in kwargs["text"]
 
 
-async def test_send_order_status_update_completed(mock_bot, mock_order):
+async def test_send_order_status_update_completed(mock_bot, mock_order, mock_manager):
     """Test notification for COMPLETED status."""
     mock_order.status = OrderStatus.COMPLETED
+    mock_manager.get_message.side_effect = lambda s, k, **kw: f"[{k}]"
 
     await notification_service.send_order_status_update(mock_bot, mock_order)
 
     mock_bot.send_message.assert_awaited_once()
     args, kwargs = mock_bot.send_message.call_args
-    assert "Complete" in kwargs["text"]
+    assert "[notification_completed]" in kwargs["text"]
 
 
-async def test_send_order_status_update_cancelled(mock_bot, mock_order):
+async def test_send_order_status_update_cancelled(mock_bot, mock_order, mock_manager):
     """Test notification for CANCELLED status."""
     mock_order.status = OrderStatus.CANCELLED
+    mock_manager.get_message.side_effect = lambda s, k, **kw: f"[{k}]"
 
     await notification_service.send_order_status_update(mock_bot, mock_order)
 
     mock_bot.send_message.assert_awaited_once()
     args, kwargs = mock_bot.send_message.call_args
-    assert "cancelled" in kwargs["text"]
+    assert "[notification_cancelled]" in kwargs["text"]
 
 
 async def test_send_order_status_update_no_notification(mock_bot, mock_order):
@@ -79,9 +95,11 @@ async def test_send_order_status_update_no_notification(mock_bot, mock_order):
     mock_bot.send_message.assert_not_awaited()
 
 
-async def test_send_order_status_update_bad_request(mock_bot, mock_order):
+async def test_send_order_status_update_bad_request(mock_bot, mock_order, mock_manager):
     """Test handling of TelegramBadRequest (e.g. user blocked bot)."""
     mock_order.status = OrderStatus.PROCESSING
+    mock_manager.get_message.side_effect = lambda s, k, **kw: f"[{k}]"
+
     mock_bot.send_message.side_effect = TelegramBadRequest(
         method="sendMessage", message="Blocked"
     )
@@ -91,9 +109,13 @@ async def test_send_order_status_update_bad_request(mock_bot, mock_order):
     mock_bot.send_message.assert_awaited_once()
 
 
-async def test_send_order_status_update_generic_error(mock_bot, mock_order):
+async def test_send_order_status_update_generic_error(
+    mock_bot, mock_order, mock_manager
+):
     """Test handling of generic exceptions."""
     mock_order.status = OrderStatus.PROCESSING
+    mock_manager.get_message.side_effect = lambda s, k, **kw: f"[{k}]"
+
     mock_bot.send_message.side_effect = Exception("Network error")
 
     # Should not raise exception
