@@ -9,6 +9,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.callback_data import OrderCallbackFactory
+from ecombot.config import settings
 from ecombot.core.manager import central_manager as manager
 from ecombot.db.models import User
 from ecombot.schemas.dto import OrderDTO
@@ -38,12 +39,15 @@ def format_order_details_text(order_details: OrderDTO) -> str:
     status_text = manager.get_message("common", order_details.status.message_key)
     date_format = manager.get_message("orders", "date_format")
 
+    # Convert UTC timestamp to configured timezone for display
+    local_date = order_details.created_at.astimezone(settings.get_zoneinfo())
+
     text_parts = [
         header,
         manager.get_message(
             "orders",
             "order_date_line",
-            date=order_details.created_at.strftime(date_format),
+            date=local_date.strftime(date_format),
         ),
         manager.get_message(
             "orders",
