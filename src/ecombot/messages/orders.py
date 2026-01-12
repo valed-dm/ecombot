@@ -1,137 +1,136 @@
-"""Orders messages for the EcomBot application."""
+"""Order-related messages for the EcomBot application."""
 
 from ..core.messages import BaseMessageManager
 from ..core.messages import Language
 
 
 class OrdersMessageManager(BaseMessageManager):
-    """Message manager for orders-related messages."""
+    """Message manager for order-related messages."""
 
     def _load_messages(self) -> None:
-        """Load orders messages for all supported languages."""
+        """Load order messages for all supported languages."""
 
         # English messages
         en_messages = {
-            # Header messages
-            "order_history_header": "<b>Your Order History</b>\n\n",
-            "order_details_header": "<b>Details for Order #{order_id}</b>\n",
-            "order_items_header": "<b>Items:</b>\n",
-            # Status and content messages
-            "status_line": "Status: <i>{status}</i>\n\n",
-            "order_date_line": "<b>Placed on:</b> {date}\n",
-            "order_address_line": (
-                "<b>Shipping Address:</b>\n<code>{address}</code>\n\n"
-            ),
-            "no_orders_message": "You have not placed any orders yet.",
-            "order_status_updated": "Order status has been updated to: {status}",
-            # Order display templates
-            "order_list_item": (
-                "📦 <b>Order #{order_number}</b> - <i>{status}</i>\n"
-                "Placed on: {date}\n"
-                "Total: ${total:.2f}\n\n"
-            ),
-            "order_list_button": "📦 #{order_id} - {status} (${total:.2f})",
+            "order_history_header": "<b>📦 Your Order History:</b>\n\n",
+            "no_orders_message": "You haven't placed any orders yet.",
+            "order_list_button": "{order_id} - {status} ({total:.2f})",
+            "order_details_header": "<b>🧾 Order Details #{order_id}</b>\n\n",
+            "order_date_line": "<b>Date:</b> {date}\n",
+            "order_address_line": "<b>Shipping Address:</b>\n<code>{address}</code>\n",
+            "status_line": "<b>Status:</b> {status}\n",
+            "order_items_header": "\n<b>Items:</b>\n",
             "order_item_template": (
-                "  - <b>{name}</b>\n"
-                "    <code>{quantity} x ${price:.2f} = ${total:.2f}</code>\n"
+                "• {name} x{quantity} — {price:.2f} (Total: {total:.2f})\n"
             ),
-            "deleted_product_suffix": " ⚠️ <i>(Deleted)</i>",
-            "active_items_total": "<b>Active Items: ${total:.2f}</b>\n",
-            "deleted_items_total": "<s>Deleted Items: ${total:.2f}</s>\n",
-            "total_paid": "<b>Total Paid: ${total:.2f}</b>",
+            "deleted_product_suffix": " (No longer available)",
             "total_label": "<b>Total: ${total:.2f}</b>",
-            # Actions
-            "view_details": "📋 View Details",
-            "back_to_orders": "⬅️ Back to Orders",
-            # Error messages
-            "error_order_not_found": "Could not find this order.",
-            "error_loading_orders": "Error loading your orders. Please try again.",
-            # Date format (technical, not user-facing)
+            "active_items_total": "<b>Active Items Total: ${total:.2f}</b>\n",
+            "deleted_items_total": "<b>Unavailable Items Total: ${total:.2f}</b>\n",
+            "total_paid": "<b>Total Paid: ${total:.2f}</b>",
             "date_format": "%Y-%m-%d %H:%M",
+            # Notifications
+            "notification_processing": (
+                "✅ <b>Order Status Updated: {status}</b>\n\n"
+                "Your order <code>{order_number}</code> is now being processed. "
+                "We'll notify you again once it has shipped."
+            ),
+            "notification_shipped": (
+                "🚚 <b>Order Status Updated: {status}</b>\n\n"
+                "Your order <code>{order_number}</code> has been shipped. "
+                "You can track its progress in your /orders menu."
+            ),
+            "notification_completed": (
+                "🎉 <b>Your Order is Complete!</b>\n\n"
+                "Thank you for your purchase! Order: <code>{order_number}</code>"
+            ),
+            "notification_cancelled": (
+                "❌ <b>Order Status Updated: {status}</b>\n\n"
+                "Your order <code>{order_number}</code> has been successfully "
+                "cancelled."
+            ),
         }
 
         # Spanish messages
         es_messages = {
-            # Header messages
-            "order_history_header": "<b>Tu Historial de Pedidos</b>\n\n",
-            "order_details_header": "<b>Detalles del Pedido #{order_id}</b>\n",
-            "order_items_header": "<b>Artículos:</b>\n",
-            # Status and content messages
-            "status_line": "Estado: <i>{status}</i>\n\n",
-            "order_date_line": "<b>Realizado el:</b> {date}\n",
-            "order_address_line": (
-                "<b>Dirección de Envío:</b>\n<code>{address}</code>\n\n"
-            ),
+            "order_history_header": "<b>📦 Tu Historial de Pedidos:</b>\n\n",
             "no_orders_message": "Aún no has realizado ningún pedido.",
-            "order_status_updated": (
-                "El estado del pedido se ha actualizado a: {status}"
+            "order_list_button": "{order_id} - {status} ({total:.2f})",
+            "order_details_header": "<b>🧾 Detalles del Pedido #{order_id}</b>\n\n",
+            "order_date_line": "<b>Fecha:</b> {date}\n",
+            "order_address_line": (
+                "<b>Dirección de Envío:</b>\n<code>{address}</code>\n"
             ),
-            # Order display templates
-            "order_list_item": (
-                "📦 <b>Pedido #{order_number}</b> - <i>{status}</i>\n"
-                "Realizado el: {date}\n"
-                "Total: €{total:.2f}\n\n"
-            ),
-            "order_list_button": "📦 #{order_id} - {status} (€{total:.2f})",
+            "status_line": "<b>Estado:</b> {status}\n",
+            "order_items_header": "\n<b>Artículos:</b>\n",
             "order_item_template": (
-                "  - <b>{name}</b>\n"
-                "    <code>{quantity} x €{price:.2f} = €{total:.2f}</code>\n"
+                "• {name} x{quantity} — {price:.2f} (Total: {total:.2f})\n"
             ),
-            "deleted_product_suffix": " ⚠️ <i>(Eliminado)</i>",
-            "active_items_total": "<b>Artículos Activos: €{total:.2f}</b>\n",
-            "deleted_items_total": "<s>Artículos Eliminados: €{total:.2f}</s>\n",
-            "total_paid": "<b>Total Pagado: €{total:.2f}</b>",
+            "deleted_product_suffix": " (Ya no disponible)",
             "total_label": "<b>Total: €{total:.2f}</b>",
-            # Actions
-            "view_details": "📋 Ver Detalles",
-            "back_to_orders": "⬅️ Volver a Pedidos",
-            # Error messages
-            "error_order_not_found": "No se pudo encontrar este pedido.",
-            "error_loading_orders": (
-                "Error al cargar tus pedidos. Por favor, inténtalo de nuevo."
+            "active_items_total": "<b>Total Artículos Activos: €{total:.2f}</b>\n",
+            "deleted_items_total": (
+                "<b>Total Artículos No Disponibles: €{total:.2f}</b>\n"
             ),
-            # Date format (technical, not user-facing)
-            "date_format": "%Y-%m-%d %H:%M",
+            "total_paid": "<b>Total Pagado: €{total:.2f}</b>",
+            "date_format": "%d/%m/%Y %H:%M",
+            # Notifications
+            "notification_processing": (
+                "✅ <b>Estado del Pedido Actualizado: {status}</b>\n\n"
+                "Tu pedido <code>{order_number}</code> está siendo procesado. "
+                "Te notificaremos nuevamente cuando haya sido enviado."
+            ),
+            "notification_shipped": (
+                "🚚 <b>Estado del Pedido Actualizado: {status}</b>\n\n"
+                "Tu pedido <code>{order_number}</code> ha sido enviado. "
+                "Puedes seguir su progreso en tu menú /orders."
+            ),
+            "notification_completed": (
+                "🎉 <b>¡Tu Pedido está Completo!</b>\n\n"
+                "¡Gracias por tu compra! Pedido: <code>{order_number}</code>"
+            ),
+            "notification_cancelled": (
+                "❌ <b>Estado del Pedido Actualizado: {status}</b>\n\n"
+                "Tu pedido <code>{order_number}</code> ha sido cancelado exitosamente."
+            ),
         }
 
-        # Russian messages
+        # Russian messages (Assuming similar structure, placeholders for brevity if
+        # needed, but providing full for completeness)
         ru_messages = {
-            # Header messages
-            "order_history_header": "<b>История Ваших Заказов</b>\n\n",
-            "order_details_header": "<b>Детали Заказа #{order_id}</b>\n",
-            "order_items_header": "<b>Товары:</b>\n",
-            # Status and content messages
-            "status_line": "Статус: <i>{status}</i>\n\n",
-            "order_date_line": "<b>Дата заказа:</b> {date}\n",
-            "order_address_line": "<b>Адрес доставки:</b>\n<code>{address}</code>\n\n",
-            "no_orders_message": "Вы еще не сделали ни одного заказа.",
-            "order_status_updated": "Статус заказа обновлен на: {status}",
-            # Order display templates
-            "order_list_item": (
-                "📦 <b>Заказ #{order_number}</b> - <i>{status}</i>\n"
-                "Размещен: {date}\n"
-                "Итого: ₽{total:.2f}\n\n"
-            ),
-            "order_list_button": "📦 #{order_id} - {status} (₽{total:.2f})",
+            "order_history_header": "<b>📦 История ваших заказов:</b>\n\n",
+            "no_orders_message": "Вы еще не делали заказов.",
+            "order_list_button": "{order_id} - {status} ({total:.2f})",
+            "order_details_header": "<b>🧾 Детали заказа #{order_id}</b>\n\n",
+            "order_date_line": "<b>Дата:</b> {date}\n",
+            "order_address_line": "<b>Адрес доставки:</b>\n<code>{address}</code>\n",
+            "status_line": "<b>Статус:</b> {status}\n",
+            "order_items_header": "\n<b>Товары:</b>\n",
             "order_item_template": (
-                "  - <b>{name}</b>\n"
-                "    <code>{quantity} x ₽{price:.2f} = ₽{total:.2f}</code>\n"
+                "• {name} x{quantity} — {price:.2f} (Итого: {total:.2f})\n"
             ),
-            "deleted_product_suffix": " ⚠️ <i>(Удален)</i>",
-            "active_items_total": "<b>Активные Товары: ₽{total:.2f}</b>\n",
-            "deleted_items_total": "<s>Удаленные Товары: ₽{total:.2f}</s>\n",
-            "total_paid": "<b>Итого Оплачено: ₽{total:.2f}</b>",
-            "total_label": "<b>Итого: ₽{total:.2f}</b>",
-            # Actions
-            "view_details": "📋 Посмотреть Детали",
-            "back_to_orders": "⬅️ Назад к Заказам",
-            # Error messages
-            "error_order_not_found": "Не удалось найти этот заказ.",
-            "error_loading_orders": (
-                "Ошибка загрузки ваших заказов. Пожалуйста, попробуйте снова."
+            "deleted_product_suffix": " (Больше не доступен)",
+            "total_label": "<b>Итого: {total:.2f}₽</b>",
+            "active_items_total": "<b>Итого (доступные): {total:.2f}₽</b>\n",
+            "deleted_items_total": "<b>Итого (недоступные): {total:.2f}₽</b>\n",
+            "total_paid": "<b>Всего оплачено: {total:.2f}₽</b>",
+            "date_format": "%d.%m.%Y %H:%M",
+            "notification_processing": (
+                "✅ <b>Статус заказа обновлен: {status}</b>\n\n"
+                "Ваш заказ <code>{order_number}</code> обрабатывается."
             ),
-            # Date format (technical, not user-facing)
-            "date_format": "%Y-%m-%d %H:%M",
+            "notification_shipped": (
+                "🚚 <b>Статус заказа обновлен: {status}</b>\n\n"
+                "Ваш заказ <code>{order_number}</code> отправлен."
+            ),
+            "notification_completed": (
+                "🎉 <b>Заказ выполнен!</b>\n\n"
+                "Спасибо за покупку! Заказ: <code>{order_number}</code>"
+            ),
+            "notification_cancelled": (
+                "❌ <b>Статус заказа обновлен: {status}</b>\n\n"
+                "Ваш заказ <code>{order_number}</code> отменен."
+            ),
         }
 
         self._messages = {

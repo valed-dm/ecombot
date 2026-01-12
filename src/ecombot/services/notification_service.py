@@ -7,6 +7,7 @@ from html import escape
 from aiogram import Bot
 from aiogram.exceptions import TelegramBadRequest
 
+from ecombot.core.manager import central_manager as manager
 from ecombot.logging_setup import log
 from ecombot.schemas.dto import OrderDTO
 from ecombot.schemas.enums import OrderStatus
@@ -19,32 +20,35 @@ async def send_order_status_update(bot: Bot, order: OrderDTO):
     """
     user_telegram_id = order.user.telegram_id
     text = ""
-    safe_order_number = escape(order.order_number)
+    safe_order_number = escape(order.display_order_number)
 
-    status_name = order.status.name.capitalize()
+    # Get localized status name using common messages
+    status_name = manager.get_message("common", order.status.message_key)
 
     if order.status == OrderStatus.PROCESSING:
-        text = (
-            f"✅ **Order Status Updated: {status_name}**\n\n"
-            f"Your order <code>{safe_order_number}</code> is now being processed. "
-            f"We'll notify you again once it has shipped."
+        text = manager.get_message(
+            "orders",
+            "notification_processing",
+            status=status_name,
+            order_number=safe_order_number,
         )
     elif order.status == OrderStatus.SHIPPED:
-        text = (
-            f"🚚 **Order Status Updated: {status_name}**\n\n"
-            f"Your order <code>{safe_order_number}</code> has been shipped. "
-            f"You can track its progress in your /orders menu."
+        text = manager.get_message(
+            "orders",
+            "notification_shipped",
+            status=status_name,
+            order_number=safe_order_number,
         )
     elif order.status == OrderStatus.COMPLETED:
-        text = (
-            f"🎉 **Your Order is Complete!**\n\n"
-            f"Thank you for your purchase! Order: <code>{safe_order_number}</code>"
+        text = manager.get_message(
+            "orders", "notification_completed", order_number=safe_order_number
         )
     elif order.status == OrderStatus.CANCELLED:
-        text = (
-            f"❌ **Order Status Updated: {status_name}**\n\n"
-            f"Your order <code>{safe_order_number}</code>"
-            f" has been successfully cancelled."
+        text = manager.get_message(
+            "orders",
+            "notification_cancelled",
+            status=status_name,
+            order_number=safe_order_number,
         )
 
     if text:

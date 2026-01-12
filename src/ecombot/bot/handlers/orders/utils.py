@@ -31,7 +31,7 @@ def format_order_list_text(user_orders: list[OrderDTO]) -> str:
 def format_order_details_text(order_details: OrderDTO) -> str:
     """Format the order details text."""
     header = manager.get_message(
-        "orders", "order_details_header", order_id=order_details.id
+        "orders", "order_details_header", order_id=order_details.display_order_number
     )
     items_header = manager.get_message("orders", "order_items_header")
 
