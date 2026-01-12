@@ -15,7 +15,7 @@ from aiogram.exceptions import TelegramBadRequest
 import pytest
 from pytest_mock import MockerFixture
 
-from ecombot.bot.handlers.orders import utils
+import ecombot.bot.handlers.orders.utils as utils
 from ecombot.schemas.dto import OrderDTO
 from ecombot.schemas.enums import OrderStatus
 
