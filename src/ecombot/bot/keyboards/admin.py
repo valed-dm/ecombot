@@ -83,8 +83,16 @@ def get_admin_order_filters_keyboard() -> InlineKeyboardMarkup:
         callback_data=f"admin_order_filter:{OrderStatus.PROCESSING.value}",
     )
     builder.button(
+        text=manager.get_message("keyboards", "pickup_ready"),
+        callback_data=f"admin_order_filter:{OrderStatus.PICKUP_READY.value}",
+    )
+    builder.button(
         text=manager.get_message("keyboards", "shipped"),
         callback_data=f"admin_order_filter:{OrderStatus.SHIPPED.value}",
+    )
+    builder.button(
+        text=manager.get_message("keyboards", "mark_as_paid"),
+        callback_data=f"admin_order_filter:{OrderStatus.PAID.value}",
     )
     builder.button(
         text=manager.get_message("keyboards", "completed"),
@@ -95,10 +103,18 @@ def get_admin_order_filters_keyboard() -> InlineKeyboardMarkup:
         callback_data=f"admin_order_filter:{OrderStatus.CANCELLED.value}",
     )
     builder.button(
+        text=manager.get_message("keyboards", "refunded"),
+        callback_data=f"admin_order_filter:{OrderStatus.REFUNDED.value}",
+    )
+    builder.button(
+        text=manager.get_message("keyboards", "failed"),
+        callback_data=f"admin_order_filter:{OrderStatus.FAILED.value}",
+    )
+    builder.button(
         text=manager.get_message("keyboards", "back_to_admin_panel"),
         callback_data=AdminCallbackFactory(action="back_main"),
     )
-    builder.adjust(2, 2, 1, 1)
+    builder.adjust(2, 2, 2)
     return builder.as_markup()
 
 
@@ -114,16 +130,39 @@ def get_admin_order_details_keyboard(order: OrderDTO) -> InlineKeyboardMarkup:
         )
     elif order.status == OrderStatus.PROCESSING:
         builder.button(
+            text=manager.get_message("keyboards", "mark_as_pickup_ready"),
+            callback_data=f"admin_order_status:{order.id}:{OrderStatus.PICKUP_READY.value}",
+        )
+        builder.button(
             text=manager.get_message("keyboards", "mark_as_shipped"),
             callback_data=f"admin_order_status:{order.id}:{OrderStatus.SHIPPED.value}",
         )
-    elif order.status == OrderStatus.SHIPPED:
+    elif order.status in [OrderStatus.SHIPPED, OrderStatus.PICKUP_READY]:
+        builder.button(
+            text=manager.get_message("keyboards", "mark_as_paid"),
+            callback_data=f"admin_order_status:{order.id}:{OrderStatus.PAID.value}",
+        )
+    if order.status == OrderStatus.PICKUP_READY:
+        builder.button(
+            text=manager.get_message("keyboards", "mark_as_shipped"),
+            callback_data=f"admin_order_status:{order.id}:{OrderStatus.SHIPPED.value}",
+        )
+    elif order.status in [
+        OrderStatus.PAID,
+        OrderStatus.PICKUP_READY,
+        OrderStatus.SHIPPED,
+    ]:
         builder.button(
             text=manager.get_message("keyboards", "mark_as_completed"),
             callback_data=f"admin_order_status:{order.id}:{OrderStatus.COMPLETED.value}",
         )
 
-    if order.status not in [OrderStatus.COMPLETED, OrderStatus.CANCELLED]:
+    if order.status not in [
+        OrderStatus.COMPLETED,
+        OrderStatus.CANCELLED,
+        OrderStatus.REFUNDED,
+        OrderStatus.FAILED,
+    ]:
         builder.button(
             text=manager.get_message("keyboards", "cancel_order"),
             callback_data=f"admin_order_status:{order.id}:{OrderStatus.CANCELLED.value}",
