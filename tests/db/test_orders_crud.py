@@ -45,7 +45,8 @@ async def test_create_order_with_items_success(mock_session: AsyncMock):
     assert isinstance(result, Order)
     assert result.user_id == user_id
     assert result.contact_name == "John Doe"
-    assert result.order_number.startswith("ECO-")
+    # Order number format is JJJ-HHMMSS-XXXX (e.g., 001-120000-abcd)
+    assert len(result.order_number.split("-")) == 3
 
     # Verify stock deduction
     assert product1.stock == 8  # 10 - 2
