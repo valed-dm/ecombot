@@ -20,10 +20,14 @@ class CommonMessageManager(BaseMessageManager):
             "currency_symbol": "$",
             # Order Statuses
             "status_pending": "Pending",
-            "status_processing": "Processing",
+            "status_processing": "Accepted",
             "status_shipped": "Shipped",
+            "status_pickup_ready": "Ready for Pickup",
+            "status_paid": "Paid",
             "status_completed": "Completed",
             "status_cancelled": "Cancelled",
+            "status_refunded": "Refunded",
+            "status_failed": "Failed",
             # Common actions
             "restore_item_template": "🔄 {name}",
             "restore_product_template": "🔄 {name} - ${price:.2f}",
@@ -57,10 +61,14 @@ class CommonMessageManager(BaseMessageManager):
             "currency_symbol": "€",
             # Order Statuses
             "status_pending": "Pendiente",
-            "status_processing": "Procesando",
+            "status_processing": "Aceptado",
             "status_shipped": "Enviado",
+            "status_pickup_ready": "Listo para recoger",
+            "status_paid": "Pagado",
             "status_completed": "Completado",
             "status_cancelled": "Cancelado",
+            "status_refunded": "Reembolsado",
+            "status_failed": "Fallido",
             # Common actions
             "restore_item_template": "🔄 {name}",
             "restore_product_template": "🔄 {name} - €{price:.2f}",
@@ -94,10 +102,14 @@ class CommonMessageManager(BaseMessageManager):
             "currency_symbol": "₽",
             # Order Statuses
             "status_pending": "Ожидает",
-            "status_processing": "В обработке",
+            "status_processing": "Принят",
             "status_shipped": "Отправлен",
+            "status_pickup_ready": "Готов к выдаче",
+            "status_paid": "Оплачен",
             "status_completed": "Выполнен",
             "status_cancelled": "Отменен",
+            "status_refunded": "Возвращен",
+            "status_failed": "Ошибка",
             # Common actions
             "restore_item_template": "🔄 {name}",
             "restore_product_template": "🔄 {name} - ₽{price:.2f}",
