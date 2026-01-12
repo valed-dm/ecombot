@@ -32,6 +32,20 @@ async def send_order_status_update(bot: Bot, order: OrderDTO):
             status=status_name,
             order_number=safe_order_number,
         )
+    elif order.status == OrderStatus.PICKUP_READY:
+        text = manager.get_message(
+            "orders",
+            "notification_pickup_ready",
+            status=status_name,
+            order_number=safe_order_number,
+        )
+    elif order.status == OrderStatus.PAID:
+        text = manager.get_message(
+            "orders",
+            "notification_paid",
+            status=status_name,
+            order_number=safe_order_number,
+        )
     elif order.status == OrderStatus.SHIPPED:
         text = manager.get_message(
             "orders",
@@ -47,6 +61,20 @@ async def send_order_status_update(bot: Bot, order: OrderDTO):
         text = manager.get_message(
             "orders",
             "notification_cancelled",
+            status=status_name,
+            order_number=safe_order_number,
+        )
+    elif order.status == OrderStatus.REFUNDED:
+        text = manager.get_message(
+            "orders",
+            "notification_refunded",
+            status=status_name,
+            order_number=safe_order_number,
+        )
+    elif order.status == OrderStatus.FAILED:
+        text = manager.get_message(
+            "orders",
+            "notification_failed",
             status=status_name,
             order_number=safe_order_number,
         )
