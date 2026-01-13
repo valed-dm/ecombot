@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", case_sensitive=False)
 
     APP_NAME: Annotated[str, Field(default="ECOMBot")]
+    APP_NAME_RU: Annotated[str, Field(default="")]
+    APP_NAME_EN: Annotated[str, Field(default="")]
+    APP_TG_USER: Annotated[str, Field(default="")]
     BOT_TOKEN: Annotated[str, Field(default="")]
     ADMIN_IDS: Annotated[list[int], Field(default=[1644421909])]
 
@@ -58,6 +61,7 @@ class Settings(BaseSettings):
 
     CURRENCY: Annotated[str, Field(default="₽")]
     TIMEZONE: Annotated[str, Field(default="Europe/Moscow")]
+    WEBHOOK_URL: Annotated[str, Field(default="")]
 
     def get_zoneinfo(self) -> ZoneInfo:
         return ZoneInfo(self.TIMEZONE)
