@@ -52,6 +52,14 @@ def mock_order_service(mocker: MockerFixture):
 
 
 @pytest.fixture
+def mock_notification_service(mocker: MockerFixture):
+    """Mocks the notification service."""
+    mock = mocker.patch("ecombot.bot.handlers.checkout.slow_path.notification_service")
+    mock.notify_admins_new_order = AsyncMock()
+    return mock
+
+
+@pytest.fixture
 def mock_utils(mocker: MockerFixture):
     """Mocks utility functions."""
     return mocker.patch(
@@ -162,7 +170,12 @@ async def test_get_address_handler_invalid(mock_manager, mock_session):
 
 
 async def test_slow_path_confirm_handler_success(
-    mock_manager, mock_user_service, mock_order_service, mock_session
+    mock_manager,
+    mock_user_service,
+    mock_order_service,
+    mock_notification_service,
+    mock_session,
+    mocker,
 ):
     """Test confirming order in slow path."""
     query = AsyncMock()
@@ -188,6 +201,14 @@ async def test_slow_path_confirm_handler_success(
     mock_order.order_number = "ORD-1"
     mock_order_service.place_order.return_value = mock_order
 
+    # Mock DTO validation
+    mock_dto = MagicMock()
+    mock_dto.display_order_number = "ORD-1"
+    mocker.patch(
+        "ecombot.bot.handlers.checkout.slow_path.OrderDTO.model_validate",
+        return_value=mock_dto,
+    )
+
     await slow_path.slow_path_confirm_handler(
         query, mock_session, db_user, state, callback_message
     )
@@ -197,6 +218,7 @@ async def test_slow_path_confirm_handler_success(
     mock_user_service.add_new_address.assert_awaited_once()
     mock_user_service.set_user_default_address.assert_awaited_once()
     mock_order_service.place_order.assert_awaited_once()
+    mock_notification_service.notify_admins_new_order.assert_awaited_once()
 
     assert callback_message.edit_text.await_count == 2  # Progress -> Success
     state.clear.assert_awaited_once()

@@ -65,6 +65,13 @@ class OrdersMessageManager(BaseMessageManager):
                 "⚠️ <b>Order Status Updated: {status}</b>\n\n"
                 "Processing for order <code>{order_number}</code> has failed."
             ),
+            "admin_new_order": (
+                "🆕 <b>New Order Received!</b>\n\n"
+                "<b>Order:</b> <code>{order_number}</code>\n"
+                "<b>Customer:</b> {contact_name} (ID: {user_id})\n"
+                "<b>Items:</b> {items_count}\n"
+                "<b>Total:</b> ${total:.2f}"
+            ),
         }
 
         # Spanish messages
@@ -125,6 +132,13 @@ class OrdersMessageManager(BaseMessageManager):
                 "⚠️ <b>Estado del Pedido Actualizado: {status}</b>\n\n"
                 "El procesamiento del pedido <code>{order_number}</code> ha fallado."
             ),
+            "admin_new_order": (
+                "🆕 <b>¡Nuevo Pedido Recibido!</b>\n\n"
+                "<b>Pedido:</b> <code>{order_number}</code>\n"
+                "<b>Cliente:</b> {contact_name} (ID: {user_id})\n"
+                "<b>Artículos:</b> {items_count}\n"
+                "<b>Total:</b> €{total:.2f}"
+            ),
         }
 
         # Russian messages (Assuming similar structure, placeholders for brevity if
@@ -178,6 +192,13 @@ class OrdersMessageManager(BaseMessageManager):
             "notification_failed": (
                 "⚠️ <b>Статус заказа обновлен: {status}</b>\n\n"
                 "Ошибка обработки заказа <code>{order_number}</code>."
+            ),
+            "admin_new_order": (
+                "🆕 <b>Новый заказ получен!</b>\n\n"
+                "<b>Заказ:</b> <code>{order_number}</code>\n"
+                "<b>Клиент:</b> {contact_name} (ID: {user_id})\n"
+                "<b>Товаров:</b> {items_count}\n"
+                "<b>Итого:</b> {total:.2f}₽"
             ),
         }
 

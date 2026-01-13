@@ -16,6 +16,7 @@ from ecombot.db.models import DeliveryAddress
 from ecombot.db.models import User
 from ecombot.logging_setup import logger
 from ecombot.schemas.dto import OrderDTO
+from ecombot.services import notification_service
 from ecombot.services import order_service
 from ecombot.services.order_service import OrderPlacementError
 
@@ -62,6 +63,9 @@ async def fast_checkout_confirm_handler(
         )
 
         order_dto = OrderDTO.model_validate(order)
+
+        # Notify admins
+        await notification_service.notify_admins_new_order(query.bot, order_dto)
 
         success_msg = manager.get_message(
             "checkout",

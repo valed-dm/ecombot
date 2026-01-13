@@ -36,8 +36,16 @@ def mock_order_service(mocker: MockerFixture):
     return mock
 
 
+@pytest.fixture
+def mock_notification_service(mocker: MockerFixture):
+    """Mocks the notification service."""
+    mock = mocker.patch("ecombot.bot.handlers.checkout.fast_path.notification_service")
+    mock.notify_admins_new_order = AsyncMock()
+    return mock
+
+
 async def test_fast_checkout_confirm_handler_success(
-    mock_manager, mock_order_service, mock_session
+    mock_manager, mock_order_service, mock_notification_service, mock_session, mocker
 ):
     """Test successful order placement via fast path."""
     query = AsyncMock()
@@ -58,6 +66,14 @@ async def test_fast_checkout_confirm_handler_success(
     mock_order.order_number = "ORD-123"
     mock_order_service.place_order = AsyncMock(return_value=mock_order)
 
+    # Mock DTO validation to return a mock DTO
+    mock_dto = MagicMock()
+    mock_dto.display_order_number = "ORD-123"
+    mocker.patch(
+        "ecombot.bot.handlers.checkout.fast_path.OrderDTO.model_validate",
+        return_value=mock_dto,
+    )
+
     await fast_path.fast_checkout_confirm_handler(
         query, mock_session, db_user, state, callback_message
     )
@@ -68,6 +84,8 @@ async def test_fast_checkout_confirm_handler_success(
     mock_order_service.place_order.assert_awaited_once_with(
         session=mock_session, db_user=db_user, delivery_address=mock_address
     )
+    # Verify admin notification
+    mock_notification_service.notify_admins_new_order.assert_awaited_once()
     # Verify cleanup
     state.clear.assert_awaited_once()
     query.answer.assert_awaited_once()

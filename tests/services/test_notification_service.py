@@ -1,3 +1,4 @@
+from decimal import Decimal
 from unittest.mock import AsyncMock
 from unittest.mock import MagicMock
 
@@ -23,6 +24,9 @@ def mock_order():
     order.user = user
     order.order_number = "ORD-123"
     order.display_order_number = "ORD-123"
+    order.contact_name = "John Doe"
+    order.total_price = Decimal("100.00")
+    order.items = [MagicMock(), MagicMock()]
     return order
 
 
@@ -34,6 +38,13 @@ def mock_manager(mocker):
     # Configure get_message to return a predictable string
     manager.get_message.side_effect = lambda section, key, **kwargs: f"[{key}]"
     return manager
+
+
+@pytest.fixture
+def mock_settings(mocker):
+    """Mocks the settings."""
+    settings = mocker.patch("ecombot.services.notification_service.settings")
+    return settings
 
 
 async def test_send_order_status_update_processing(mock_bot, mock_order, mock_manager):
@@ -107,6 +118,21 @@ async def test_send_order_status_update_bad_request(mock_bot, mock_order, mock_m
     # Should not raise exception
     await notification_service.send_order_status_update(mock_bot, mock_order)
     mock_bot.send_message.assert_awaited_once()
+
+
+async def test_notify_admins_new_order(
+    mock_bot, mock_order, mock_manager, mock_settings
+):
+    """Test notifying admins about a new order."""
+    mock_settings.ADMIN_IDS = [111, 222]
+    mock_manager.get_message.side_effect = lambda s, k, **kw: f"[{k}]"
+
+    await notification_service.notify_admins_new_order(mock_bot, mock_order)
+
+    assert mock_bot.send_message.await_count == 2
+    # Check calls
+    mock_bot.send_message.assert_any_await(chat_id=111, text="[admin_new_order]")
+    mock_bot.send_message.assert_any_await(chat_id=222, text="[admin_new_order]")
 
 
 async def test_send_order_status_update_generic_error(
