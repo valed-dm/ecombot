@@ -42,7 +42,7 @@
         "**/.venv": true,
         "**/venv": true,
         "**/env": true,
-        "**/.env": true,
+        "**/.env": false,
 
         // Python cache files
         "**/*.pyc": true,
