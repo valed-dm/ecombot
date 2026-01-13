@@ -1,8 +1,12 @@
 import asyncio
+from contextlib import asynccontextmanager
 
 from aiogram import Bot
 from aiogram import Dispatcher
 from aiogram.client.default import DefaultBotProperties
+from aiogram.types import Update
+from fastapi import FastAPI
+from fastapi import Request
 
 from ecombot.bot.handlers import admin
 from ecombot.bot.handlers import admin_orders
@@ -18,33 +22,57 @@ from ecombot.db.database import AsyncSessionLocal
 from ecombot.logging_setup import log
 
 
+# Initialize Bot and Dispatcher globally for Vercel/FastAPI
+bot = Bot(
+    token=settings.BOT_TOKEN,
+    default=DefaultBotProperties(parse_mode="HTML"),
+)
+dp = Dispatcher()
+
+# Register middlewares
+dp.update.middleware(DbSessionMiddleware(session_pool=AsyncSessionLocal))
+dp.update.middleware(UserMiddleware())
+
+# Include routers
+dp.include_router(admin.router)
+dp.include_router(admin_orders.router)
+dp.include_router(catalog.router)
+dp.include_router(cart.router)
+dp.include_router(checkout.router)
+dp.include_router(profile.router)
+dp.include_router(orders.router)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan events for FastAPI (startup/shutdown)."""
+    if settings.WEBHOOK_URL:
+        webhook_url = f"{settings.WEBHOOK_URL}/webhook"
+        log.info(f"Setting webhook to {webhook_url}")
+        await bot.set_webhook(webhook_url)
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
+
+
+@app.post("/webhook")
+async def webhook_handler(request: Request):
+    """Handle incoming Telegram updates via webhook."""
+    try:
+        data = await request.json()
+        update = Update.model_validate(data, context={"bot": bot})
+        await dp.feed_update(bot, update)
+        return {"status": "ok"}
+    except Exception as e:
+        log.error(f"Webhook error: {e}")
+        return {"status": "error"}
+
+
 async def main() -> None:
-    """
-    Initializes and starts the Telegram bot.
-
-    This function sets up the Bot and Dispatcher instances, registers
-    essential middlewares for database session management and user context,
-    includes all the necessary routers for handling different bot features,
-    and starts the polling process.
-    """
-    bot = Bot(
-        token=settings.BOT_TOKEN,
-        default=DefaultBotProperties(parse_mode="HTML"),
-    )
-    dp = Dispatcher()
-
-    dp.update.middleware(DbSessionMiddleware(session_pool=AsyncSessionLocal))
-    dp.update.middleware(UserMiddleware())
-
-    dp.include_router(admin.router)
-    dp.include_router(admin_orders.router)
-    dp.include_router(catalog.router)
-    dp.include_router(cart.router)
-    dp.include_router(checkout.router)
-    dp.include_router(profile.router)
-    dp.include_router(orders.router)
-
+    """Run polling for local development."""
     log.info("Bot is starting...")
+    await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
 
