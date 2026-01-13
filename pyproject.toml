@@ -14,10 +14,10 @@ pydantic = "==2.11.10"
 pydantic-settings = "==2.12.0"
 aiogram = "^3.4.1"
 asyncpg = "^0.30.0"
-anyio = "^4.12.0"
-poetry-core = "^2.2.1"
 alembic = "==1.17.2"
 sqlalchemy = { version = "^2.0.45", extras = ["asyncio", "mypy"] }
+fastapi = "^0.110.0"
+uvicorn = "^0.27.1"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "==4.5.1"
