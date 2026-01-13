@@ -1,9 +1,9 @@
 [tool.poetry]
-name = "ecombot"
+name = "botaikhleb"
 version = "0.1.0"
-description = "Telegram Bot for e-commerce with admin panel"
+description = "Not just bread, but a lifestyle. Botai!"
 authors = ["dmvaled <dmvaled@gmail.com>"]
-license = "MIT"
+license = "Proprietary"
 readme = "README.md"
 packages = [{ include = "ecombot", from = "src" }]
 
