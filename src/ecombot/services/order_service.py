@@ -38,7 +38,7 @@ async def place_order_from_cart(
     user_id: int,
     contact_name: str,
     phone: str,
-    address: str,
+    address: str | None,
     delivery_method: str,
 ) -> OrderDTO:
     """
@@ -56,7 +56,7 @@ async def place_order_from_cart(
         user_id: The ID of the user placing the order.
         contact_name: The customer's name for the order.
         phone: The customer's phone number.
-        address: The shipping address.
+        address: The shipping address (or None for pickup).
         delivery_method: The chosen delivery method.
 
     Returns:
@@ -105,7 +105,7 @@ async def place_order_from_cart(
 async def place_order(
     session: AsyncSession,
     db_user: User,
-    delivery_address: DeliveryAddress,
+    delivery_address: Optional[DeliveryAddress],
     delivery_method: str = "Standard",
 ) -> OrderDTO:
     """
@@ -117,11 +117,14 @@ async def place_order(
 
     contact_name = db_user.first_name
     phone = db_user.phone
-    address = delivery_address.full_address
+    address = delivery_address.full_address if delivery_address else None
 
-    if not phone or not address:
+    if not phone:
+        raise OrderPlacementError("User profile is incomplete. Phone is required.")
+
+    if not address and delivery_method != "pickup":
         raise OrderPlacementError(
-            "User profile is incomplete. Phone and address are required."
+            "User profile is incomplete. Address is required for delivery."
         )
 
     try:

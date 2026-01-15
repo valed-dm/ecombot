@@ -140,8 +140,10 @@ class Order(Base, TimestampMixin):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     contact_name: Mapped[str] = mapped_column(String(255))
     phone: Mapped[str] = mapped_column(String(50))
-    address: Mapped[str] = mapped_column(Text)
-    delivery_method: Mapped[str] = mapped_column(String(100))
+    address: Mapped[str | None] = mapped_column(Text)
+    delivery_method: Mapped[str] = mapped_column(
+        String(100), default="pickup", server_default="'pickup'"
+    )
     status: Mapped[OrderStatus] = mapped_column(
         SAEnum(
             OrderStatus,

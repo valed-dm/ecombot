@@ -115,7 +115,7 @@ class OrderDTO(BaseDTO):
     status: OrderStatus
     contact_name: str
     phone: str
-    address: str
+    address: str | None = None
     delivery_method: str
     items: list[OrderItemDTO]
     created_at: datetime
@@ -123,7 +123,7 @@ class OrderDTO(BaseDTO):
     @property
     def shipping_address(self) -> str:
         """Alias for address."""
-        return self.address
+        return self.address or "Pickup"
 
     @property
     def total_price(self) -> Decimal:

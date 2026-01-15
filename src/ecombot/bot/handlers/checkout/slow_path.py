@@ -15,10 +15,10 @@ from ecombot.bot.callback_data import CheckoutCallbackFactory
 from ecombot.bot.keyboards.checkout import get_checkout_confirmation_keyboard
 from ecombot.bot.keyboards.checkout import get_request_contact_keyboard
 from ecombot.bot.middlewares import MessageInteractionMiddleware
+from ecombot.config import settings
 from ecombot.core.manager import central_manager as manager
 from ecombot.db.models import User
 from ecombot.logging_setup import logger
-from ecombot.schemas.dto import OrderDTO
 from ecombot.services import cart_service
 from ecombot.services import notification_service
 from ecombot.services import order_service
@@ -46,8 +46,13 @@ async def get_name_handler(message: Message, state: FSMContext):
 
 
 @router.message(CheckoutFSM.getting_phone, or_f(F.text, F.contact))
-async def get_phone_handler(message: Message, state: FSMContext):
-    """Slow Path Step 2: Receives phone, asks for address."""
+async def get_phone_handler(
+    message: Message,
+    session: AsyncSession,
+    state: FSMContext,
+    db_user: User,
+):
+    """Slow Path Step 2: Receives phone, asks for address OR confirms if pickup."""
     phone = message.contact.phone_number if message.contact else message.text
 
     if not phone or not phone.strip():
@@ -56,12 +61,27 @@ async def get_phone_handler(message: Message, state: FSMContext):
         return
 
     await state.update_data(phone=phone.strip())
-    address_msg = manager.get_message("checkout", "slow_path_address")
-    await message.answer(
-        address_msg,
-        reply_markup=ReplyKeyboardRemove(),
-    )
-    await state.set_state(CheckoutFSM.getting_address)
+
+    if settings.DELIVERY:
+        address_msg = manager.get_message("checkout", "slow_path_address")
+        await message.answer(
+            address_msg,
+            reply_markup=ReplyKeyboardRemove(),
+        )
+        await state.set_state(CheckoutFSM.getting_address)
+    else:
+        # Skip address step for pickup
+        # Remove the 'Request Contact' keyboard
+        await message.answer("...", reply_markup=ReplyKeyboardRemove())
+
+        user_data = await state.get_data()
+        cart_data = await cart_service.get_user_cart(session, db_user.telegram_id)
+        confirmation_text = generate_slow_path_confirmation_text(user_data, cart_data)
+        await message.answer(
+            confirmation_text,
+            reply_markup=get_checkout_confirmation_keyboard(),
+        )
+        await state.set_state(CheckoutFSM.confirm_slow_path)
 
 
 @router.message(CheckoutFSM.getting_address, F.text)
@@ -108,15 +128,21 @@ async def slow_path_confirm_handler(
         await user_service.update_profile_details(
             session, db_user.id, {"phone": user_data["phone"]}
         )
-        # 2. Add the new address and set it as default
-        new_address_model = await user_service.add_new_address(
-            session, db_user.id, "Default", user_data["address"]
-        )
-        await user_service.set_user_default_address(
-            session,
-            db_user.id,
-            new_address_model.id,
-        )
+
+        new_address_model = None
+        delivery_method = "pickup"
+
+        if settings.DELIVERY:
+            delivery_method = "Standard"
+            # 2. Add the new address and set it as default
+            new_address_model = await user_service.add_new_address(
+                session, db_user.id, "Default", user_data["address"]
+            )
+            await user_service.set_user_default_address(
+                session,
+                db_user.id,
+                new_address_model.id,
+            )
 
         refreshed_user_obj = await session.get(User, db_user.id)
         if refreshed_user_obj is None:
@@ -125,13 +151,12 @@ async def slow_path_confirm_handler(
                 " Please contact support."
             )
 
-        order = await order_service.place_order(
+        order_dto = await order_service.place_order(
             session=session,
             db_user=refreshed_user_obj,
             delivery_address=new_address_model,
+            delivery_method=delivery_method,
         )
-
-        order_dto = OrderDTO.model_validate(order)
 
         # Notify admins
         await notification_service.notify_admins_new_order(query.bot, order_dto)
