@@ -16,15 +16,17 @@ from typing import Annotated
 from zoneinfo import ZoneInfo
 
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic import field_validator
 from pydantic_settings import SettingsConfigDict
+
+from .config_db import DatabaseSettings
 
 
 BASE_DIR: Path = Path(__file__).resolve().parents[2]
 OUTPUT_DIR: Path = BASE_DIR / "output"
 
 
-class Settings(BaseSettings):
+class Settings(DatabaseSettings):
     """
     Defines and validates all environment variables for the application.
 
@@ -50,18 +52,17 @@ class Settings(BaseSettings):
 
     DEBUG: Annotated[bool, Field(default=True)]
 
-    PGDATABASE: Annotated[str, Field(default="bread")]
-    PGUSER: Annotated[str, Field(default="postgres")]
-    PGPASSWORD: Annotated[str, Field(default="postgres_default")]
-    PGHOST: Annotated[str, Field(default="localhost")]
-    PGPORT: Annotated[int, Field(default=5432)]
-
     LOG_LEVEL: Annotated[str, Field(default="DEBUG")]
     LOG_FILE: Annotated[Path, Field(default=OUTPUT_DIR / "ecombot.log")]
 
     CURRENCY: Annotated[str, Field(default="₽")]
     TIMEZONE: Annotated[str, Field(default="Europe/Moscow")]
     WEBHOOK_URL: Annotated[str, Field(default="")]
+
+    @field_validator("WEBHOOK_URL")
+    @classmethod
+    def strip_webhook_url(cls, v: str) -> str:
+        return v.strip() if v else v
 
     def get_zoneinfo(self) -> ZoneInfo:
         return ZoneInfo(self.TIMEZONE)
