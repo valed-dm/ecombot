@@ -20,7 +20,7 @@ class DatabaseSettings(BaseSettings):
     PGPASSWORD: Annotated[str, Field(default="postgres_default")]
     PGPORT: Annotated[int, Field(default=5432)]
     PGDATABASE: Annotated[str, Field(default="bab")]
-    PGTEST_DB_NAME: Annotated[str, Field(default="bread_test")]
+    PGTEST_DB_NAME: Annotated[str, Field(default="bab_test")]
 
     @property
     def database_url(self) -> str:

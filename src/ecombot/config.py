@@ -35,7 +35,9 @@ class Settings(DatabaseSettings):
     casting and validation.
     """
 
-    model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", case_sensitive=False)
+    model_config = SettingsConfigDict(
+        env_file=BASE_DIR / ".env", case_sensitive=False, extra="ignore"
+    )
 
     APP_NAME: Annotated[str, Field(default="ECOMBot")]
     APP_NAME_RU: Annotated[str, Field(default="")]
