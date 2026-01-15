@@ -30,6 +30,8 @@ services:
       redis:
         condition: service_started
     environment:
+      - DEBUG=False
+      - LOG_LEVEL=INFO
       - PGUSER=${PGUSER}
       - PGPASSWORD=${PGPASSWORD}
       - PGHOST=db

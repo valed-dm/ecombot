@@ -50,9 +50,9 @@ class Settings(DatabaseSettings):
     def PRODUCT_IMAGE_DIR(self) -> Path:
         return self.STATIC_DIR / "products"
 
-    DEBUG: Annotated[bool, Field(default=True)]
+    DEBUG: Annotated[bool, Field(default=False)]
 
-    LOG_LEVEL: Annotated[str, Field(default="DEBUG")]
+    LOG_LEVEL: Annotated[str, Field(default="INFO")]
     LOG_FILE: Annotated[Path, Field(default=OUTPUT_DIR / "ecombot.log")]
 
     CURRENCY: Annotated[str, Field(default="₽")]
