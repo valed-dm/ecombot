@@ -57,6 +57,7 @@ class Settings(DatabaseSettings):
     LOG_LEVEL: Annotated[str, Field(default="INFO")]
     LOG_FILE: Annotated[Path, Field(default=OUTPUT_DIR / "ecombot.log")]
 
+    DELIVERY: Annotated[bool, Field(default=False)]
     CURRENCY: Annotated[str, Field(default="₽")]
     TIMEZONE: Annotated[str, Field(default="Europe/Moscow")]
     WEBHOOK_URL: Annotated[str, Field(default="")]

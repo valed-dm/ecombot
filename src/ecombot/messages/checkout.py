@@ -51,6 +51,17 @@ class CheckoutMessageManager(BaseMessageManager):
                 "<b>Contact:</b> {name}, {phone}\n"
                 "<b>Shipping to:</b>\n<code>{address}</code>"
             ),
+            "pickup_slow_confirm": (
+                "<b>Please confirm your details:</b>\n\n"
+                "<b>Contact:</b> {name}, {phone}\n"
+                "<b>Method:</b> Pickup"
+            ),
+            "pickup_fast_confirm": (
+                "Ready to place your order?\n\n"
+                "<b>Method:</b> Pickup\n"
+                "<b>Phone:</b> {phone}\n\n"
+                "Confirm to proceed."
+            ),
             "total_price_line": "<b>Total Price: ${total:.2f}</b>",
             # Fast path messages
             "fast_path_confirm": (
@@ -119,6 +130,17 @@ class CheckoutMessageManager(BaseMessageManager):
                 "<b>Contacto:</b> {name}, {phone}\n"
                 "<b>Envío a:</b>\n<code>{address}</code>"
             ),
+            "pickup_slow_confirm": (
+                "<b>Por favor confirma tus detalles:</b>\n\n"
+                "<b>Contacto:</b> {name}, {phone}\n"
+                "<b>Método:</b> Recogida"
+            ),
+            "pickup_fast_confirm": (
+                "¿Listo para realizar tu pedido?\n\n"
+                "<b>Método:</b> Recogida\n"
+                "<b>Teléfono:</b> {phone}\n\n"
+                "Confirma para proceder."
+            ),
             "total_price_line": "<b>Precio Total: €{total:.2f}</b>",
             # Fast path messages
             "fast_path_confirm": (
@@ -184,6 +206,17 @@ class CheckoutMessageManager(BaseMessageManager):
                 "<b>Пожалуйста, подтвердите ваши данные:</b>\n\n"
                 "<b>Контакт:</b> {name}, {phone}\n"
                 "<b>Доставка по адресу:</b>\n<code>{address}</code>"
+            ),
+            "pickup_slow_confirm": (
+                "<b>Пожалуйста, подтвердите ваши данные:</b>\n\n"
+                "<b>Контакт:</b> {name}, {phone}\n"
+                "<b>Способ:</b> Самовывоз"
+            ),
+            "pickup_fast_confirm": (
+                "Готовы оформить заказ?\n\n"
+                "<b>Способ:</b> Самовывоз\n"
+                "<b>Телефон:</b> {phone}\n\n"
+                "Подтвердите для продолжения."
             ),
             "total_price_line": "<b>Итоговая цена: ₽{total:.2f}</b>",
             # Fast path messages
