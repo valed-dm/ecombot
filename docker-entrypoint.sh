@@ -16,6 +16,10 @@ echo "PostgreSQL started"
 echo "Running database migrations..."
 alembic upgrade head
 
+# Seed default data (Pickup Point)
+echo "Seeding default pickup point..."
+python src/ecombot/bot/handlers/checkout/seed_pickup.py
+
 # Start the application
 echo "Starting application..."
 exec "$@"
