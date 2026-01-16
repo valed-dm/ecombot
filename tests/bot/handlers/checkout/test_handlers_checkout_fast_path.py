@@ -17,6 +17,7 @@ from ecombot.bot.handlers.checkout import fast_path
 from ecombot.db.models import DeliveryAddress
 from ecombot.db.models import Order
 from ecombot.db.models import User
+from ecombot.schemas.enums import DeliveryType
 from ecombot.services.order_service import OrderPlacementError
 
 
@@ -48,6 +49,9 @@ async def test_fast_checkout_confirm_handler_success(
     mock_manager, mock_order_service, mock_notification_service, mock_session, mocker
 ):
     """Test successful order placement via fast path."""
+    # Force DELIVERY=True to test the address flow
+    mocker.patch("ecombot.bot.handlers.checkout.fast_path.settings.DELIVERY", True)
+
     query = AsyncMock()
     callback_message = AsyncMock()
     state = AsyncMock()
@@ -82,7 +86,11 @@ async def test_fast_checkout_confirm_handler_success(
     assert callback_message.edit_text.await_count == 2
     # Verify order placement call
     mock_order_service.place_order.assert_awaited_once_with(
-        session=mock_session, db_user=db_user, delivery_address=mock_address
+        session=mock_session,
+        db_user=db_user,
+        delivery_type=DeliveryType.LOCAL_SAME_DAY,
+        delivery_address=mock_address,
+        pickup_point_id=None,
     )
     # Verify admin notification
     mock_notification_service.notify_admins_new_order.assert_awaited_once()
@@ -92,9 +100,12 @@ async def test_fast_checkout_confirm_handler_success(
 
 
 async def test_fast_checkout_confirm_handler_address_not_found(
-    mock_manager, mock_order_service, mock_session
+    mock_manager, mock_order_service, mock_session, mocker
 ):
     """Test handling when the default address is missing."""
+    # Force DELIVERY=True to test the address flow
+    mocker.patch("ecombot.bot.handlers.checkout.fast_path.settings.DELIVERY", True)
+
     query = AsyncMock()
     callback_message = AsyncMock()
     state = AsyncMock()
@@ -113,9 +124,12 @@ async def test_fast_checkout_confirm_handler_address_not_found(
 
 
 async def test_fast_checkout_confirm_handler_placement_error(
-    mock_manager, mock_order_service, mock_session
+    mock_manager, mock_order_service, mock_session, mocker
 ):
     """Test handling of OrderPlacementError (e.g., stock issues)."""
+    # Force DELIVERY=True to test the address flow
+    mocker.patch("ecombot.bot.handlers.checkout.fast_path.settings.DELIVERY", True)
+
     query = AsyncMock()
     callback_message = AsyncMock()
     state = AsyncMock()
@@ -136,9 +150,12 @@ async def test_fast_checkout_confirm_handler_placement_error(
 
 
 async def test_fast_checkout_confirm_handler_generic_error(
-    mock_manager, mock_order_service, mock_session
+    mock_manager, mock_order_service, mock_session, mocker
 ):
     """Test handling of unexpected exceptions."""
+    # Force DELIVERY=True to test the address flow
+    mocker.patch("ecombot.bot.handlers.checkout.fast_path.settings.DELIVERY", True)
+
     query = AsyncMock()
     callback_message = AsyncMock()
     state = AsyncMock()

@@ -8,6 +8,7 @@ from ecombot.db.models import CartItem
 from ecombot.db.models import Order
 from ecombot.db.models import OrderItem
 from ecombot.db.models import Product
+from ecombot.schemas.enums import DeliveryType
 from ecombot.schemas.enums import OrderStatus
 
 
@@ -38,7 +39,7 @@ async def test_create_order_with_items_success(mock_session: AsyncMock):
         "John Doe",
         "555-1234",
         "123 Main St",
-        "Courier",
+        DeliveryType.LOCAL_SAME_DAY,
         items,
     )
 
@@ -66,7 +67,13 @@ async def test_create_order_insufficient_stock(mock_session: AsyncMock):
 
     with pytest.raises(orders_crud.InsufficientStockError):
         await orders_crud.create_order_with_items(
-            mock_session, 1, "Name", "Phone", "Addr", "Method", items
+            mock_session,
+            1,
+            "Name",
+            "Phone",
+            "Addr",
+            DeliveryType.LOCAL_SAME_DAY,
+            items,
         )
 
     # Stock should remain unchanged
@@ -80,7 +87,13 @@ async def test_create_order_product_not_found(mock_session: AsyncMock):
 
     with pytest.raises(ValueError, match="Product with ID 10 not found"):
         await orders_crud.create_order_with_items(
-            mock_session, 1, "Name", "Phone", "Addr", "Method", items
+            mock_session,
+            1,
+            "Name",
+            "Phone",
+            "Addr",
+            DeliveryType.LOCAL_SAME_DAY,
+            items,
         )
 
 

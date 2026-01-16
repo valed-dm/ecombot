@@ -9,6 +9,7 @@ from ecombot.db.models import CartItem
 from ecombot.db.models import DeliveryAddress
 from ecombot.db.models import Order
 from ecombot.db.models import User
+from ecombot.schemas.enums import DeliveryType
 from ecombot.services import order_service
 from ecombot.services.order_service import OrderPlacementError
 
@@ -41,7 +42,10 @@ async def test_place_order_success(mocker: MockerFixture, mock_session: AsyncMoc
     mocker.patch("ecombot.schemas.dto.OrderDTO.model_validate")
 
     await order_service.place_order(
-        session=mock_session, db_user=mock_user, delivery_address=mock_address
+        session=mock_session,
+        db_user=mock_user,
+        delivery_type=DeliveryType.LOCAL_SAME_DAY,
+        delivery_address=mock_address,
     )
 
     mock_create.assert_awaited_once()
@@ -71,7 +75,10 @@ async def test_place_order_insufficient_stock(
 
     with pytest.raises(OrderPlacementError, match="Not enough stock"):
         await order_service.place_order(
-            session=mock_session, db_user=mock_user, delivery_address=mock_address
+            session=mock_session,
+            db_user=mock_user,
+            delivery_type=DeliveryType.LOCAL_SAME_DAY,
+            delivery_address=mock_address,
         )
 
 
