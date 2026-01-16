@@ -1,5 +1,6 @@
 """Order management CRUD operations."""
 
+from decimal import Decimal
 from typing import List
 from typing import Optional
 from typing import Sequence
@@ -10,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from ...logging_setup import log
+from ...schemas.enums import DeliveryType
 from ...schemas.enums import OrderStatus
 from ...utils import generate_order_number
 from ..models import CartItem
@@ -29,8 +31,11 @@ async def create_order_with_items(
     user_id: int,
     contact_name: str,
     phone: str,
-    address: str,
-    delivery_method: str,
+    address: Optional[str],
+    delivery_type: DeliveryType,
+    delivery_option_id: Optional[int],
+    pickup_point_id: Optional[int],
+    delivery_fee: Decimal,
     items: List[CartItem],
 ) -> Order:
     """
@@ -43,7 +48,10 @@ async def create_order_with_items(
         contact_name=contact_name,
         phone=phone,
         address=address,
-        delivery_method=delivery_method,
+        delivery_type=delivery_type,
+        delivery_option_id=delivery_option_id,
+        pickup_point_id=pickup_point_id,
+        delivery_fee=delivery_fee,
     )
     session.add(new_order)
     await session.flush()
@@ -85,6 +93,7 @@ async def get_order(session: AsyncSession, order_id: int) -> Optional[Order]:
         .options(
             selectinload(Order.user),
             selectinload(Order.items),
+            selectinload(Order.pickup_point),
         )
     )
     result = await session.execute(stmt)
@@ -118,6 +127,7 @@ async def get_orders_by_user_pk(
         .options(
             selectinload(Order.user),
             selectinload(Order.items),
+            selectinload(Order.pickup_point),
         )
         .order_by(Order.created_at.desc())
     )
@@ -149,6 +159,7 @@ async def get_orders_by_status(
         .options(
             selectinload(Order.user),
             selectinload(Order.items),
+            selectinload(Order.pickup_point),
         )
         .order_by(Order.created_at.desc())
     )

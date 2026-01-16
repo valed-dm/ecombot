@@ -2,6 +2,7 @@
 Service layer for order processing and management.
 """
 
+from decimal import Decimal
 from typing import List
 from typing import Optional
 
@@ -9,8 +10,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.db import crud
 from ecombot.db.models import DeliveryAddress
+from ecombot.db.models import DeliveryOption
+from ecombot.db.models import PickupPoint
 from ecombot.db.models import User
 from ecombot.schemas.dto import OrderDTO
+from ecombot.schemas.enums import DeliveryType
 from ecombot.schemas.enums import OrderStatus
 
 
@@ -38,8 +42,10 @@ async def place_order_from_cart(
     user_id: int,
     contact_name: str,
     phone: str,
-    address: str | None,
-    delivery_method: str,
+    delivery_type: DeliveryType,
+    address: str | None = None,
+    delivery_option_id: int | None = None,
+    pickup_point_id: int | None = None,
 ) -> OrderDTO:
     """
     Handles the core business logic of placing an order.
@@ -56,8 +62,10 @@ async def place_order_from_cart(
         user_id: The ID of the user placing the order.
         contact_name: The customer's name for the order.
         phone: The customer's phone number.
-        address: The shipping address (or None for pickup).
-        delivery_method: The chosen delivery method.
+        delivery_type: The chosen delivery type (Enum).
+        address: The shipping address string (required if not pickup).
+        delivery_option_id: ID of the selected delivery option (for fee calc).
+        pickup_point_id: ID of the selected pickup point (required if pickup).
 
     Returns:
         An OrderDTO of the newly created order.
@@ -71,6 +79,48 @@ async def place_order_from_cart(
     if not cart.items:
         raise EmptyCartError()
 
+    # --- Validation & Fee Calculation ---
+    delivery_fee = Decimal("0.00")
+    final_address = address
+
+    # 1. Validate Pickup vs Delivery
+    is_pickup = delivery_type in (
+        DeliveryType.PICKUP_STORE,
+        DeliveryType.PICKUP_LOCKER,
+        DeliveryType.PICKUP_CURBSIDE,
+    )
+
+    if is_pickup:
+        if not pickup_point_id:
+            raise OrderPlacementError(
+                "A pickup point must be selected for pickup orders."
+            )
+        # Fetch pickup point to ensure it exists and get its address
+        pickup_point = await session.get(PickupPoint, pickup_point_id)
+        if not pickup_point:
+            raise OrderPlacementError("Selected pickup point not found.")
+        final_address = f"{pickup_point.name}: {pickup_point.address}"
+    else:
+        if not final_address:
+            raise OrderPlacementError(
+                "A delivery address is required for this delivery method."
+            )
+
+    # 2. Calculate Fee based on DeliveryOption
+    if delivery_option_id:
+        option = await session.get(DeliveryOption, delivery_option_id)
+        if option:
+            # Calculate cart total to check for free threshold
+            cart_total = sum(
+                (item.product.price * item.quantity for item in cart.items),
+                start=Decimal("0.00"),
+            )
+
+            if option.free_threshold and cart_total >= option.free_threshold:
+                delivery_fee = Decimal("0.00")
+            else:
+                delivery_fee = option.price
+
     try:
         # Pessimistic locking.
         order = await crud.create_order_with_items(
@@ -78,8 +128,11 @@ async def place_order_from_cart(
             user_id=user_id,
             contact_name=contact_name,
             phone=phone,
-            address=address,
-            delivery_method=delivery_method,
+            address=final_address,
+            delivery_type=delivery_type,
+            delivery_option_id=delivery_option_id,
+            pickup_point_id=pickup_point_id,
+            delivery_fee=delivery_fee,
             items=list(cart.items),  # Copy of the items
         )
 
@@ -105,8 +158,10 @@ async def place_order_from_cart(
 async def place_order(
     session: AsyncSession,
     db_user: User,
-    delivery_address: Optional[DeliveryAddress],
-    delivery_method: str = "Standard",
+    delivery_type: DeliveryType,
+    delivery_address: Optional[DeliveryAddress] = None,
+    delivery_option_id: int | None = None,
+    pickup_point_id: int | None = None,
 ) -> OrderDTO:
     """
     The main business logic for placing an order using pre-existing user data.
@@ -117,15 +172,47 @@ async def place_order(
 
     contact_name = db_user.first_name
     phone = db_user.phone
-    address = delivery_address.full_address if delivery_address else None
 
     if not phone:
         raise OrderPlacementError("User profile is incomplete. Phone is required.")
 
-    if not address and delivery_method != "pickup":
-        raise OrderPlacementError(
-            "User profile is incomplete. Address is required for delivery."
-        )
+    # --- Validation & Fee Calculation ---
+    delivery_fee = Decimal("0.00")
+    final_address = delivery_address.full_address if delivery_address else None
+
+    is_pickup = delivery_type in (
+        DeliveryType.PICKUP_STORE,
+        DeliveryType.PICKUP_LOCKER,
+        DeliveryType.PICKUP_CURBSIDE,
+    )
+
+    if is_pickup:
+        if not pickup_point_id:
+            raise OrderPlacementError(
+                "A pickup point must be selected for pickup orders."
+            )
+        pickup_point = await session.get(PickupPoint, pickup_point_id)
+        if not pickup_point:
+            raise OrderPlacementError("Selected pickup point not found.")
+        final_address = f"{pickup_point.name}: {pickup_point.address}"
+    else:
+        if not final_address:
+            raise OrderPlacementError(
+                "User profile is incomplete. Address is required for delivery."
+            )
+
+    if delivery_option_id:
+        option = await session.get(DeliveryOption, delivery_option_id)
+        if option:
+            # Calculate cart total
+            cart_total = sum(
+                (item.product.price * item.quantity for item in cart.items),
+                start=Decimal("0.00"),
+            )
+            if option.free_threshold and cart_total >= option.free_threshold:
+                delivery_fee = Decimal("0.00")
+            else:
+                delivery_fee = option.price
 
     try:
         order = await crud.create_order_with_items(
@@ -133,8 +220,11 @@ async def place_order(
             user_id=db_user.id,
             contact_name=contact_name,
             phone=phone,
-            address=address,
-            delivery_method=delivery_method,
+            address=final_address,
+            delivery_type=delivery_type,
+            delivery_option_id=delivery_option_id,
+            pickup_point_id=pickup_point_id,
+            delivery_fee=delivery_fee,
             items=list(cart.items),
         )
         await crud.clear_cart(session, cart)
