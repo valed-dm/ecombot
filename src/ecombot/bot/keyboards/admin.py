@@ -9,6 +9,7 @@ from ecombot.schemas.enums import OrderStatus
 
 from ..callback_data import AdminCallbackFactory
 from ..callback_data import AdminNavCallbackFactory
+from ..callback_data import DeliveryAdminCallbackFactory
 from ..callback_data import EditProductCallbackFactory
 from ..callback_data import OrderCallbackFactory
 
@@ -48,7 +49,11 @@ def get_admin_panel_keyboard() -> InlineKeyboardMarkup:
         text=manager.get_message("keyboards", "view_orders"),
         callback_data=AdminCallbackFactory(action="view_orders"),
     )
-    builder.adjust(3, 4, 1)
+    builder.button(
+        text=manager.get_message("keyboards", "manage_delivery"),
+        callback_data=DeliveryAdminCallbackFactory(action="menu"),
+    )
+    builder.adjust(3, 4, 2)
     return builder.as_markup()
 
 

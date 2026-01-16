@@ -65,3 +65,19 @@ class CheckoutCallbackFactory(CallbackData, prefix="checkout"):
 class ProfileCallbackFactory(CallbackData, prefix="profile"):
     action: str  # "edit_phone", "edit_email", "manage_addr", "add_addr", "delete_addr"
     address_id: int | None = None
+
+
+class DeliveryAdminCallbackFactory(CallbackData, prefix="admin_del"):
+    """CallbackData for admin delivery management."""
+
+    action: str  # "menu", "toggle_global", "pp_list", "pp_edit", "dt_list", etc.
+    item_id: int | None = None  # For pickup point ID
+    value: str | None = None  # For delivery type enum value
+
+
+class PickupTypeCallbackFactory(CallbackData, prefix="pp_type"):
+    type_value: str  # e.g., "pickup_store"
+
+
+class PickupSelectCallbackFactory(CallbackData, prefix="pp_sel"):
+    pickup_point_id: int

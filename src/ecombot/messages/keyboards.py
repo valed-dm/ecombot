@@ -28,6 +28,12 @@ class KeyboardMessageManager(BaseMessageManager):
             "delete_product": "❌ Delete Product",
             "restore_product": "🔄 Restore Product",
             "view_orders": "📦 View Orders",
+            "manage_delivery": "🚚 Delivery Settings",
+            "manage_pickup_points": "📍 Manage Pickup Points",
+            "manage_delivery_types": "🚚 Manage Delivery Types",
+            "global_delivery_toggle": "Global Delivery: {status_text} {status_icon}",
+            "enabled": "Enabled",
+            "disabled": "Disabled",
             "back_to_admin_panel": "⬅️ Back to Admin Panel",
             # Order status buttons
             "pending": "⏳ Pending",
@@ -108,6 +114,12 @@ class KeyboardMessageManager(BaseMessageManager):
             "delete_product": "❌ Eliminar Producto",
             "restore_product": "🔄 Restaurar Producto",
             "view_orders": "📦 Ver Pedidos",
+            "manage_delivery": "🚚 Configuración de Entrega",
+            "manage_pickup_points": "📍 Gestionar Puntos de Recogida",
+            "manage_delivery_types": "🚚 Gestionar Tipos de Entrega",
+            "global_delivery_toggle": "Entrega Global: {status_text} {status_icon}",
+            "enabled": "Habilitado",
+            "disabled": "Deshabilitado",
             "back_to_admin_panel": "⬅️ Volver al Panel Admin",
             # Order status buttons
             "pending": "⏳ Pendiente",
@@ -188,6 +200,14 @@ class KeyboardMessageManager(BaseMessageManager):
             "delete_product": "❌ Удалить Товар",
             "restore_product": "🔄 Восстановить Товар",
             "view_orders": "📦 Просмотр Заказов",
+            "manage_delivery": "🚚 Настройки Доставки",
+            "manage_pickup_points": "📍 Управление Пунктами Выдачи",
+            "manage_delivery_types": "🚚 Управление Типами Доставки",
+            "global_delivery_toggle": (
+                "Глобальная Доставка: {status_text} {status_icon}"
+            ),
+            "enabled": "Включено",
+            "disabled": "Выключено",
             "back_to_admin_panel": "⬅️ Назад в Админ Панель",
             # Order status buttons
             "pending": "⏳ Ожидает",
