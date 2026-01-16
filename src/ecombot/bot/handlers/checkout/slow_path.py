@@ -9,14 +9,14 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 from aiogram.types import Message
 from aiogram.types import ReplyKeyboardRemove
-from sqlalchemy import select
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.callback_data import CheckoutCallbackFactory
+from ecombot.bot.callback_data import PickupSelectCallbackFactory
 from ecombot.bot.keyboards.checkout import get_checkout_confirmation_keyboard
 from ecombot.bot.keyboards.checkout import get_request_contact_keyboard
 from ecombot.bot.middlewares import MessageInteractionMiddleware
-from ecombot.config import settings
 from ecombot.core.manager import central_manager as manager
 from ecombot.db.models import PickupPoint
 from ecombot.db.models import User
@@ -29,7 +29,9 @@ from ecombot.services import user_service
 from ecombot.services.order_service import OrderPlacementError
 
 from .states import CheckoutFSM
+from .utils import check_courier_availability
 from .utils import generate_slow_path_confirmation_text
+from .utils import get_active_pickup_points
 
 
 router = Router()
@@ -65,7 +67,10 @@ async def get_phone_handler(
 
     await state.update_data(phone=phone.strip())
 
-    if settings.DELIVERY:
+    courier_available = await check_courier_availability(session)
+
+    if courier_available:
+        await state.update_data(is_pickup=False)
         address_msg = manager.get_message("checkout", "slow_path_address")
         await message.answer(
             address_msg,
@@ -73,18 +78,75 @@ async def get_phone_handler(
         )
         await state.set_state(CheckoutFSM.getting_address)
     else:
+        await state.update_data(is_pickup=True)
         # Skip address step for pickup
         # Remove the 'Request Contact' keyboard
         await message.answer("✅", reply_markup=ReplyKeyboardRemove())
 
-        user_data = await state.get_data()
-        cart_data = await cart_service.get_user_cart(session, db_user.telegram_id)
-        confirmation_text = generate_slow_path_confirmation_text(user_data, cart_data)
-        await message.answer(
-            confirmation_text,
-            reply_markup=get_checkout_confirmation_keyboard(),
-        )
-        await state.set_state(CheckoutFSM.confirm_slow_path)
+        pickup_points = await get_active_pickup_points(session)
+        if len(pickup_points) > 1:
+            builder = InlineKeyboardBuilder()
+            for pp in pickup_points:
+                builder.button(
+                    text=pp.name,
+                    callback_data=PickupSelectCallbackFactory(pickup_point_id=pp.id),
+                )
+            builder.adjust(1)
+            await message.answer(
+                "📍 Please select a pickup point:", reply_markup=builder.as_markup()
+            )
+            await state.set_state(CheckoutFSM.choosing_pickup_slow)
+        elif len(pickup_points) == 1:
+            pp = pickup_points[0]
+            await state.update_data(
+                pickup_point_id=pp.id, pickup_point_name=f"{pp.name} ({pp.address})"
+            )
+            user_data = await state.get_data()
+            cart_data = await cart_service.get_user_cart(session, db_user.telegram_id)
+            confirmation_text = generate_slow_path_confirmation_text(
+                user_data, cart_data, is_pickup=True
+            )
+            await message.answer(
+                confirmation_text,
+                reply_markup=get_checkout_confirmation_keyboard(),
+            )
+            await state.set_state(CheckoutFSM.confirm_slow_path)
+        else:
+            await message.answer("⚠️ Error: No pickup points available.")
+
+
+@router.callback_query(
+    CheckoutFSM.choosing_pickup_slow, PickupSelectCallbackFactory.filter()
+)
+async def slow_path_pickup_selected(
+    query: CallbackQuery,
+    callback_data: PickupSelectCallbackFactory,
+    state: FSMContext,
+    session: AsyncSession,
+    db_user: User,
+):
+    """Handles pickup point selection in slow path."""
+    pp_id = callback_data.pickup_point_id
+    pickup_point = await session.get(PickupPoint, pp_id)
+    if not pickup_point:
+        await query.answer("Invalid pickup point.", show_alert=True)
+        return
+
+    await state.update_data(
+        pickup_point_id=pp_id,
+        pickup_point_name=f"{pickup_point.name} ({pickup_point.address})",
+    )
+
+    user_data = await state.get_data()
+    cart_data = await cart_service.get_user_cart(session, db_user.telegram_id)
+    confirmation_text = generate_slow_path_confirmation_text(
+        user_data, cart_data, is_pickup=True
+    )
+    await query.message.edit_text(
+        confirmation_text,
+        reply_markup=get_checkout_confirmation_keyboard(),
+    )
+    await state.set_state(CheckoutFSM.confirm_slow_path)
 
 
 @router.message(CheckoutFSM.getting_address, F.text)
@@ -101,7 +163,9 @@ async def get_address_handler(
     user_data = await state.get_data()
     cart_data = await cart_service.get_user_cart(session, db_user.telegram_id)
 
-    confirmation_text = generate_slow_path_confirmation_text(user_data, cart_data)
+    confirmation_text = generate_slow_path_confirmation_text(
+        user_data, cart_data, is_pickup=False
+    )
     await message.answer(
         confirmation_text,
         reply_markup=get_checkout_confirmation_keyboard(),
@@ -124,6 +188,8 @@ async def slow_path_confirm_handler(
     progress_msg = manager.get_message("checkout", "progress_saving_details")
     await callback_message.edit_text(progress_msg)
     user_data = await state.get_data()
+    is_pickup = user_data.get("is_pickup", False)
+    pickup_point_id = user_data.get("pickup_point_id")
 
     try:
         # --- Save user info for next time ---
@@ -134,9 +200,8 @@ async def slow_path_confirm_handler(
 
         new_address_model = None
         delivery_type = None
-        pickup_point_id = None
 
-        if settings.DELIVERY:
+        if not is_pickup:
             delivery_type = DeliveryType.LOCAL_SAME_DAY
             # 2. Add the new address and set it as default
             new_address_model = await user_service.add_new_address(
@@ -149,14 +214,8 @@ async def slow_path_confirm_handler(
             )
         else:
             delivery_type = DeliveryType.PICKUP_STORE
-            # Fetch the default (first) active pickup point
-            stmt = select(PickupPoint).where(PickupPoint.is_active).limit(1)
-            result = await session.execute(stmt)
-            pickup_point = result.scalar_one_or_none()
-
-            if not pickup_point:
-                raise OrderPlacementError("No active pickup point found.")
-            pickup_point_id = pickup_point.id
+            if not pickup_point_id:
+                raise OrderPlacementError("No pickup point selected.")
 
         refreshed_user_obj = await session.get(User, db_user.id)
         if refreshed_user_obj is None:
