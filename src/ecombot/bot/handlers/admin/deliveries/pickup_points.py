@@ -4,12 +4,11 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 from aiogram.types import Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.callback_data import DeliveryAdminCallbackFactory
 from ecombot.bot.callback_data import PickupTypeCallbackFactory
-from ecombot.db.models import PickupPoint
+from ecombot.db.crud import deliveries as deliveries_crud
 from ecombot.schemas.enums import DeliveryType
 
 from .menu import send_delivery_menu
@@ -22,9 +21,7 @@ router = Router()
 @router.callback_query(DeliveryAdminCallbackFactory.filter(F.action == "pp_list"))
 async def cb_list_pickup_points(query: CallbackQuery, session: AsyncSession):
     """Lists all pickup points."""
-    stmt = select(PickupPoint).order_by(PickupPoint.id)
-    result = await session.execute(stmt)
-    points = result.scalars().all()
+    points = await deliveries_crud.get_all_pickup_points(session)
 
     builder = InlineKeyboardBuilder()
     for pp in points:
@@ -63,7 +60,7 @@ async def cb_edit_pickup_point(
 ):
     """Shows details and actions for a specific pickup point."""
     pp_id = callback_data.item_id
-    pp = await session.get(PickupPoint, pp_id)
+    pp = await deliveries_crud.get_pickup_point(session, pp_id)
 
     if not pp:
         await query.answer("Pickup point not found.", show_alert=True)
@@ -107,10 +104,8 @@ async def cb_toggle_pickup_point(
     session: AsyncSession,
 ):
     pp_id = callback_data.item_id
-    pp = await session.get(PickupPoint, pp_id)
+    pp = await deliveries_crud.toggle_pickup_point_status(session, pp_id)
     if pp:
-        pp.is_active = not pp.is_active
-        await session.commit()
         await query.answer("Status updated.")
         # Refresh view
         # We can reuse the callback_data since it has the item_id, just change action
@@ -125,10 +120,7 @@ async def cb_delete_pickup_point(
     session: AsyncSession,
 ):
     pp_id = callback_data.item_id
-    pp = await session.get(PickupPoint, pp_id)
-    if pp:
-        await session.delete(pp)
-        await session.commit()
+    if await deliveries_crud.delete_pickup_point(session, pp_id):
         await query.answer("Pickup point deleted.")
     await cb_list_pickup_points(query, session)
 
@@ -136,9 +128,7 @@ async def cb_delete_pickup_point(
 @router.callback_query(DeliveryAdminCallbackFactory.filter(F.action == "pp_view_all"))
 async def cb_view_pickup_addresses(query: CallbackQuery, session: AsyncSession):
     """Sends a message listing all pickup points and their addresses."""
-    stmt = select(PickupPoint).order_by(PickupPoint.id)
-    result = await session.execute(stmt)
-    points = result.scalars().all()
+    points = await deliveries_crud.get_all_pickup_points(session)
 
     if not points:
         await query.answer("No pickup points found.", show_alert=True)
@@ -223,15 +213,13 @@ async def process_pp_hours(message: Message, state: FSMContext, session: AsyncSe
     data = await state.get_data()
     hours = message.text
 
-    new_pp = PickupPoint(
+    new_pp = await deliveries_crud.create_pickup_point(
+        session,
         name=data["name"],
         address=data["address"],
         pickup_type=data["pickup_type"],
         working_hours=hours,
-        is_active=True,
     )
-    session.add(new_pp)
-    await session.commit()
 
     await message.answer(f"✅ Pickup point <b>{new_pp.name}</b> created successfully!")
     await state.clear()

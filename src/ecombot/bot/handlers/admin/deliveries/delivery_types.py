@@ -2,11 +2,10 @@ from aiogram import F
 from aiogram import Router
 from aiogram.types import CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.callback_data import DeliveryAdminCallbackFactory
-from ecombot.db.models import DeliveryOption
+from ecombot.db.crud import deliveries as deliveries_crud
 from ecombot.schemas.enums import DeliveryType
 
 
@@ -17,9 +16,8 @@ router = Router()
 async def cb_list_delivery_types(query: CallbackQuery, session: AsyncSession):
     """Lists all available delivery types and their status."""
     # Fetch existing configured options
-    stmt = select(DeliveryOption)
-    result = await session.execute(stmt)
-    existing_options = {opt.delivery_type: opt for opt in result.scalars().all()}
+    options = await deliveries_crud.get_all_delivery_options(session)
+    existing_options = {opt.delivery_type: opt for opt in options}
 
     builder = InlineKeyboardBuilder()
 
@@ -71,27 +69,7 @@ async def cb_toggle_delivery_type(
         await query.answer("Invalid delivery type.")
         return
 
-    # Check if option exists
-    stmt = select(DeliveryOption).where(DeliveryOption.delivery_type == dt_enum)
-    result = await session.execute(stmt)
-    option = result.scalar_one_or_none()
-
-    if option:
-        # Toggle existing
-        option.is_active = not option.is_active
-        status = "Active" if option.is_active else "Inactive"
-        await query.answer(f"{dt_enum.value} is now {status}")
-    else:
-        # Create new default option (Active)
-        # Defaulting price to 0. Admin can edit price later (feature to be added)
-        new_option = DeliveryOption(
-            delivery_type=dt_enum,
-            name=dt_enum.value.replace("_", " ").title(),
-            price=0,
-            is_active=True,
-        )
-        session.add(new_option)
-        await query.answer(f"{dt_enum.value} activated (Price: 0)")
-
-    await session.commit()
+    option = await deliveries_crud.toggle_delivery_option(session, dt_enum)
+    status = "Active" if option.is_active else "Inactive"
+    await query.answer(f"{dt_enum.value} is now {status}")
     await cb_list_delivery_types(query, session)
