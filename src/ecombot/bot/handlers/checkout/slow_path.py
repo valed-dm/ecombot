@@ -9,6 +9,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 from aiogram.types import Message
 from aiogram.types import ReplyKeyboardRemove
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.callback_data import CheckoutCallbackFactory
@@ -17,8 +18,10 @@ from ecombot.bot.keyboards.checkout import get_request_contact_keyboard
 from ecombot.bot.middlewares import MessageInteractionMiddleware
 from ecombot.config import settings
 from ecombot.core.manager import central_manager as manager
+from ecombot.db.models import PickupPoint
 from ecombot.db.models import User
 from ecombot.logging_setup import logger
+from ecombot.schemas.enums import DeliveryType
 from ecombot.services import cart_service
 from ecombot.services import notification_service
 from ecombot.services import order_service
@@ -72,7 +75,7 @@ async def get_phone_handler(
     else:
         # Skip address step for pickup
         # Remove the 'Request Contact' keyboard
-        await message.answer("...", reply_markup=ReplyKeyboardRemove())
+        await message.answer("✅", reply_markup=ReplyKeyboardRemove())
 
         user_data = await state.get_data()
         cart_data = await cart_service.get_user_cart(session, db_user.telegram_id)
@@ -130,10 +133,11 @@ async def slow_path_confirm_handler(
         )
 
         new_address_model = None
-        delivery_method = "pickup"
+        delivery_type = None
+        pickup_point_id = None
 
         if settings.DELIVERY:
-            delivery_method = "Standard"
+            delivery_type = DeliveryType.LOCAL_SAME_DAY
             # 2. Add the new address and set it as default
             new_address_model = await user_service.add_new_address(
                 session, db_user.id, "Default", user_data["address"]
@@ -143,6 +147,16 @@ async def slow_path_confirm_handler(
                 db_user.id,
                 new_address_model.id,
             )
+        else:
+            delivery_type = DeliveryType.PICKUP_STORE
+            # Fetch the default (first) active pickup point
+            stmt = select(PickupPoint).where(PickupPoint.is_active).limit(1)
+            result = await session.execute(stmt)
+            pickup_point = result.scalar_one_or_none()
+
+            if not pickup_point:
+                raise OrderPlacementError("No active pickup point found.")
+            pickup_point_id = pickup_point.id
 
         refreshed_user_obj = await session.get(User, db_user.id)
         if refreshed_user_obj is None:
@@ -155,7 +169,8 @@ async def slow_path_confirm_handler(
             session=session,
             db_user=refreshed_user_obj,
             delivery_address=new_address_model,
-            delivery_method=delivery_method,
+            delivery_type=delivery_type,
+            pickup_point_id=pickup_point_id,
         )
 
         # Notify admins

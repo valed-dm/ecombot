@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.keyboards.checkout import get_fast_checkout_confirmation_keyboard
 from ecombot.bot.middlewares import MessageInteractionMiddleware
+from ecombot.config import settings
 from ecombot.core.manager import central_manager as manager
 from ecombot.db.models import User
 from ecombot.services import cart_service
@@ -44,9 +45,17 @@ async def checkout_start_handler(
 
     default_address = get_default_address(db_user)
 
-    if db_user.phone and default_address:
-        # --- FAST PATH ---
-        await state.update_data(default_address_id=default_address.id)
+    # Determine if user has enough info for Fast Path
+    is_ready_for_fast_path = False
+
+    if settings.DELIVERY:
+        is_ready_for_fast_path = bool(db_user.phone and default_address)
+    else:
+        is_ready_for_fast_path = bool(db_user.phone)
+
+    if is_ready_for_fast_path:
+        if default_address:
+            await state.update_data(default_address_id=default_address.id)
         confirmation_text = generate_fast_path_confirmation_text(
             db_user, default_address, cart
         )

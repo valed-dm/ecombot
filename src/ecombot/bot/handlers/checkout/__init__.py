@@ -9,16 +9,13 @@ for first-time users, which then saves their details for future use.
 
 from aiogram import Router
 
-from . import fast_path
-from . import main
-from . import slow_path
-from .states import CheckoutFSM
+from .fast_path import router as fast_path_router
+from .main import router as main_router
+from .slow_path import router as slow_path_router
 
 
-# Create main router and include all sub-routers
 router = Router()
-router.include_router(main.router)
-router.include_router(fast_path.router)
-router.include_router(slow_path.router)
 
-__all__ = ["router", "CheckoutFSM"]
+router.include_router(main_router)
+router.include_router(fast_path_router)
+router.include_router(slow_path_router)

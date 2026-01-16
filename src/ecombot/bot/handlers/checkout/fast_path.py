@@ -7,15 +7,19 @@ from aiogram import Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 from aiogram.types import Message
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.callback_data import CheckoutCallbackFactory
 from ecombot.bot.middlewares import MessageInteractionMiddleware
+from ecombot.config import settings
 from ecombot.core.manager import central_manager as manager
 from ecombot.db.models import DeliveryAddress
+from ecombot.db.models import PickupPoint
 from ecombot.db.models import User
 from ecombot.logging_setup import logger
 from ecombot.schemas.dto import OrderDTO
+from ecombot.schemas.enums import DeliveryType
 from ecombot.services import notification_service
 from ecombot.services import order_service
 from ecombot.services.order_service import OrderPlacementError
@@ -45,21 +49,41 @@ async def fast_checkout_confirm_handler(
     state_data = await state.get_data()
     default_address_id = state_data.get("default_address_id")
 
-    default_address_obj = (
-        await session.get(DeliveryAddress, default_address_id)
-        if default_address_id
-        else None
-    )
+    default_address_obj = None
+    delivery_type = None
+    pickup_point_id = None
 
-    if not isinstance(default_address_obj, DeliveryAddress):
-        error_msg = manager.get_message("checkout", "error_address_not_found")
-        await callback_message.edit_text(error_msg)
-        await state.clear()
-        return
+    if settings.DELIVERY:
+        delivery_type = DeliveryType.LOCAL_SAME_DAY
+        default_address_obj = (
+            await session.get(DeliveryAddress, default_address_id)
+            if default_address_id
+            else None
+        )
+
+        if not isinstance(default_address_obj, DeliveryAddress):
+            error_msg = manager.get_message("checkout", "error_address_not_found")
+            await callback_message.edit_text(error_msg)
+            await state.clear()
+            return
+    else:
+        delivery_type = DeliveryType.PICKUP_STORE
+        stmt = select(PickupPoint).where(PickupPoint.is_active).limit(1)
+        result = await session.execute(stmt)
+        pickup_point = result.scalar_one_or_none()
+        if not pickup_point:
+            await callback_message.edit_text("⚠️ Error: No pickup point configured.")
+            await state.clear()
+            return
+        pickup_point_id = pickup_point.id
 
     try:
         order = await order_service.place_order(
-            session=session, db_user=db_user, delivery_address=default_address_obj
+            session=session,
+            db_user=db_user,
+            delivery_type=delivery_type,
+            delivery_address=default_address_obj,
+            pickup_point_id=pickup_point_id,
         )
 
         order_dto = OrderDTO.model_validate(order)
