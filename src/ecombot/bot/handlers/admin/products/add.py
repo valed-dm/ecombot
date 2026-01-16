@@ -26,7 +26,7 @@ from ecombot.core.manager import central_manager as manager
 from ecombot.logging_setup import log
 from ecombot.services import catalog_service
 
-from ..states import AddProduct
+from .states import AddProduct
 
 
 router = Router()
