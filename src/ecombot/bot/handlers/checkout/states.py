@@ -12,4 +12,6 @@ class CheckoutFSM(StatesGroup):
     confirm_slow_path = State()
 
     # State for the "fast path" / returning user
+    choosing_pickup_fast = State()
     confirm_fast_path = State()
+    choosing_pickup_slow = State()
