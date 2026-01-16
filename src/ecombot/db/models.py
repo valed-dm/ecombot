@@ -20,6 +20,7 @@ from sqlalchemy.orm import declarative_mixin
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 
+from ..schemas.enums import DeliveryType
 from ..schemas.enums import OrderStatus
 from .database import Base
 
@@ -73,6 +74,49 @@ class DeliveryAddress(Base, TimestampMixin):
     is_default: Mapped[bool] = mapped_column(Boolean, default=False)
 
     user: Mapped["User"] = relationship(back_populates="addresses")
+
+
+class DeliveryOption(Base, TimestampMixin):
+    __tablename__ = "delivery_options"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    delivery_type: Mapped[DeliveryType] = mapped_column(
+        SAEnum(
+            DeliveryType,
+            name="delivery_type_enum",
+            values_callable=lambda obj: [e.value for e in obj],
+        ),
+        unique=True,
+        index=True,
+    )
+    name: Mapped[str] = mapped_column(String(100))
+    description: Mapped[str | None] = mapped_column(Text)
+    estimated_time: Mapped[str | None] = mapped_column(String(50))
+    price: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=0)
+    free_threshold: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+
+class PickupPoint(Base, TimestampMixin):
+    __tablename__ = "pickup_points"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(255))  # e.g. "Central Station Locker"
+    address: Mapped[str] = mapped_column(Text)
+
+    # Aligned with DeliveryType logic (e.g., PICKUP_STORE, PICKUP_LOCKER)
+    pickup_type: Mapped[DeliveryType] = mapped_column(
+        SAEnum(
+            DeliveryType,
+            name="delivery_type_enum",
+            values_callable=lambda obj: [e.value for e in obj],
+        ),
+        index=True,
+    )
+    working_hours: Mapped[str | None] = mapped_column(String(255))
+    latitude: Mapped[Decimal | None] = mapped_column(Numeric(9, 6))
+    longitude: Mapped[Decimal | None] = mapped_column(Numeric(9, 6))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
 
 class Category(Base, TimestampMixin, SoftDeleteMixin):
@@ -141,9 +185,21 @@ class Order(Base, TimestampMixin):
     contact_name: Mapped[str] = mapped_column(String(255))
     phone: Mapped[str] = mapped_column(String(50))
     address: Mapped[str | None] = mapped_column(Text)
-    delivery_method: Mapped[str] = mapped_column(
-        String(100), default="pickup", server_default="'pickup'"
+
+    delivery_type: Mapped[DeliveryType] = mapped_column(
+        SAEnum(
+            DeliveryType,
+            name="delivery_type_enum",
+            values_callable=lambda obj: [e.value for e in obj],
+        ),
+        default=DeliveryType.PICKUP_STORE,
     )
+    delivery_option_id: Mapped[int | None] = mapped_column(
+        ForeignKey("delivery_options.id")
+    )
+    pickup_point_id: Mapped[int | None] = mapped_column(ForeignKey("pickup_points.id"))
+    delivery_fee: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=0)
+
     status: Mapped[OrderStatus] = mapped_column(
         SAEnum(
             OrderStatus,
@@ -156,6 +212,8 @@ class Order(Base, TimestampMixin):
 
     user: Mapped["User"] = relationship(back_populates="orders")
     items: Mapped[list[OrderItem]] = relationship(back_populates="order")
+    delivery_option: Mapped["DeliveryOption"] = relationship()
+    pickup_point: Mapped["PickupPoint"] = relationship()
 
 
 class OrderItem(Base, TimestampMixin):

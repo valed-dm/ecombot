@@ -35,7 +35,8 @@ class OrderStatus(str, enum.Enum):
 class DeliveryType(str, enum.Enum):
     """
     Represents the delivery service level and scope.
-    Categorized by logistics tiers (Pickup -> Hyperlocal -> Local -> Regional -> National).
+    Categorized by logistics tiers
+    (Pickup -> Hyperlocal -> Local -> Regional -> National).
     """
 
     # 1. PICKUP

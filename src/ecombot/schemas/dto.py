@@ -16,6 +16,7 @@ from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import Field
 
+from ecombot.schemas.enums import DeliveryType
 from ecombot.schemas.enums import OrderStatus
 
 
@@ -116,7 +117,9 @@ class OrderDTO(BaseDTO):
     contact_name: str
     phone: str
     address: str | None = None
-    delivery_method: str
+    delivery_type: DeliveryType
+    delivery_fee: Decimal
+    pickup_point: "PickupPointDTO | None" = None
     items: list[OrderItemDTO]
     created_at: datetime
 
@@ -128,11 +131,15 @@ class OrderDTO(BaseDTO):
     @property
     def total_price(self) -> Decimal:
         """Calculates the total price of a confirmed order."""
-        if not self.items:
-            return Decimal("0.00")
-        return sum(
-            (item.price * item.quantity for item in self.items), start=Decimal("0.00")
+        items_total = (
+            sum(
+                (item.price * item.quantity for item in self.items),
+                start=Decimal("0.00"),
+            )
+            if self.items
+            else Decimal("0.00")
         )
+        return items_total + self.delivery_fee
 
     @property
     def display_order_number(self) -> str:
@@ -175,3 +182,29 @@ class UserProfileDTO(BaseDTO):
     phone: str | None
     email: str | None
     addresses: list[DeliveryAddressDTO]
+
+
+class DeliveryOptionDTO(BaseDTO):
+    """DTO for available delivery options and their pricing."""
+
+    id: int
+    delivery_type: DeliveryType
+    name: str
+    description: str | None = None
+    price: Decimal
+    free_threshold: Decimal | None = None
+    estimated_time: str | None = None
+    is_active: bool
+
+
+class PickupPointDTO(BaseDTO):
+    """DTO for a physical pickup location (store, locker, etc.)."""
+
+    id: int
+    name: str
+    address: str
+    pickup_type: DeliveryType
+    working_hours: str | None = None
+    latitude: Decimal | None = None
+    longitude: Decimal | None = None
+    is_active: bool

@@ -1,29 +1,18 @@
 from logging.config import fileConfig
-import os
 
 from alembic import context
 from sqlalchemy import Connection
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+from ecombot.config import settings
 from ecombot.db.models import Base
 
 
 config = context.config
 
-# Get the raw URL template from the .ini file
-raw_db_url = config.get_main_option("sqlalchemy.url")
-
-if raw_db_url is None:
-    raise ValueError("The 'sqlalchemy.url' option is not set in your alembic.ini file.")
-
-try:
-    expanded_db_url = os.path.expandvars(raw_db_url)
-except Exception as e:
-    raise ValueError(
-        f"Failed to expand environment variables in database URL: {e}"
-    ) from e
-config.set_main_option("sqlalchemy.url", expanded_db_url)
+# Set the database URL from the application settings
+config.set_main_option("sqlalchemy.url", settings.database_url)
 
 
 if config.config_file_name is not None:
