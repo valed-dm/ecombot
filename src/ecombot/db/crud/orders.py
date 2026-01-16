@@ -33,10 +33,10 @@ async def create_order_with_items(
     phone: str,
     address: Optional[str],
     delivery_type: DeliveryType,
-    delivery_option_id: Optional[int],
-    pickup_point_id: Optional[int],
-    delivery_fee: Decimal,
     items: List[CartItem],
+    delivery_option_id: Optional[int] = None,
+    pickup_point_id: Optional[int] = None,
+    delivery_fee: Decimal = Decimal("0.00"),
 ) -> Order:
     """
     Creates an order from cart items and atomically reserves stock.
