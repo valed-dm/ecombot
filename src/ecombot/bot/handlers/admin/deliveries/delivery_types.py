@@ -5,6 +5,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.callback_data import DeliveryAdminCallbackFactory
+from ecombot.core.manager import central_manager as manager
 from ecombot.db.crud import deliveries as deliveries_crud
 from ecombot.schemas.enums import DeliveryType
 
@@ -33,8 +34,8 @@ async def cb_list_delivery_types(query: CallbackQuery, session: AsyncSession):
             "✅" if is_active else "⚪"
         )  # White circle for unconfigured/inactive
 
-        # Label formatting
-        label = dt.value.replace("_", " ").title()
+        # Label formatting using i18n
+        label = manager.get_message("delivery", dt.message_key)
         builder.button(
             text=f"{status_icon} {label}",
             callback_data=DeliveryAdminCallbackFactory(
@@ -43,15 +44,13 @@ async def cb_list_delivery_types(query: CallbackQuery, session: AsyncSession):
         )
 
     builder.button(
-        text="🔙 Back", callback_data=DeliveryAdminCallbackFactory(action="menu").pack()
+        text=manager.get_message("keyboards", "back"),
+        callback_data=DeliveryAdminCallbackFactory(action="menu").pack(),
     )
     builder.adjust(1)
 
     await query.message.edit_text(
-        "<b>🚚 Delivery Types</b>\n"
-        "Tap to toggle availability.\n"
-        "⚪ = Inactive/Not Configured\n"
-        "✅ = Active",
+        manager.get_message("delivery", "dt_list_text"),
         reply_markup=builder.as_markup(),
     )
 
@@ -66,10 +65,15 @@ async def cb_toggle_delivery_type(
     try:
         dt_enum = DeliveryType(dt_value)
     except ValueError:
-        await query.answer("Invalid delivery type.")
+        await query.answer(manager.get_message("delivery", "invalid_dt"))
         return
 
     option = await deliveries_crud.toggle_delivery_option(session, dt_enum)
-    status = "Active" if option.is_active else "Inactive"
-    await query.answer(f"{dt_enum.value} is now {status}")
+    status_key = "active" if option.is_active else "inactive"
+    status_text = manager.get_message("delivery", status_key)
+    type_text = manager.get_message("delivery", dt_enum.message_key)
+
+    await query.answer(
+        manager.get_message("delivery", "dt_toggled", type=type_text, status=status_text)
+    )
     await cb_list_delivery_types(query, session)
