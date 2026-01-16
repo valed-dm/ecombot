@@ -7,12 +7,12 @@ from aiogram import Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 from aiogram.types import Message
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ecombot.bot.callback_data import CheckoutCallbackFactory
+from ecombot.bot.callback_data import PickupSelectCallbackFactory
+from ecombot.bot.keyboards.checkout import get_fast_checkout_confirmation_keyboard
 from ecombot.bot.middlewares import MessageInteractionMiddleware
-from ecombot.config import settings
 from ecombot.core.manager import central_manager as manager
 from ecombot.db.models import DeliveryAddress
 from ecombot.db.models import PickupPoint
@@ -20,15 +20,51 @@ from ecombot.db.models import User
 from ecombot.logging_setup import logger
 from ecombot.schemas.dto import OrderDTO
 from ecombot.schemas.enums import DeliveryType
+from ecombot.services import cart_service
 from ecombot.services import notification_service
 from ecombot.services import order_service
 from ecombot.services.order_service import OrderPlacementError
 
 from .states import CheckoutFSM
+from .utils import generate_fast_path_confirmation_text
 
 
 router = Router()
 router.callback_query.middleware(MessageInteractionMiddleware())
+
+
+@router.callback_query(
+    CheckoutFSM.choosing_pickup_fast, PickupSelectCallbackFactory.filter()
+)
+async def fast_path_pickup_selected(
+    query: CallbackQuery,
+    callback_data: PickupSelectCallbackFactory,
+    state: FSMContext,
+    session: AsyncSession,
+    db_user: User,
+):
+    """Handles pickup point selection in fast path."""
+    pp_id = callback_data.pickup_point_id
+    pickup_point = await session.get(PickupPoint, pp_id)
+    if not pickup_point:
+        await query.answer("Invalid pickup point.", show_alert=True)
+        return
+
+    await state.update_data(pickup_point_id=pp_id)
+
+    # Generate confirmation
+    cart = await cart_service.get_user_cart(session, db_user.telegram_id)
+    confirmation_text = generate_fast_path_confirmation_text(
+        db_user,
+        None,
+        cart,
+        is_pickup=True,
+        pickup_point=pickup_point,
+    )
+    keyboard = get_fast_checkout_confirmation_keyboard()
+
+    await query.message.edit_text(confirmation_text, reply_markup=keyboard)
+    await state.set_state(CheckoutFSM.confirm_fast_path)
 
 
 @router.callback_query(
@@ -48,12 +84,13 @@ async def fast_checkout_confirm_handler(
 
     state_data = await state.get_data()
     default_address_id = state_data.get("default_address_id")
+    is_pickup = state_data.get("is_pickup", False)
+    pickup_point_id = state_data.get("pickup_point_id")
 
     default_address_obj = None
     delivery_type = None
-    pickup_point_id = None
 
-    if settings.DELIVERY:
+    if not is_pickup:
         delivery_type = DeliveryType.LOCAL_SAME_DAY
         default_address_obj = (
             await session.get(DeliveryAddress, default_address_id)
@@ -68,14 +105,10 @@ async def fast_checkout_confirm_handler(
             return
     else:
         delivery_type = DeliveryType.PICKUP_STORE
-        stmt = select(PickupPoint).where(PickupPoint.is_active).limit(1)
-        result = await session.execute(stmt)
-        pickup_point = result.scalar_one_or_none()
-        if not pickup_point:
-            await callback_message.edit_text("⚠️ Error: No pickup point configured.")
+        if not pickup_point_id:
+            await callback_message.edit_text("⚠️ Error: No pickup point selected.")
             await state.clear()
             return
-        pickup_point_id = pickup_point.id
 
     try:
         order = await order_service.place_order(
