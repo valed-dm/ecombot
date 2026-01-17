@@ -9,6 +9,7 @@ from ecombot.bot.middlewares import MessageInteractionMiddleware
 from . import categories
 from . import deliveries
 from . import navigation
+from . import orders
 from . import products
 
 
@@ -22,4 +23,5 @@ router.callback_query.middleware(MessageInteractionMiddleware())
 router.include_router(navigation.router)
 router.include_router(categories.router)
 router.include_router(products.router)
+router.include_router(orders.router)
 router.include_router(deliveries.router)

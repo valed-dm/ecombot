@@ -5,7 +5,6 @@ from aiogram import Dispatcher
 from aiogram.client.default import DefaultBotProperties
 
 from ecombot.bot.handlers import admin
-from ecombot.bot.handlers import admin_orders
 from ecombot.bot.handlers import cart
 from ecombot.bot.handlers import catalog
 from ecombot.bot.handlers import checkout
@@ -28,7 +27,6 @@ dp.update.middleware(DbSessionMiddleware(session_pool=AsyncSessionLocal))
 dp.update.middleware(UserMiddleware())
 
 dp.include_router(admin.router)
-dp.include_router(admin_orders.router)
 dp.include_router(catalog.router)
 dp.include_router(cart.router)
 dp.include_router(checkout.router)
