@@ -40,6 +40,10 @@ async def send_order_status_update(bot: Bot, order: OrderDTO):
             status=status_name,
             order_number=safe_order_number,
         )
+        if order.pickup_point:
+            text += f"\n\n📍 {escape(order.pickup_point.address)}"
+            if order.pickup_point.working_hours:
+                text += f"\n🕒 {escape(order.pickup_point.working_hours)}"
     elif order.status == OrderStatus.PAID:
         text = manager.get_message(
             "orders",
