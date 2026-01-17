@@ -18,9 +18,15 @@ class DeliveryMessageManager(BaseMessageManager):
             "mode_pickup_only": "Pickup Only",
             "toggled_msg": "Delivery mode set to: {status}",
             # Pickup Points
-            "pp_list_text": "<b>📍 Pickup Points</b>\nSelect a point to toggle availability or delete.",
+            "pp_list_text": (
+                "<b>📍 Pickup Points</b>\n"
+                "Select a point to toggle availability or delete."
+            ),
             "pp_not_found": "Pickup point not found.",
-            "pp_details": "<b>📍 {name}</b>\n\nAddress: {address}\nType: {type}\nHours: {hours}\nStatus: {status}",
+            "pp_details": (
+                "<b>📍 {name}</b>\n\nAddress: {address}\nType: {type}\n"
+                "Hours: {hours}\nStatus: {status}"
+            ),
             "status_active": "Active ✅",
             "status_inactive": "Inactive ❌",
             "status_updated": "Status updated.",
@@ -31,10 +37,16 @@ class DeliveryMessageManager(BaseMessageManager):
             "enter_pp_address": "Enter the <b>Full Address</b>:",
             "select_pp_type": "Select the <b>Pickup Type</b>:",
             "invalid_type": "Invalid type.",
-            "enter_pp_hours": "Selected: {type}\n\nEnter <b>Working Hours</b> (e.g., 'Mon-Fri 9-18'):",
+            "enter_pp_hours": (
+                "Selected: {type}\n\n"
+                "Enter <b>Working Hours</b> (e.g., 'Mon-Fri 9-18'):"
+            ),
             "pp_created": "✅ Pickup point <b>{name}</b> created successfully!",
             # Delivery Types
-            "dt_list_text": "<b>🚚 Delivery Types</b>\nTap to toggle availability.\n⚪ = Inactive/Not Configured\n✅ = Active",
+            "dt_list_text": (
+                "<b>🚚 Delivery Types</b>\nTap to toggle availability.\n"
+                "⚪ = Inactive/Not Configured\n✅ = Active"
+            ),
             "invalid_dt": "Invalid delivery type.",
             "dt_toggled": "{type} is now {status}",
             "active": "Active",
@@ -66,9 +78,15 @@ class DeliveryMessageManager(BaseMessageManager):
             "mode_pickup_only": "Solo Recogida",
             "toggled_msg": "Modo de entrega establecido a: {status}",
             # Pickup Points
-            "pp_list_text": "<b>📍 Puntos de Recogida</b>\nSeleccione un punto para cambiar disponibilidad o eliminar.",
+            "pp_list_text": (
+                "<b>📍 Puntos de Recogida</b>\n"
+                "Seleccione un punto para cambiar disponibilidad o eliminar."
+            ),
             "pp_not_found": "Punto de recogida no encontrado.",
-            "pp_details": "<b>📍 {name}</b>\n\nDirección: {address}\nTipo: {type}\nHorario: {hours}\nEstado: {status}",
+            "pp_details": (
+                "<b>📍 {name}</b>\n\nDirección: {address}\nTipo: {type}\n"
+                "Horario: {hours}\nEstado: {status}"
+            ),
             "status_active": "Activo ✅",
             "status_inactive": "Inactivo ❌",
             "status_updated": "Estado actualizado.",
@@ -79,10 +97,16 @@ class DeliveryMessageManager(BaseMessageManager):
             "enter_pp_address": "Ingrese la <b>Dirección Completa</b>:",
             "select_pp_type": "Seleccione el <b>Tipo de Recogida</b>:",
             "invalid_type": "Tipo inválido.",
-            "enter_pp_hours": "Seleccionado: {type}\n\nIngrese <b>Horario de Atención</b> (ej. 'Lun-Vie 9-18'):",
+            "enter_pp_hours": (
+                "Seleccionado: {type}\n\n"
+                "Ingrese <b>Horario de Atención</b> (ej. 'Lun-Vie 9-18'):"
+            ),
             "pp_created": "✅ ¡Punto de recogida <b>{name}</b> creado exitosamente!",
             # Delivery Types
-            "dt_list_text": "<b>🚚 Tipos de Entrega</b>\nToque para cambiar disponibilidad.\n⚪ = Inactivo/No Configurado\n✅ = Activo",
+            "dt_list_text": (
+                "<b>🚚 Tipos de Entrega</b>\nToque para cambiar disponibilidad.\n"
+                "⚪ = Inactivo/No Configurado\n✅ = Activo"
+            ),
             "invalid_dt": "Tipo de entrega inválido.",
             "dt_toggled": "{type} ahora está {status}",
             "active": "Activo",
@@ -114,9 +138,15 @@ class DeliveryMessageManager(BaseMessageManager):
             "mode_pickup_only": "Только Самовывоз",
             "toggled_msg": "Режим доставки установлен: {status}",
             # Pickup Points
-            "pp_list_text": "<b>📍 Пункты Выдачи</b>\nВыберите пункт для изменения статуса или удаления.",
+            "pp_list_text": (
+                "<b>📍 Пункты Выдачи</b>\n"
+                "Выберите пункт для изменения статуса или удаления."
+            ),
             "pp_not_found": "Пункт выдачи не найден.",
-            "pp_details": "<b>📍 {name}</b>\n\nАдрес: {address}\nТип: {type}\nЧасы работы: {hours}\nСтатус: {status}",
+            "pp_details": (
+                "<b>📍 {name}</b>\n\nАдрес: {address}\nТип: {type}\n"
+                "Часы работы: {hours}\nСтатус: {status}"
+            ),
             "status_active": "Активен ✅",
             "status_inactive": "Неактивен ❌",
             "status_updated": "Статус обновлен.",
@@ -127,10 +157,16 @@ class DeliveryMessageManager(BaseMessageManager):
             "enter_pp_address": "Введите <b>Полный Адрес</b>:",
             "select_pp_type": "Выберите <b>Тип Пункта</b>:",
             "invalid_type": "Неверный тип.",
-            "enter_pp_hours": "Выбрано: {type}\n\nВведите <b>Часы Работы</b> (например, 'Пн-Пт 9-18'):",
+            "enter_pp_hours": (
+                "Выбрано: {type}\n\n"
+                "Введите <b>Часы Работы</b> (например, 'Пн-Пт 9-18'):"
+            ),
             "pp_created": "✅ Пункт выдачи <b>{name}</b> успешно создан!",
             # Delivery Types
-            "dt_list_text": "<b>🚚 Типы Доставки</b>\nНажмите для переключения доступности.\n⚪ = Неактивно/Не настроено\n✅ = Активно",
+            "dt_list_text": (
+                "<b>🚚 Типы Доставки</b>\nНажмите для переключения доступности.\n"
+                "⚪ = Неактивно/Не настроено\n✅ = Активно"
+            ),
             "invalid_dt": "Неверный тип доставки.",
             "dt_toggled": "{type} теперь {status}",
             "active": "Активен",

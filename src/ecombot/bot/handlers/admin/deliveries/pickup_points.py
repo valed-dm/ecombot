@@ -164,18 +164,14 @@ async def cb_view_pickup_addresses(query: CallbackQuery, session: AsyncSession):
 
 @router.callback_query(DeliveryAdminCallbackFactory.filter(F.action == "pp_add"))
 async def cb_add_pickup_start(query: CallbackQuery, state: FSMContext):
-    await query.message.edit_text(
-        manager.get_message("delivery", "enter_pp_name")
-    )
+    await query.message.edit_text(manager.get_message("delivery", "enter_pp_name"))
     await state.set_state(PickupPointStates.waiting_for_name)
 
 
 @router.message(PickupPointStates.waiting_for_name)
 async def process_pp_name(message: Message, state: FSMContext):
     await state.update_data(name=message.text)
-    await message.answer(
-        manager.get_message("delivery", "enter_pp_address")
-    )
+    await message.answer(manager.get_message("delivery", "enter_pp_address"))
     await state.set_state(PickupPointStates.waiting_for_address)
 
 

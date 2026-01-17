@@ -74,6 +74,8 @@ async def cb_toggle_delivery_type(
     type_text = manager.get_message("delivery", dt_enum.message_key)
 
     await query.answer(
-        manager.get_message("delivery", "dt_toggled", type=type_text, status=status_text)
+        manager.get_message(
+            "delivery", "dt_toggled", type=type_text, status=status_text
+        )
     )
     await cb_list_delivery_types(query, session)
