@@ -134,6 +134,17 @@ class Category(Base, TimestampMixin, SoftDeleteMixin):
     products: Mapped[list[Product]] = relationship(back_populates="category")
 
 
+class ProductImage(Base, TimestampMixin):
+    __tablename__ = "product_images"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
+    file_id: Mapped[str] = mapped_column(String(500))  # Telegram file_id or URL
+    is_main: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    product: Mapped["Product"] = relationship(back_populates="images")
+
+
 class Product(Base, TimestampMixin, SoftDeleteMixin):
     __tablename__ = "products"
     __table_args__ = (
@@ -146,10 +157,12 @@ class Product(Base, TimestampMixin, SoftDeleteMixin):
     description: Mapped[str] = mapped_column(Text)
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     stock: Mapped[int] = mapped_column(Integer)
-    image_url: Mapped[str | None] = mapped_column(String(500))
     category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"))
 
     category: Mapped[Category] = relationship(back_populates="products")
+    images: Mapped[list["ProductImage"]] = relationship(
+        back_populates="product", cascade="all, delete-orphan"
+    )
 
 
 class Cart(Base, TimestampMixin):

@@ -40,6 +40,14 @@ class CategoryDTO(BaseDTO):
     description: str | None = None
 
 
+class ProductImageDTO(BaseDTO):
+    """DTO for a product image."""
+
+    id: int
+    file_id: str
+    is_main: bool
+
+
 class ProductDTO(BaseDTO):
     """DTO for a single product. This is what the user sees."""
 
@@ -47,7 +55,7 @@ class ProductDTO(BaseDTO):
     name: str
     description: str
     price: Decimal = Field(gt=0)
-    image_url: str | None = None
+    images: list[ProductImageDTO] = []
     category: CategoryDTO
     deleted_at: datetime | None = None
 
@@ -131,14 +139,9 @@ class OrderDTO(BaseDTO):
     @property
     def total_price(self) -> Decimal:
         """Calculates the total price of a confirmed order."""
-        items_total = (
-            sum(
-                (item.price * item.quantity for item in self.items),
-                start=Decimal("0.00"),
-            )
-            if self.items
-            else Decimal("0.00")
-        )
+        items_total = sum(
+            (item.price * item.quantity for item in self.items), start=Decimal("0.00")
+        ) if self.items else Decimal("0.00")
         return items_total + self.delivery_fee
 
     @property
