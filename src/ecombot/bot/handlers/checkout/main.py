@@ -87,7 +87,8 @@ async def checkout_start_handler(
                     )
                 builder.adjust(1)
                 await callback_message.answer(
-                    "📍 Please select a pickup point:", reply_markup=builder.as_markup()
+                    manager.get_message("delivery", "select_pickup_point"),
+                    reply_markup=builder.as_markup(),
                 )
                 await state.set_state(CheckoutFSM.choosing_pickup_fast)
             elif len(pickup_points) == 1:
@@ -101,7 +102,9 @@ async def checkout_start_handler(
                 await callback_message.answer(confirmation_text, reply_markup=keyboard)
                 await state.set_state(CheckoutFSM.confirm_fast_path)
             else:
-                await callback_message.answer("⚠️ Error: No pickup points available.")
+                await callback_message.answer(
+                    manager.get_message("delivery", "error_no_pickup_points")
+                )
 
     else:
         # --- SLOW PATH ---

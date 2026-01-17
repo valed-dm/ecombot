@@ -9,6 +9,7 @@ from ..messages.cart import CartMessageManager
 from ..messages.catalog import CatalogMessageManager
 from ..messages.checkout import CheckoutMessageManager
 from ..messages.common import CommonMessageManager
+from ..messages.delivery import DeliveryMessageManager
 from ..messages.keyboards import KeyboardMessageManager
 from ..messages.orders import OrdersMessageManager
 from ..messages.profile import ProfileMessageManager
@@ -34,6 +35,7 @@ class CentralizedManager:
             "catalog": CatalogMessageManager(default_language),
             "cart": CartMessageManager(default_language),
             "checkout": CheckoutMessageManager(default_language),
+            "delivery": DeliveryMessageManager(default_language),
             "keyboards": KeyboardMessageManager(default_language),
             "orders": OrdersMessageManager(default_language),
             "profile": ProfileMessageManager(default_language),

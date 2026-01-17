@@ -47,7 +47,9 @@ async def fast_path_pickup_selected(
     pp_id = callback_data.pickup_point_id
     pickup_point = await session.get(PickupPoint, pp_id)
     if not pickup_point:
-        await query.answer("Invalid pickup point.", show_alert=True)
+        await query.answer(
+            manager.get_message("delivery", "pp_not_found"), show_alert=True
+        )
         return
 
     await state.update_data(pickup_point_id=pp_id)

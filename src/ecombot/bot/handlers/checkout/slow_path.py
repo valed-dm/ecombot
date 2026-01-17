@@ -93,7 +93,8 @@ async def get_phone_handler(
                 )
             builder.adjust(1)
             await message.answer(
-                "📍 Please select a pickup point:", reply_markup=builder.as_markup()
+                manager.get_message("delivery", "select_pickup_point"),
+                reply_markup=builder.as_markup(),
             )
             await state.set_state(CheckoutFSM.choosing_pickup_slow)
         elif len(pickup_points) == 1:
@@ -112,7 +113,9 @@ async def get_phone_handler(
             )
             await state.set_state(CheckoutFSM.confirm_slow_path)
         else:
-            await message.answer("⚠️ Error: No pickup points available.")
+            await message.answer(
+                manager.get_message("delivery", "error_no_pickup_points")
+            )
 
 
 @router.callback_query(
@@ -129,7 +132,9 @@ async def slow_path_pickup_selected(
     pp_id = callback_data.pickup_point_id
     pickup_point = await session.get(PickupPoint, pp_id)
     if not pickup_point:
-        await query.answer("Invalid pickup point.", show_alert=True)
+        await query.answer(
+            manager.get_message("delivery", "pp_not_found"), show_alert=True
+        )
         return
 
     await state.update_data(

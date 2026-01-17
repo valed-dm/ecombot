@@ -66,6 +66,8 @@ class DeliveryMessageManager(BaseMessageManager):
             "delivery_national_priority": "National Priority",
             "delivery_special_scheduled": "Scheduled Delivery",
             "delivery_special_bulk": "Bulk Delivery",
+            "select_pickup_point": "📍 Please select a pickup point:",
+            "error_no_pickup_points": "⚠️ Error: No pickup points available.",
         }
 
         es_messages = {
@@ -126,6 +128,8 @@ class DeliveryMessageManager(BaseMessageManager):
             "delivery_national_priority": "Nacional Prioritario",
             "delivery_special_scheduled": "Entrega Programada",
             "delivery_special_bulk": "Entrega a Granel",
+            "select_pickup_point": "📍 Por favor seleccione un punto de recogida:",
+            "error_no_pickup_points": "⚠️ Error: No hay puntos de recogida disponibles.",
         }
 
         ru_messages = {
@@ -186,6 +190,8 @@ class DeliveryMessageManager(BaseMessageManager):
             "delivery_national_priority": "По стране (Приоритет)",
             "delivery_special_scheduled": "Запланированная доставка",
             "delivery_special_bulk": "Оптовая доставка",
+            "select_pickup_point": "📍 Пожалуйста, выберите пункт выдачи:",
+            "error_no_pickup_points": "⚠️ Ошибка: Нет доступных пунктов выдачи.",
         }
 
         self._messages = {
