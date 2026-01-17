@@ -14,8 +14,8 @@ import pytest
 from pytest_mock import MockerFixture
 
 from ecombot.bot.callback_data import OrderCallbackFactory
-from ecombot.bot.handlers.admin_orders import viewing
-from ecombot.bot.handlers.admin_orders.utils import InvalidQueryDataError
+from ecombot.bot.handlers.admin.orders import viewing
+from ecombot.bot.handlers.admin.orders.utils import InvalidQueryDataError
 from ecombot.schemas.enums import OrderStatus
 
 

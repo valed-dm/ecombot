@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock
 import pytest
 from pytest_mock import MockerFixture
 
-from ecombot.bot.handlers.admin_orders import navigation
+from ecombot.bot.handlers.admin.orders import navigation
 
 
 @pytest.fixture

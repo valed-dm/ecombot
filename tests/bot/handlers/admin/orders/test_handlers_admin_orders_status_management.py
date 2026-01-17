@@ -13,8 +13,8 @@ from unittest.mock import MagicMock
 import pytest
 from pytest_mock import MockerFixture
 
-from ecombot.bot.handlers.admin_orders import status_management
-from ecombot.bot.handlers.admin_orders.utils import InvalidQueryDataError
+from ecombot.bot.handlers.admin.orders import status_management
+from ecombot.bot.handlers.admin.orders.utils import InvalidQueryDataError
 from ecombot.schemas.enums import OrderStatus
 
 

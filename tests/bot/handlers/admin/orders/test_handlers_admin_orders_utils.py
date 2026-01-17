@@ -13,7 +13,7 @@ from unittest.mock import MagicMock
 import pytest
 from pytest_mock import MockerFixture
 
-from ecombot.bot.handlers.admin_orders import utils
+from ecombot.bot.handlers.admin.orders import utils
 from ecombot.schemas.enums import OrderStatus
 
 
