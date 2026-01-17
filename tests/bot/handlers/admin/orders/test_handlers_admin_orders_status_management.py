@@ -22,7 +22,7 @@ from ecombot.schemas.enums import OrderStatus
 def mock_manager(mocker: MockerFixture):
     """Mocks the central manager."""
     manager = mocker.patch(
-        "ecombot.bot.handlers.admin_orders.status_management.manager"
+        "ecombot.bot.handlers.admin.orders.status_management.manager"
     )
     manager.get_message.return_value = "Message text"
     return manager
@@ -32,7 +32,7 @@ def mock_manager(mocker: MockerFixture):
 def mock_order_service(mocker: MockerFixture):
     """Mocks the order service."""
     return mocker.patch(
-        "ecombot.bot.handlers.admin_orders.status_management.order_service"
+        "ecombot.bot.handlers.admin.orders.status_management.order_service"
     )
 
 
@@ -40,7 +40,7 @@ def mock_order_service(mocker: MockerFixture):
 def mock_notification_service(mocker: MockerFixture):
     """Mocks the notification service."""
     mock = mocker.patch(
-        "ecombot.bot.handlers.admin_orders.status_management.notification_service"
+        "ecombot.bot.handlers.admin.orders.status_management.notification_service"
     )
     mock.send_order_status_update = AsyncMock()
     return mock
@@ -50,7 +50,7 @@ def mock_notification_service(mocker: MockerFixture):
 def mock_send_details(mocker: MockerFixture):
     """Mocks the send_order_details_view helper."""
     return mocker.patch(
-        "ecombot.bot.handlers.admin_orders.status_management.send_order_details_view",
+        "ecombot.bot.handlers.admin.orders.status_management.send_order_details_view",
         new_callable=AsyncMock,
     )
 
@@ -58,7 +58,7 @@ def mock_send_details(mocker: MockerFixture):
 @pytest.fixture
 def mock_crud(mocker: MockerFixture):
     """Mocks the CRUD operations."""
-    return mocker.patch("ecombot.bot.handlers.admin_orders.status_management.crud")
+    return mocker.patch("ecombot.bot.handlers.admin.orders.status_management.crud")
 
 
 async def test_change_order_status_success(
@@ -145,7 +145,7 @@ async def test_change_order_status_service_error(
     # Mock DTO validation
     fake_dto = MagicMock()
     mocker.patch(
-        "ecombot.bot.handlers.admin_orders.status_management.OrderDTO.model_validate",
+        "ecombot.bot.handlers.admin.orders.status_management.OrderDTO.model_validate",
         return_value=fake_dto,
     )
 

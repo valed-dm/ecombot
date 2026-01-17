@@ -20,14 +20,14 @@ from ecombot.schemas.enums import OrderStatus
 @pytest.fixture
 def mock_manager(mocker: MockerFixture):
     """Mocks the central manager."""
-    return mocker.patch("ecombot.bot.handlers.admin_orders.utils.manager")
+    return mocker.patch("ecombot.bot.handlers.admin.orders.utils.manager")
 
 
 @pytest.fixture
 def mock_keyboards(mocker: MockerFixture):
     """Mocks the keyboard generator."""
     return mocker.patch(
-        "ecombot.bot.handlers.admin_orders.utils.get_admin_order_details_keyboard"
+        "ecombot.bot.handlers.admin.orders.utils.get_admin_order_details_keyboard"
     )
 
 

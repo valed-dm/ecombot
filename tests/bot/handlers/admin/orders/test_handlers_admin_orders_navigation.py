@@ -17,7 +17,7 @@ from ecombot.bot.handlers.admin.orders import navigation
 def mock_send_panel(mocker: MockerFixture):
     """Mocks the send_main_admin_panel helper."""
     return mocker.patch(
-        "ecombot.bot.handlers.admin_orders.navigation.send_main_admin_panel"
+        "ecombot.bot.handlers.admin.orders.navigation.send_main_admin_panel"
     )
 
 

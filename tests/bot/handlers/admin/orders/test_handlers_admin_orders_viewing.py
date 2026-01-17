@@ -22,7 +22,7 @@ from ecombot.schemas.enums import OrderStatus
 @pytest.fixture
 def mock_manager(mocker: MockerFixture):
     """Mocks the central manager."""
-    manager = mocker.patch("ecombot.bot.handlers.admin_orders.viewing.manager")
+    manager = mocker.patch("ecombot.bot.handlers.admin.orders.viewing.manager")
     manager.get_message.return_value = "Message text"
     return manager
 
@@ -30,20 +30,20 @@ def mock_manager(mocker: MockerFixture):
 @pytest.fixture
 def mock_order_service(mocker: MockerFixture):
     """Mocks the order service."""
-    return mocker.patch("ecombot.bot.handlers.admin_orders.viewing.order_service")
+    return mocker.patch("ecombot.bot.handlers.admin.orders.viewing.order_service")
 
 
 @pytest.fixture
 def mock_crud(mocker: MockerFixture):
     """Mocks the CRUD operations."""
-    return mocker.patch("ecombot.bot.handlers.admin_orders.viewing.crud")
+    return mocker.patch("ecombot.bot.handlers.admin.orders.viewing.crud")
 
 
 @pytest.fixture
 def mock_send_details(mocker: MockerFixture):
     """Mocks the send_order_details_view helper."""
     return mocker.patch(
-        "ecombot.bot.handlers.admin_orders.viewing.send_order_details_view",
+        "ecombot.bot.handlers.admin.orders.viewing.send_order_details_view",
         new_callable=AsyncMock,
     )
 
@@ -52,10 +52,10 @@ def mock_send_details(mocker: MockerFixture):
 def mock_keyboards(mocker: MockerFixture):
     """Mocks the keyboard generators."""
     mocker.patch(
-        "ecombot.bot.handlers.admin_orders.viewing.get_admin_order_filters_keyboard"
+        "ecombot.bot.handlers.admin.orders.viewing.get_admin_order_filters_keyboard"
     )
     mocker.patch(
-        "ecombot.bot.handlers.admin_orders.viewing.get_admin_orders_list_keyboard"
+        "ecombot.bot.handlers.admin.orders.viewing.get_admin_orders_list_keyboard"
     )
 
 
@@ -138,7 +138,7 @@ async def test_admin_view_order_details_handler_success(
 
     fake_dto = MagicMock()
     mocker.patch(
-        "ecombot.bot.handlers.admin_orders.viewing.OrderDTO.model_validate",
+        "ecombot.bot.handlers.admin.orders.viewing.OrderDTO.model_validate",
         return_value=fake_dto,
     )
 
