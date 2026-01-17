@@ -21,7 +21,7 @@ from ecombot.bot.callback_data import AdminCallbackFactory
 from ecombot.bot.callback_data import CatalogCallbackFactory
 from ecombot.bot.callback_data import EditProductCallbackFactory
 from ecombot.bot.handlers.admin.products import edit
-from ecombot.bot.handlers.admin.states import EditProduct
+from ecombot.bot.handlers.admin.products.states import EditProduct
 from ecombot.db.models import Category
 from ecombot.db.models import Product
 

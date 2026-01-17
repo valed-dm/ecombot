@@ -18,7 +18,7 @@ from ecombot.bot.callback_data import AdminCallbackFactory
 from ecombot.bot.callback_data import CatalogCallbackFactory
 from ecombot.bot.callback_data import ConfirmationCallbackFactory
 from ecombot.bot.handlers.admin.products import delete
-from ecombot.bot.handlers.admin.states import DeleteProduct
+from ecombot.bot.handlers.admin.products.states import DeleteProduct
 from ecombot.db.models import Category
 from ecombot.db.models import Product
 

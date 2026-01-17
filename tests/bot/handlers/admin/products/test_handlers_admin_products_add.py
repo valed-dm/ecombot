@@ -23,7 +23,7 @@ from pytest_mock import MockerFixture
 from ecombot.bot.callback_data import AdminCallbackFactory
 from ecombot.bot.callback_data import CatalogCallbackFactory
 from ecombot.bot.handlers.admin.products import add
-from ecombot.bot.handlers.admin.states import AddProduct
+from ecombot.bot.handlers.admin.products.states import AddProduct
 from ecombot.db.models import Category
 
 
