@@ -94,7 +94,11 @@ async def test_get_phone_handler_text(
     mock_manager, mock_keyboards, mock_session, mocker
 ):
     """Test receiving phone as text."""
-    mocker.patch("ecombot.bot.handlers.checkout.slow_path.settings.DELIVERY", True)
+    mocker.patch(
+        "ecombot.bot.handlers.checkout.slow_path.check_courier_availability",
+        return_value=True,
+        new_callable=AsyncMock,
+    )
     message = AsyncMock()
     message.text = "1234567890"
     message.contact = None
@@ -103,7 +107,8 @@ async def test_get_phone_handler_text(
 
     await slow_path.get_phone_handler(message, mock_session, state, db_user)
 
-    state.update_data.assert_awaited_once_with(phone="1234567890")
+    state.update_data.assert_any_call(phone="1234567890")
+    state.update_data.assert_any_call(is_pickup=False)
     message.answer.assert_awaited_once()
     state.set_state.assert_awaited_once_with(CheckoutFSM.getting_address)
 
@@ -112,7 +117,11 @@ async def test_get_phone_handler_contact(
     mock_manager, mock_keyboards, mock_session, mocker
 ):
     """Test receiving phone as contact."""
-    mocker.patch("ecombot.bot.handlers.checkout.slow_path.settings.DELIVERY", True)
+    mocker.patch(
+        "ecombot.bot.handlers.checkout.slow_path.check_courier_availability",
+        return_value=True,
+        new_callable=AsyncMock,
+    )
     message = AsyncMock()
     message.text = None
     contact = MagicMock(spec=Contact)
@@ -123,7 +132,8 @@ async def test_get_phone_handler_contact(
 
     await slow_path.get_phone_handler(message, mock_session, state, db_user)
 
-    state.update_data.assert_awaited_once_with(phone="9876543210")
+    state.update_data.assert_any_call(phone="9876543210")
+    state.update_data.assert_any_call(is_pickup=False)
     message.answer.assert_awaited_once()
     state.set_state.assert_awaited_once_with(CheckoutFSM.getting_address)
 
@@ -186,14 +196,13 @@ async def test_slow_path_confirm_handler_success(
     mocker,
 ):
     """Test confirming order in slow path."""
-    mocker.patch("ecombot.bot.handlers.checkout.slow_path.settings.DELIVERY", True)
     query = AsyncMock()
     callback_message = AsyncMock()
     state = AsyncMock(spec=FSMContext)
     db_user = MagicMock(spec=User)
     db_user.id = 1
 
-    state.get_data.return_value = {"phone": "123", "address": "Street"}
+    state.get_data.return_value = {"phone": "123", "address": "Street", "is_pickup": False}
 
     # Mock user service calls
     mock_user_service.update_profile_details = AsyncMock()
@@ -230,14 +239,13 @@ async def test_slow_path_confirm_handler_placement_error(
     mock_manager, mock_user_service, mock_order_service, mock_session, mocker
 ):
     """Test handling order placement error."""
-    mocker.patch("ecombot.bot.handlers.checkout.slow_path.settings.DELIVERY", True)
     query = AsyncMock()
     callback_message = AsyncMock()
     state = AsyncMock(spec=FSMContext)
     db_user = MagicMock(spec=User)
     db_user.id = 1
 
-    state.get_data.return_value = {"phone": "123", "address": "Street"}
+    state.get_data.return_value = {"phone": "123", "address": "Street", "is_pickup": False}
 
     # Setup mocks to pass until place_order
     mock_user_service.add_new_address = AsyncMock(return_value=MagicMock(id=1))

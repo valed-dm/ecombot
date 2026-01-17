@@ -85,9 +85,14 @@ async def test_checkout_start_handler_empty_cart(
 
 
 async def test_checkout_start_handler_fast_path(
-    mock_manager, mock_cart_service, mock_utils, mock_keyboards, mock_session
+    mock_manager, mock_cart_service, mock_utils, mock_keyboards, mock_session, mocker
 ):
     """Test fast path checkout (user has phone and default address)."""
+    mocker.patch(
+        "ecombot.bot.handlers.checkout.main.check_courier_availability",
+        return_value=True,
+        new_callable=AsyncMock,
+    )
     query = AsyncMock()
     callback_message = AsyncMock()
     state = AsyncMock()
@@ -111,7 +116,8 @@ async def test_checkout_start_handler_fast_path(
         query, mock_session, db_user, state, callback_message
     )
 
-    state.update_data.assert_awaited_once_with(default_address_id=1)
+    state.update_data.assert_any_call(is_pickup=False)
+    state.update_data.assert_any_call(default_address_id=1)
     callback_message.answer.assert_awaited_once()
     state.set_state.assert_awaited_once_with(CheckoutFSM.confirm_fast_path)
 

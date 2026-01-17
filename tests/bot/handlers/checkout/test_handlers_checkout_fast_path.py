@@ -49,9 +49,6 @@ async def test_fast_checkout_confirm_handler_success(
     mock_manager, mock_order_service, mock_notification_service, mock_session, mocker
 ):
     """Test successful order placement via fast path."""
-    # Force DELIVERY=True to test the address flow
-    mocker.patch("ecombot.bot.handlers.checkout.fast_path.settings.DELIVERY", True)
-
     query = AsyncMock()
     callback_message = AsyncMock()
     state = AsyncMock()
@@ -59,7 +56,7 @@ async def test_fast_checkout_confirm_handler_success(
     db_user.id = 123
 
     # Mock state data
-    state.get_data.return_value = {"default_address_id": 1}
+    state.get_data.return_value = {"default_address_id": 1, "is_pickup": False}
 
     # Mock DB address retrieval
     mock_address = MagicMock(spec=DeliveryAddress)
@@ -103,15 +100,12 @@ async def test_fast_checkout_confirm_handler_address_not_found(
     mock_manager, mock_order_service, mock_session, mocker
 ):
     """Test handling when the default address is missing."""
-    # Force DELIVERY=True to test the address flow
-    mocker.patch("ecombot.bot.handlers.checkout.fast_path.settings.DELIVERY", True)
-
     query = AsyncMock()
     callback_message = AsyncMock()
     state = AsyncMock()
     db_user = MagicMock(spec=User)
 
-    state.get_data.return_value = {"default_address_id": 1}
+    state.get_data.return_value = {"default_address_id": 1, "is_pickup": False}
     mock_session.get.return_value = None  # Address not found
 
     await fast_path.fast_checkout_confirm_handler(
@@ -127,15 +121,12 @@ async def test_fast_checkout_confirm_handler_placement_error(
     mock_manager, mock_order_service, mock_session, mocker
 ):
     """Test handling of OrderPlacementError (e.g., stock issues)."""
-    # Force DELIVERY=True to test the address flow
-    mocker.patch("ecombot.bot.handlers.checkout.fast_path.settings.DELIVERY", True)
-
     query = AsyncMock()
     callback_message = AsyncMock()
     state = AsyncMock()
     db_user = MagicMock(spec=User)
 
-    state.get_data.return_value = {"default_address_id": 1}
+    state.get_data.return_value = {"default_address_id": 1, "is_pickup": False}
     mock_session.get.return_value = MagicMock(spec=DeliveryAddress)
 
     mock_order_service.place_order.side_effect = OrderPlacementError("Stock error")
@@ -153,16 +144,13 @@ async def test_fast_checkout_confirm_handler_generic_error(
     mock_manager, mock_order_service, mock_session, mocker
 ):
     """Test handling of unexpected exceptions."""
-    # Force DELIVERY=True to test the address flow
-    mocker.patch("ecombot.bot.handlers.checkout.fast_path.settings.DELIVERY", True)
-
     query = AsyncMock()
     callback_message = AsyncMock()
     state = AsyncMock()
     db_user = MagicMock(spec=User)
     db_user.id = 123
 
-    state.get_data.return_value = {"default_address_id": 1}
+    state.get_data.return_value = {"default_address_id": 1, "is_pickup": False}
     mock_session.get.return_value = MagicMock(spec=DeliveryAddress)
 
     mock_order_service.place_order.side_effect = Exception("Boom")

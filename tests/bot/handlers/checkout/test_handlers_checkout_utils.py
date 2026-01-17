@@ -107,7 +107,7 @@ def test_determine_missing_info_address(mock_manager, mocker):
     mocker.patch("ecombot.bot.handlers.checkout.utils.settings.DELIVERY", True)
     user = MagicMock(spec=User, phone="123")
 
-    result = utils.determine_missing_info(user, None)
+    result = utils.determine_missing_info(user, None, courier_available=True)
     assert "[missing_address]" in result
     assert "[missing_phone]" not in result
 
@@ -117,7 +117,7 @@ def test_determine_missing_info_both(mock_manager, mocker):
     mocker.patch("ecombot.bot.handlers.checkout.utils.settings.DELIVERY", True)
     user = MagicMock(spec=User, phone=None)
 
-    result = utils.determine_missing_info(user, None)
+    result = utils.determine_missing_info(user, None, courier_available=True)
     assert "[missing_phone]" in result
     assert "[missing_address]" in result
 
@@ -153,7 +153,7 @@ def test_generate_fast_path_confirmation_text_pickup(mock_manager, mocker):
     user = MagicMock(spec=User, phone="555-1234")
     cart = MagicMock(spec=CartDTO, total_price=100.50)
 
-    text = utils.generate_fast_path_confirmation_text(user, None, cart)
+    text = utils.generate_fast_path_confirmation_text(user, None, cart, is_pickup=True)
 
     assert "Confirm Pickup: 555-1234" in text
     assert "100.50" in text
@@ -179,7 +179,7 @@ def test_generate_slow_path_confirmation_text_pickup(mock_manager, mocker):
     user_data = {"name": "John Doe", "phone": "555-9876"}
     cart = MagicMock(spec=CartDTO, total_price=50.00)
 
-    text = utils.generate_slow_path_confirmation_text(user_data, cart)
+    text = utils.generate_slow_path_confirmation_text(user_data, cart, is_pickup=True)
 
     assert "Confirm Pickup Slow: John Doe, 555-9876" in text
     assert "50.00" in text
