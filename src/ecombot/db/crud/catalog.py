@@ -246,7 +246,26 @@ async def update_product(
 async def add_product_image(
     session: AsyncSession, product_id: int, file_id: str, is_main: bool = False
 ) -> ProductImage:
-    """Adds a new image to a product."""
+    """Adds a new image to a product, avoiding duplicates."""
+    # Check if image already exists
+    stmt = select(ProductImage).where(
+        ProductImage.product_id == product_id, ProductImage.file_id == file_id
+    )
+    result = await session.execute(stmt)
+    existing_image = result.scalars().first()
+
+    if existing_image:
+        return existing_image
+
+    # If not explicitly set as main, check if the product has any main image
+    if not is_main:
+        stmt_main = select(ProductImage).where(
+            ProductImage.product_id == product_id, ProductImage.is_main.is_(True)
+        )
+        result_main = await session.execute(stmt_main)
+        if not result_main.scalars().first():
+            is_main = True
+
     new_image = ProductImage(product_id=product_id, file_id=file_id, is_main=is_main)
     session.add(new_image)
     await session.flush()

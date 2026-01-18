@@ -395,6 +395,15 @@ async def edit_product_finish_images(
             product = await crud.get_product(session, product_id)
             if product and product.images:
                 for img in product.images:
+                    try:
+                        file_path = Path(img.file_id)
+                        if file_path.exists() and file_path.is_file():
+                            file_path.unlink()
+                    except Exception as e:
+                        log.warning(
+                            f"Failed to delete old image file {img.file_id}: {e}"
+                        )
+
                     await crud.delete_product_image(session, img.id)
 
         for img_path in images:
