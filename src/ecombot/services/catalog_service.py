@@ -14,6 +14,7 @@ from ecombot.db import crud
 from ecombot.schemas.dto import AdminProductDTO
 from ecombot.schemas.dto import CategoryDTO
 from ecombot.schemas.dto import ProductDTO
+from ecombot.schemas.dto import ProductImageDTO
 from ecombot.services.cart_service import ProductNotFoundError
 
 
@@ -107,7 +108,7 @@ async def add_new_product(
     price: Decimal,
     stock: int,
     category_id: int,
-    image_url: Optional[str] = None,
+    images: Optional[List[str]] = None,
 ) -> ProductDTO:
     """
     Service-level function to handle the business logic of adding a new product.
@@ -123,7 +124,7 @@ async def add_new_product(
         price=price,
         stock=stock,
         category_id=category_id,
-        image_url=image_url,
+        images=images,
     )
 
     refreshed_product = await crud.get_product(session, product.id)
@@ -161,3 +162,11 @@ async def delete_product_by_id(session: AsyncSession, product_id: int) -> bool:
     """
     success = await crud.delete_product(session, product_id)
     return success
+
+
+async def add_product_image(
+    session: AsyncSession, product_id: int, file_id: str, is_main: bool = False
+) -> ProductImageDTO:
+    """Adds a new image to a product."""
+    image = await crud.add_product_image(session, product_id, file_id, is_main)
+    return ProductImageDTO.model_validate(image)
