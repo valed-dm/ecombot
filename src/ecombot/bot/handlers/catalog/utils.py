@@ -73,11 +73,8 @@ async def send_product_with_photo(
             else:
                 # Multiple images: send as media group
                 media_group = []
-                for i, img in enumerate(images):
-                    media = InputMediaPhoto(
-                        media=FSInputFile(path=img.file_id),
-                        caption=text if i == 0 else None,
-                    )
+                for img in images:
+                    media = InputMediaPhoto(media=FSInputFile(path=img.file_id))
                     media_group.append(media)
 
                 await bot.send_media_group(
@@ -85,7 +82,7 @@ async def send_product_with_photo(
                 )
                 # Send keyboard as a separate message
                 await bot.send_message(
-                    chat_id=callback_message.chat.id, text="⬇️", reply_markup=keyboard
+                    chat_id=callback_message.chat.id, text=text, reply_markup=keyboard
                 )
                 await callback_message.delete()
                 return
