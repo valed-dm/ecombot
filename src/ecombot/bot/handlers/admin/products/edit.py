@@ -2,20 +2,26 @@
 
 import decimal
 from decimal import Decimal
+from pathlib import Path
 import uuid
 
 from aiogram import Bot
 from aiogram import F
 from aiogram import Router
+from aiogram.filters import Command
+from aiogram.filters import or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 from aiogram.types import Message
 from aiogram.types import PhotoSize
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ecombot.bot.callback_data import AddProductImageCallbackFactory
 from ecombot.bot.callback_data import AdminCallbackFactory
 from ecombot.bot.callback_data import CatalogCallbackFactory
 from ecombot.bot.callback_data import EditProductCallbackFactory
+from ecombot.bot.keyboards.admin import get_add_product_image_keyboard
 from ecombot.bot.keyboards.admin import get_admin_panel_keyboard
 from ecombot.bot.keyboards.admin import get_edit_product_menu_keyboard
 from ecombot.bot.keyboards.catalog import get_catalog_categories_keyboard
@@ -23,6 +29,7 @@ from ecombot.bot.keyboards.catalog import get_catalog_products_keyboard
 from ecombot.bot.keyboards.common import get_cancel_keyboard
 from ecombot.config import settings
 from ecombot.core.manager import central_manager as manager
+from ecombot.db import crud
 from ecombot.logging_setup import log
 from ecombot.services import catalog_service
 
@@ -188,13 +195,45 @@ async def edit_product_choose_field(
     field = callback_data.action
 
     if field == "change_photo":
-        await callback_message.edit_text(
-            manager.get_message("admin_products", "edit_product_image_prompt"),
-            reply_markup=get_cancel_keyboard(),
+        builder = InlineKeyboardBuilder()
+        builder.button(
+            text="➕ Add New",
+            callback_data=EditProductCallbackFactory(
+                action="photo_add",
+                product_id=callback_data.product_id,
+            ),
         )
-        await state.update_data(edit_field="image_url")
+        builder.button(
+            text="🔄 Replace All",
+            callback_data=EditProductCallbackFactory(
+                action="photo_replace",
+                product_id=callback_data.product_id,
+            ),
+        )
+        builder.adjust(2)
+
+        await callback_message.edit_text(
+            "📸 <b>Manage Photos</b>\n\nChoose an action:",
+            reply_markup=builder.as_markup(),
+        )
+        await query.answer()
+        return
+
+    if field in ("photo_add", "photo_replace"):
+        action = "add" if field == "photo_add" else "replace"
+        await callback_message.edit_text(
+            manager.get_message("admin_products", "add_product_image_prompt"),
+            reply_markup=get_add_product_image_keyboard(),
+        )
+        await state.update_data(
+            edit_field="image_url", new_images=[], image_action=action
+        )
         await state.set_state(EditProduct.get_new_image)
-    else:
+        await query.answer()
+        return
+
+    # Handle other text fields
+    if field not in ["change_photo", "photo_add", "photo_replace"]:
         field_prompts = {
             "name": manager.get_message("admin_products", "edit_product_name_prompt"),
             "description": manager.get_message(
@@ -214,7 +253,7 @@ async def edit_product_choose_field(
         await state.update_data(edit_field=field)
         await state.set_state(EditProduct.get_new_value)
 
-    await query.answer()
+        await query.answer()
 
 
 @router.message(EditProduct.get_new_value, F.text)
@@ -304,28 +343,62 @@ async def edit_product_get_new_value(
 
 
 @router.message(EditProduct.get_new_image, F.photo)
-async def edit_product_get_new_image(
+async def edit_product_handle_photo(
     message: Message,
     state: FSMContext,
-    session: AsyncSession,
     bot: Bot,
 ):
-    """Step 5 (Edit Product): Processes new image and updates product."""
-    state_data = await state.get_data()
-    product_id = state_data.get("product_id")
-    product_name = state_data.get("product_name", "the product")
+    """Step 5a (Edit Product): Receives a photo, saves it, and waits for more."""
+    photo: PhotoSize = message.photo[-1]
+    settings.PRODUCT_IMAGE_DIR.mkdir(parents=True, exist_ok=True)
+    unique_filename = f"{uuid.uuid4()}.jpg"
+    destination = settings.PRODUCT_IMAGE_DIR / unique_filename
+    await bot.download(file=photo.file_id, destination=destination)
+    image_path = str(destination)
+
+    data = await state.get_data()
+    images = data.get("new_images", [])
+    images.append(image_path)
+    await state.update_data(new_images=images)
+
+    count = len(images)
+    await message.answer(
+        f"✅ Photo {count} saved. Send more or type /done.",
+        reply_markup=get_add_product_image_keyboard(),
+    )
+
+
+@router.message(EditProduct.get_new_image, or_f(Command("done"), Command("skip")))
+@router.callback_query(
+    EditProduct.get_new_image, AddProductImageCallbackFactory.filter()
+)
+async def edit_product_finish_images(
+    event: Message | CallbackQuery,
+    state: FSMContext,
+    session: AsyncSession,
+):
+    """Step 5b (Edit Product): Finishes image upload and updates product."""
+    if isinstance(event, CallbackQuery):
+        message = event.message
+        await event.answer()
+    else:
+        message = event
+
+    data = await state.get_data()
+    product_id = data.get("product_id")
+    product_name = data.get("product_name", "the product")
+    images = data.get("new_images", [])
+    image_action = data.get("image_action", "add")
 
     try:
-        # Save new image
-        photo: PhotoSize = message.photo[-1]
-        settings.PRODUCT_IMAGE_DIR.mkdir(parents=True, exist_ok=True)
-        unique_filename = f"{uuid.uuid4()}.jpg"
-        destination = settings.PRODUCT_IMAGE_DIR / unique_filename
-        await bot.download(file=photo.file_id, destination=destination)
-        image_path = str(destination)
+        if images and image_action == "replace":
+            product = await crud.get_product(session, product_id)
+            if product and product.images:
+                for img in product.images:
+                    await crud.delete_product_image(session, img.id)
 
-        # Update product
-        await catalog_service.add_product_image(session, product_id, image_path)
+        for img_path in images:
+            await catalog_service.add_product_image(session, product_id, img_path)
 
         await message.answer(
             manager.get_message(
@@ -335,6 +408,13 @@ async def edit_product_get_new_image(
         )
     except Exception as e:
         log.error(f"Failed to update product image {product_id}: {e}", exc_info=True)
+        # Cleanup
+        for img_path in images:
+            try:
+                Path(img_path).unlink()
+            except Exception:
+                pass
+
         await message.answer(
             manager.get_message("admin_products", "edit_product_image_error"),
             reply_markup=get_admin_panel_keyboard(),

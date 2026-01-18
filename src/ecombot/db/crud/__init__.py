@@ -13,8 +13,10 @@ from .cart import clear_cart
 from .cart import get_or_create_cart
 from .cart import get_or_create_cart_lean
 from .cart import set_cart_item_quantity
+from .catalog import add_product_image
 from .catalog import create_category
 from .catalog import create_product
+from .catalog import delete_product_image
 from .catalog import delete_product
 from .catalog import get_categories
 from .catalog import get_category_by_name
@@ -48,8 +50,10 @@ __all__ = [
     "get_or_create_cart_lean",
     "set_cart_item_quantity",
     # Catalog functions
+    "add_product_image",
     "create_category",
     "create_product",
+    "delete_product_image",
     "delete_product",
     "get_categories",
     "get_category_by_name",
