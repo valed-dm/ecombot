@@ -243,6 +243,8 @@ async def add_product_finish(
     if isinstance(event, CallbackQuery):
         message = event.message
         user = event.from_user
+        if message:
+            await message.edit_reply_markup(reply_markup=None)
         await event.answer()
     else:
         message = event
