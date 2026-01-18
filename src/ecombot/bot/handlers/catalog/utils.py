@@ -2,6 +2,7 @@
 
 from aiogram import Bot
 from aiogram.types import FSInputFile
+from aiogram.types import InputMediaPhoto
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -55,7 +56,44 @@ async def send_product_with_photo(
     )
     keyboard = get_product_details_keyboard(product)
 
-    if product.image_url:
+    # Check for new images list first
+    images = getattr(product, "images", [])
+    if images:
+        try:
+            if len(images) == 1:
+                photo_file = FSInputFile(path=images[0].file_id)
+                await bot.send_photo(
+                    chat_id=callback_message.chat.id,
+                    photo=photo_file,
+                    caption=text,
+                    reply_markup=keyboard,
+                )
+                await callback_message.delete()
+                return
+            else:
+                # Multiple images: send as media group
+                media_group = []
+                for i, img in enumerate(images):
+                    media = InputMediaPhoto(
+                        media=FSInputFile(path=img.file_id),
+                        caption=text if i == 0 else None,
+                    )
+                    media_group.append(media)
+
+                await bot.send_media_group(
+                    chat_id=callback_message.chat.id, media=media_group
+                )
+                # Send keyboard as a separate message
+                await bot.send_message(
+                    chat_id=callback_message.chat.id, text="⬇️", reply_markup=keyboard
+                )
+                await callback_message.delete()
+                return
+        except Exception as e:
+            log.warning(f"Failed to send images for product {product.id}: {e}")
+
+    # Fallback/Legacy: Check for single image_url
+    elif getattr(product, "image_url", None):
         try:
             photo_file = FSInputFile(path=product.image_url)
             await bot.send_photo(
