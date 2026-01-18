@@ -17,8 +17,10 @@ from aiogram.types import Message
 from aiogram.types import PhotoSize
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ecombot.bot.callback_data import AddProductImageCallbackFactory
 from ecombot.bot.callback_data import AdminCallbackFactory
 from ecombot.bot.callback_data import CatalogCallbackFactory
+from ecombot.bot.keyboards.admin import get_add_product_image_keyboard
 from ecombot.bot.keyboards.catalog import get_catalog_categories_keyboard
 from ecombot.bot.keyboards.common import get_cancel_keyboard
 from ecombot.config import settings
@@ -201,7 +203,7 @@ async def add_product_stock_step(message: Message, state: FSMContext):
     await state.update_data(stock=stock)
     await message.answer(
         manager.get_message("admin_products", "add_product_image_prompt"),
-        reply_markup=get_cancel_keyboard(),
+        reply_markup=get_add_product_image_keyboard(),
     )
     await state.set_state(AddProduct.get_image)
 
@@ -226,14 +228,26 @@ async def add_product_handle_photo(
     await state.update_data(images=images)
 
     count = len(images)
-    await message.answer(f"✅ Photo {count} saved. Send more or type /done.")
+    await message.answer(
+        f"✅ Photo {count} saved. Send more or type /done.",
+        reply_markup=get_add_product_image_keyboard(),
+    )
 
 
 @router.message(AddProduct.get_image, or_f(Command("done"), Command("skip")))
+@router.callback_query(AddProduct.get_image, AddProductImageCallbackFactory.filter())
 async def add_product_finish(
-    message: Message, state: FSMContext, session: AsyncSession
+    event: Message | CallbackQuery, state: FSMContext, session: AsyncSession
 ):
     """Step 7b (Final): Finishes upload and creates the product."""
+    if isinstance(event, CallbackQuery):
+        message = event.message
+        user = event.from_user
+        await event.answer()
+    else:
+        message = event
+        user = event.from_user
+
     product_data = await state.get_data()
     images = product_data.get("images", [])
 
@@ -263,8 +277,8 @@ async def add_product_finish(
                 log.error(f"Failed to cleanup image file {img_path}: {cleanup_e}")
 
         admin_id: str = "Unknown"
-        if message.from_user:
-            admin_id = str(message.from_user.id)
+        if user:
+            admin_id = str(user.id)
         log.error(
             f"Failed to create product. Admin: {admin_id}. Error: {e}",
             exc_info=True,

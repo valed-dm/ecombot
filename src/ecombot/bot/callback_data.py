@@ -50,6 +50,12 @@ class EditProductCallbackFactory(CallbackData, prefix="edit_prod"):
     product_id: int
 
 
+class AddProductImageCallbackFactory(CallbackData, prefix="add_prod_img"):
+    """CallbackData for add product image step (done/skip)."""
+
+    action: str  # "done", "skip"
+
+
 class ConfirmationCallbackFactory(CallbackData, prefix="confirm"):
     action: str  # "delete_product" or "delete_category"
     item_id: int  # product_id or category_id

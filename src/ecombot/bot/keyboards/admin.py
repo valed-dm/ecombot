@@ -7,6 +7,7 @@ from ecombot.core.manager import central_manager as manager
 from ecombot.schemas.dto import OrderDTO
 from ecombot.schemas.enums import OrderStatus
 
+from ..callback_data import AddProductImageCallbackFactory
 from ..callback_data import AdminCallbackFactory
 from ..callback_data import AdminNavCallbackFactory
 from ..callback_data import DeliveryAdminCallbackFactory
@@ -220,5 +221,20 @@ def get_edit_product_menu_keyboard(
         ),
     )
 
+    builder.adjust(2)
+    return builder.as_markup()
+
+
+def get_add_product_image_keyboard() -> InlineKeyboardMarkup:
+    """Builds a keyboard for the image upload step (Done/Skip)."""
+    builder = InlineKeyboardBuilder()
+    builder.button(
+        text=manager.get_message("keyboards", "done"),
+        callback_data=AddProductImageCallbackFactory(action="done"),
+    )
+    builder.button(
+        text=manager.get_message("keyboards", "skip"),
+        callback_data=AddProductImageCallbackFactory(action="skip"),
+    )
     builder.adjust(2)
     return builder.as_markup()
