@@ -155,19 +155,18 @@ async def edit_product_choose_product(
         category_id=product.category.id,
     )
 
-    admin_manager = manager.get_manager("admin_products")
-    price_label = admin_manager.get_message("edit_menu_price_label")
-    stock_label = admin_manager.get_message("edit_menu_stock_label")
-    stock_units = admin_manager.get_message("edit_menu_stock_units")
+    price_label = manager.get_message("admin_products", "edit_menu_price_label")
+    stock_label = manager.get_message("admin_products", "edit_menu_stock_label")
+    stock_units = manager.get_message("admin_products", "edit_menu_stock_units")
     currency = manager.get_message("common", "currency_symbol")
 
     text = (
-        f"{admin_manager.get_message('edit_menu_header')}\n\n"
+        f"{manager.get_message('admin_products', 'edit_menu_header')}\n\n"
         f"<b>{product.name}</b>\n"
         f"<i>{product.description}</i>\n\n"
         f"<b>{price_label}</b> {currency}{product.price:.2f}\n"
         f"<b>{stock_label}</b> {product.stock} {stock_units}\n\n"
-        f"{admin_manager.get_message('edit_menu_choose_field')}"
+        f"{manager.get_message('admin_products', 'edit_menu_choose_field')}"
     )
 
     await callback_message.edit_text(text, reply_markup=keyboard)
