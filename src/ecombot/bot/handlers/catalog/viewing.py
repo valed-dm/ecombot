@@ -3,6 +3,7 @@
 from aiogram import Bot
 from aiogram import F
 from aiogram import Router
+from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,6 +13,7 @@ from ecombot.bot.keyboards.catalog import get_catalog_products_keyboard
 from ecombot.core.manager import central_manager as manager
 from ecombot.services import catalog_service
 
+from .utils import cleanup_media_group
 from .utils import handle_message_with_photo_transition
 from .utils import send_product_with_photo
 
@@ -26,6 +28,7 @@ async def view_category_handler(
     session: AsyncSession,
     callback_message: Message,
     bot: Bot,
+    state: FSMContext,
 ):
     """
     Handler for when a user clicks on a category button OR the
@@ -38,6 +41,9 @@ async def view_category_handler(
     category_products_message = manager.get_message(
         "catalog", "category_products_message"
     )
+
+    await cleanup_media_group(state, bot, callback_message.chat.id)
+
     await handle_message_with_photo_transition(
         callback_message, bot, category_products_message, keyboard
     )
@@ -51,6 +57,7 @@ async def view_product_handler(
     session: AsyncSession,
     callback_message: Message,
     bot: Bot,
+    state: FSMContext,
 ):
     """
     Handler for when a user clicks on a specific product.
@@ -64,5 +71,5 @@ async def view_product_handler(
         await query.answer(error_message, show_alert=True)
         return
 
-    await send_product_with_photo(callback_message, bot, product)
+    await send_product_with_photo(callback_message, bot, product, state)
     await query.answer()

@@ -1,6 +1,7 @@
 """Utilities for catalog handlers."""
 
 from aiogram import Bot
+from aiogram.fsm.context import FSMContext
 from aiogram.types import FSInputFile
 from aiogram.types import InputMediaPhoto
 from aiogram.types import Message
@@ -14,12 +15,30 @@ from ecombot.schemas.dto import ProductDTO
 from ecombot.services import catalog_service
 
 
+async def cleanup_media_group(state: FSMContext, bot: Bot, chat_id: int):
+    """Deletes the previously sent media group messages, if any."""
+    data = await state.get_data()
+    media_ids = data.get("media_group_ids")
+    if media_ids:
+        try:
+            await bot.delete_messages(chat_id=chat_id, message_ids=media_ids)
+        except Exception as e:
+            log.warning(f"Failed to delete media group: {e}")
+        await state.update_data(media_group_ids=None)
+
+
 async def show_main_catalog(
-    event_target: Message, session: AsyncSession, is_edit: bool = False
+    event_target: Message,
+    session: AsyncSession,
+    is_edit: bool = False,
+    state: FSMContext = None,
 ):
     """
     Display the main catalog. Can either send a new message or edit an existing one.
     """
+    if state and isinstance(event_target, Message):
+        await cleanup_media_group(state, event_target.bot, event_target.chat.id)
+
     categories = await catalog_service.get_all_categories(session)
     keyboard = get_catalog_categories_keyboard(categories)
     welcome_message = manager.get_message("catalog", "welcome_message")
@@ -44,7 +63,7 @@ async def handle_message_with_photo_transition(
 
 
 async def send_product_with_photo(
-    callback_message: Message, bot: Bot, product: ProductDTO
+    callback_message: Message, bot: Bot, product: ProductDTO, state: FSMContext = None
 ):
     """Send product details with photo if available, fallback to text."""
     text = manager.get_message(
@@ -77,9 +96,14 @@ async def send_product_with_photo(
                     media = InputMediaPhoto(media=FSInputFile(path=img.file_id))
                     media_group.append(media)
 
-                await bot.send_media_group(
+                msgs = await bot.send_media_group(
                     chat_id=callback_message.chat.id, media=media_group
                 )
+                if state:
+                    await state.update_data(
+                        media_group_ids=[m.message_id for m in msgs]
+                    )
+
                 # Send keyboard as a separate message
                 await bot.send_message(
                     chat_id=callback_message.chat.id, text=text, reply_markup=keyboard
