@@ -197,14 +197,14 @@ async def edit_product_choose_field(
     if field == "change_photo":
         builder = InlineKeyboardBuilder()
         builder.button(
-            text="➕ Add New",
+            text=manager.get_message("admin_products", "edit_photo_add_btn"),
             callback_data=EditProductCallbackFactory(
                 action="photo_add",
                 product_id=callback_data.product_id,
             ),
         )
         builder.button(
-            text="🔄 Replace All",
+            text=manager.get_message("admin_products", "edit_photo_replace_btn"),
             callback_data=EditProductCallbackFactory(
                 action="photo_replace",
                 product_id=callback_data.product_id,
@@ -213,7 +213,7 @@ async def edit_product_choose_field(
         builder.adjust(2)
 
         await callback_message.edit_text(
-            "📸 <b>Manage Photos</b>\n\nChoose an action:",
+            manager.get_message("admin_products", "edit_photo_menu_title"),
             reply_markup=builder.as_markup(),
         )
         await query.answer()
@@ -363,7 +363,9 @@ async def edit_product_handle_photo(
 
     count = len(images)
     await message.answer(
-        f"✅ Photo {count} saved. Send more or type /done.",
+        manager.get_message(
+            "admin_products", "add_product_image_saved_count", count=count
+        ),
         reply_markup=get_add_product_image_keyboard(),
     )
 

@@ -16,8 +16,8 @@ from .cart import set_cart_item_quantity
 from .catalog import add_product_image
 from .catalog import create_category
 from .catalog import create_product
-from .catalog import delete_product_image
 from .catalog import delete_product
+from .catalog import delete_product_image
 from .catalog import get_categories
 from .catalog import get_category_by_name
 from .catalog import get_deleted_categories

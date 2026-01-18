@@ -229,7 +229,9 @@ async def add_product_handle_photo(
 
     count = len(images)
     await message.answer(
-        f"✅ Photo {count} saved. Send more or type /done.",
+        manager.get_message(
+            "admin_products", "add_product_image_saved_count", count=count
+        ),
         reply_markup=get_add_product_image_keyboard(),
     )
 

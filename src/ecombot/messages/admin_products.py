@@ -62,6 +62,9 @@ class AdminProductsMessageManager(BaseMessageManager):
                 "Excellent. Now, please upload photos for the product.\n"
                 "Send them one by one or as a group. Type /done when finished (or /skip)."
             ),
+            "add_product_image_saved_count": (
+                "✅ Photo {count} saved. Send more or type /done."
+            ),
             "add_product_success": "✅ Product '{name}' created successfully!",
             "add_product_error": (
                 "❌ An unexpected error occurred while creating the product. "
@@ -178,6 +181,9 @@ class AdminProductsMessageManager(BaseMessageManager):
             "edit_product_image_error": (
                 "❌ An unexpected error occurred while updating the product image."
             ),
+            "edit_photo_add_btn": "➕ Add New",
+            "edit_photo_replace_btn": "🔄 Replace All",
+            "edit_photo_menu_title": "📸 <b>Manage Photos</b>\n\nChoose an action:",
         }
 
         # Spanish messages
@@ -237,6 +243,9 @@ class AdminProductsMessageManager(BaseMessageManager):
             "add_product_image_prompt": (
                 "Excelente. Ahora, por favor sube las fotos del producto.\n"
                 "Envíalas una por una o como grupo. Escribe /done cuando termines (o /skip)."
+            ),
+            "add_product_image_saved_count": (
+                "✅ Foto {count} guardada. Envía más o escribe /done."
             ),
             "add_product_success": "✅ ¡Producto '{name}' creado exitosamente!",
             "add_product_error": (
@@ -368,6 +377,9 @@ class AdminProductsMessageManager(BaseMessageManager):
             "edit_product_image_error": (
                 "❌ Ocurrió un error inesperado al actualizar la imagen del producto."
             ),
+            "edit_photo_add_btn": "➕ Agregar Nueva",
+            "edit_photo_replace_btn": "🔄 Reemplazar Todo",
+            "edit_photo_menu_title": "📸 <b>Gestionar Fotos</b>\n\nElige una acción:",
         }
 
         # Russian messages
@@ -424,6 +436,9 @@ class AdminProductsMessageManager(BaseMessageManager):
             "add_product_image_prompt": (
                 "Отлично. Теперь загрузите фото товара.\n"
                 "Отправляйте их по одному или группой. Напишите /done, когда закончите (или /skip)."
+            ),
+            "add_product_image_saved_count": (
+                "✅ Фото {count} сохранено. Отправьте еще или напишите /done."
             ),
             "add_product_success": "✅ Товар '{name}' успешно создан!",
             "add_product_error": (
@@ -541,6 +556,9 @@ class AdminProductsMessageManager(BaseMessageManager):
             "edit_product_image_error": (
                 "❌ Произошла неожиданная ошибка при обновлении фото товара."
             ),
+            "edit_photo_add_btn": "➕ Добавить",
+            "edit_photo_replace_btn": "🔄 Заменить Все",
+            "edit_photo_menu_title": "📸 <b>Управление Фото</b>\n\nВыберите действие:",
         }
 
         self._messages = {
