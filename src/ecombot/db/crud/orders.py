@@ -105,7 +105,7 @@ async def get_order(session: AsyncSession, order_id: int) -> Optional[Order]:
             product_stmt = (
                 select(Product)
                 .where(Product.id == item.product_id)
-                .options(selectinload(Product.category))
+                .options(selectinload(Product.category), selectinload(Product.images))
             )
             product_result = await session.execute(product_stmt)
             item.product = product_result.scalars().first()
@@ -140,7 +140,7 @@ async def get_orders_by_user_pk(
             product_stmt = (
                 select(Product)
                 .where(Product.id == item.product_id)
-                .options(selectinload(Product.category))
+                .options(selectinload(Product.category), selectinload(Product.images))
             )
             product_result = await session.execute(product_stmt)
             item.product = product_result.scalars().first()
@@ -172,7 +172,7 @@ async def get_orders_by_status(
             product_stmt = (
                 select(Product)
                 .where(Product.id == item.product_id)
-                .options(selectinload(Product.category))
+                .options(selectinload(Product.category), selectinload(Product.images))
             )
             product_result = await session.execute(product_stmt)
             item.product = product_result.scalars().first()

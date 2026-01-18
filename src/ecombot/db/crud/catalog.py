@@ -18,6 +18,7 @@ from ..models import CartItem
 from ..models import Category
 from ..models import OrderItem
 from ..models import Product
+from ..models import ProductImage
 
 
 async def get_categories(session: AsyncSession) -> List[Category]:
@@ -112,12 +113,12 @@ async def soft_delete_category(session: AsyncSession, category_id: int) -> bool:
 async def get_product(session: AsyncSession, product_id: int) -> Optional[Product]:
     """
     Fetches a single active (non-deleted) product by its ID,
-    eagerly loading its category.
+    eagerly loading its category and images.
     """
     stmt = (
         select(Product)
         .where(Product.id == product_id, Product.deleted_at.is_(None))
-        .options(selectinload(Product.category))
+        .options(selectinload(Product.category), selectinload(Product.images))
     )
     result = await session.execute(stmt)
     return result.scalars().first()
@@ -134,7 +135,7 @@ async def get_products_by_category(
     stmt = (
         select(Product)
         .where(Product.category_id == category_id, Product.deleted_at.is_(None))
-        .options(selectinload(Product.category))
+        .options(selectinload(Product.category), selectinload(Product.images))
         .order_by(Product.name)
     )
     result = await session.execute(stmt)
@@ -148,7 +149,7 @@ async def create_product(
     price: Decimal,
     stock: int,
     category_id: int,
-    image_url: Optional[str] = None,
+    images: Optional[List[str]] = None,
 ) -> Product:
     """Creates a new product in the database."""
     # Validate business rules
@@ -175,10 +176,18 @@ async def create_product(
         price=price,
         stock=stock,
         category_id=category_id,
-        image_url=image_url,
     )
     session.add(new_product)
     await session.flush()
+
+    if images:
+        for i, file_id in enumerate(images):
+            session.add(
+                ProductImage(
+                    product_id=new_product.id, file_id=file_id, is_main=(i == 0)
+                )
+            )
+        await session.flush()
     return new_product
 
 
@@ -189,7 +198,7 @@ async def update_product(
     Updates a product's details and returns the updated object with
     all necessary relationships eagerly loaded for DTO conversion.
     """
-    allowed_fields = {"name", "description", "price", "stock", "image_url"}
+    allowed_fields = {"name", "description", "price", "stock"}
 
     filtered_data = {}
     for key, value in update_data.items():
@@ -234,6 +243,26 @@ async def update_product(
     return None
 
 
+async def add_product_image(
+    session: AsyncSession, product_id: int, file_id: str, is_main: bool = False
+) -> ProductImage:
+    """Adds a new image to a product."""
+    new_image = ProductImage(product_id=product_id, file_id=file_id, is_main=is_main)
+    session.add(new_image)
+    await session.flush()
+    return new_image
+
+
+async def delete_product_image(session: AsyncSession, image_id: int) -> bool:
+    """Deletes a product image."""
+    image = await session.get(ProductImage, image_id)
+    if image:
+        await session.delete(image)
+        await session.flush()
+        return True
+    return False
+
+
 async def get_product_including_deleted(
     session: AsyncSession, product_id: int
 ) -> Optional[Product]:
@@ -243,7 +272,7 @@ async def get_product_including_deleted(
     stmt = (
         select(Product)
         .where(Product.id == product_id)
-        .options(selectinload(Product.category))
+        .options(selectinload(Product.category), selectinload(Product.images))
     )
     result = await session.execute(stmt)
     return result.scalars().first()
@@ -399,7 +428,7 @@ async def get_deleted_products(session: AsyncSession) -> List[Product]:
     stmt = (
         select(Product)
         .where(Product.deleted_at.is_not(None))
-        .options(selectinload(Product.category))
+        .options(selectinload(Product.category), selectinload(Product.images))
         .order_by(Product.name)
     )
     result = await session.execute(stmt)
