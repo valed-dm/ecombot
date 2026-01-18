@@ -59,8 +59,8 @@ class AdminProductsMessageManager(BaseMessageManager):
                 "Invalid format. Please enter a whole number."
             ),
             "add_product_image_prompt": (
-                "Excellent. Now, please upload a photo for the product "
-                "(or send /skip)."
+                "Excellent. Now, please upload photos for the product.\n"
+                "Send them one by one or as a group. Type /done when finished (or /skip)."
             ),
             "add_product_success": "✅ Product '{name}' created successfully!",
             "add_product_error": (
@@ -235,8 +235,8 @@ class AdminProductsMessageManager(BaseMessageManager):
                 "Formato inválido. Por favor ingresa un número entero."
             ),
             "add_product_image_prompt": (
-                "Excelente. Ahora, por favor sube una foto para el producto "
-                "(o envía /skip)."
+                "Excelente. Ahora, por favor sube las fotos del producto.\n"
+                "Envíalas una por una o como grupo. Escribe /done cuando termines (o /skip)."
             ),
             "add_product_success": "✅ ¡Producto '{name}' creado exitosamente!",
             "add_product_error": (
@@ -386,8 +386,7 @@ class AdminProductsMessageManager(BaseMessageManager):
             ),
             "add_product_name_prompt": ("Отлично. Теперь, как называется товар?"),
             "add_product_name_empty": (
-                "Пожалуйста, введите корректное название товара "
-                "(не может быть пустым)."
+                "Пожалуйста, введите корректное название товара (не может быть пустым)."
             ),
             "add_product_name_too_long": (
                 "Название товара слишком длинное (максимум 255 символов)."
@@ -396,16 +395,14 @@ class AdminProductsMessageManager(BaseMessageManager):
                 "Понятно. Теперь, пожалуйста, предоставьте описание товара."
             ),
             "add_product_description_empty": (
-                "Пожалуйста, введите корректное описание товара "
-                "(не может быть пустым)."
+                "Пожалуйста, введите корректное описание товара (не может быть пустым)."
             ),
             "add_product_description_too_long": (
                 "Описание товара слишком длинное (максимум 1000 символов)."
             ),
             "add_product_price_prompt": ("Отлично. Какая цена? (например, 25.99)"),
             "add_product_price_invalid": (
-                "Цена должна быть положительным числом. "
-                "Пожалуйста, попробуйте снова."
+                "Цена должна быть положительным числом. Пожалуйста, попробуйте снова."
             ),
             "add_product_price_format_error": (
                 "Неверный формат цены. Пожалуйста, введите число (например, 25.99)."
@@ -425,8 +422,8 @@ class AdminProductsMessageManager(BaseMessageManager):
                 "Неверный формат. Пожалуйста, введите целое число."
             ),
             "add_product_image_prompt": (
-                "Отлично. Теперь, пожалуйста, загрузите фото товара "
-                "(или отправьте /skip)."
+                "Отлично. Теперь загрузите фото товара.\n"
+                "Отправляйте их по одному или группой. Напишите /done, когда закончите (или /skip)."
             ),
             "add_product_success": "✅ Товар '{name}' успешно создан!",
             "add_product_error": (
@@ -519,11 +516,10 @@ class AdminProductsMessageManager(BaseMessageManager):
             "edit_product_stock_prompt": "Введите новое количество на складе:",
             "edit_product_image_prompt": "Пожалуйста, загрузите новое фото товара:",
             "edit_product_value_empty": (
-                "Пожалуйста, введите корректное значение " "(не может быть пустым)."
+                "Пожалуйста, введите корректное значение (не может быть пустым)."
             ),
             "edit_product_price_invalid": (
-                "Цена должна быть положительным числом. "
-                "Пожалуйста, попробуйте снова."
+                "Цена должна быть положительным числом. Пожалуйста, попробуйте снова."
             ),
             "edit_product_stock_negative": (
                 "Количество на складе не может быть отрицательным. "

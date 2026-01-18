@@ -326,9 +326,7 @@ async def edit_product_get_new_image(
         image_path = str(destination)
 
         # Update product
-        await catalog_service.update_product_details(
-            session, product_id, {"image_url": image_path}
-        )
+        await catalog_service.add_product_image(session, product_id, image_path)
 
         await message.answer(
             manager.get_message(

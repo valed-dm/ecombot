@@ -206,25 +206,36 @@ async def add_product_stock_step(message: Message, state: FSMContext):
     await state.set_state(AddProduct.get_image)
 
 
-@router.message(AddProduct.get_image, or_f(F.photo, Command("skip")))
-async def add_product_get_image(
+@router.message(AddProduct.get_image, F.photo)
+async def add_product_handle_photo(
     message: Message,
     state: FSMContext,
-    session: AsyncSession,
     bot: Bot,
 ):
-    """Step 7 (Final): Receives the photo (or /skip) and creates the product."""
-    image_path: str | None = None
-    if message.photo:
-        photo: PhotoSize = message.photo[-1]
-        settings.PRODUCT_IMAGE_DIR.mkdir(parents=True, exist_ok=True)
-        unique_filename = f"{uuid.uuid4()}.jpg"
-        destination = settings.PRODUCT_IMAGE_DIR / unique_filename
-        await bot.download(file=photo.file_id, destination=destination)
-        image_path = str(destination)
+    """Step 7a: Receives a photo, saves it, and waits for more."""
+    photo: PhotoSize = message.photo[-1]
+    settings.PRODUCT_IMAGE_DIR.mkdir(parents=True, exist_ok=True)
+    unique_filename = f"{uuid.uuid4()}.jpg"
+    destination = settings.PRODUCT_IMAGE_DIR / unique_filename
+    await bot.download(file=photo.file_id, destination=destination)
+    image_path = str(destination)
 
-    await state.update_data(image_url=image_path)
+    data = await state.get_data()
+    images = data.get("images", [])
+    images.append(image_path)
+    await state.update_data(images=images)
+
+    count = len(images)
+    await message.answer(f"✅ Photo {count} saved. Send more or type /done.")
+
+
+@router.message(AddProduct.get_image, or_f(Command("done"), Command("skip")))
+async def add_product_finish(
+    message: Message, state: FSMContext, session: AsyncSession
+):
+    """Step 7b (Final): Finishes upload and creates the product."""
     product_data = await state.get_data()
+    images = product_data.get("images", [])
 
     try:
         new_product = await catalog_service.add_new_product(
@@ -234,7 +245,7 @@ async def add_product_get_image(
             price=product_data["price"],
             stock=product_data["stock"],
             category_id=product_data["category_id"],
-            image_url=product_data["image_url"],
+            images=images,
         )
         await message.answer(
             manager.get_message(
@@ -243,12 +254,14 @@ async def add_product_get_image(
         )
 
     except Exception as e:
-        if image_path:
+        # Cleanup images on failure
+        for img_path in images:
             try:
-                Path(image_path).unlink()
-                log.info(f"Cleaned up orphaned image file: {image_path}")
+                Path(img_path).unlink()
+                log.info(f"Cleaned up orphaned image file: {img_path}")
             except OSError as cleanup_e:
-                log.error(f"Failed to cleanup image file {image_path}: {cleanup_e}")
+                log.error(f"Failed to cleanup image file {img_path}: {cleanup_e}")
+
         admin_id: str = "Unknown"
         if message.from_user:
             admin_id = str(message.from_user.id)
