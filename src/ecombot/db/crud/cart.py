@@ -22,7 +22,7 @@ async def get_or_create_cart(session: AsyncSession, user_id: int) -> Cart:
         .options(
             selectinload(Cart.items)
             .selectinload(CartItem.product)
-            .selectinload(Product.category)
+            .options(selectinload(Product.category), selectinload(Product.images))
         )
     )
     result = await session.execute(stmt)
