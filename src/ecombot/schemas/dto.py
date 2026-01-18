@@ -45,6 +45,7 @@ class ProductImageDTO(BaseDTO):
 
     id: int
     file_id: str
+    telegram_file_id: str | None = None
     is_main: bool
 
 
@@ -139,9 +140,14 @@ class OrderDTO(BaseDTO):
     @property
     def total_price(self) -> Decimal:
         """Calculates the total price of a confirmed order."""
-        items_total = sum(
-            (item.price * item.quantity for item in self.items), start=Decimal("0.00")
-        ) if self.items else Decimal("0.00")
+        items_total = (
+            sum(
+                (item.price * item.quantity for item in self.items),
+                start=Decimal("0.00"),
+            )
+            if self.items
+            else Decimal("0.00")
+        )
         return items_total + self.delivery_fee
 
     @property

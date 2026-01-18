@@ -1,6 +1,7 @@
 """Utilities for catalog handlers."""
 
 from aiogram import Bot
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.types import FSInputFile
 from aiogram.types import InputMediaPhoto
@@ -10,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ecombot.bot.keyboards.catalog import get_catalog_categories_keyboard
 from ecombot.bot.keyboards.catalog import get_product_details_keyboard
 from ecombot.core.manager import central_manager as manager
+from ecombot.db import crud
 from ecombot.logging_setup import log
 from ecombot.schemas.dto import ProductDTO
 from ecombot.services import catalog_service
@@ -63,7 +65,11 @@ async def handle_message_with_photo_transition(
 
 
 async def send_product_with_photo(
-    callback_message: Message, bot: Bot, product: ProductDTO, state: FSMContext = None
+    callback_message: Message,
+    bot: Bot,
+    product: ProductDTO,
+    state: FSMContext = None,
+    session: AsyncSession = None,
 ):
     """Send product details with photo if available, fallback to text."""
     text = manager.get_message(
@@ -75,30 +81,84 @@ async def send_product_with_photo(
     )
     keyboard = get_product_details_keyboard(product)
 
-    # Check for new images list first
-    images = getattr(product, "images", [])
+    images = product.images
     if images:
         try:
             if len(images) == 1:
-                photo_file = FSInputFile(path=images[0].file_id)
-                await bot.send_photo(
-                    chat_id=callback_message.chat.id,
-                    photo=photo_file,
-                    caption=text,
-                    reply_markup=keyboard,
+                img = images[0]
+                # Try using cached Telegram ID first, otherwise fallback to local file
+                photo_input = (
+                    img.telegram_file_id
+                    if img.telegram_file_id
+                    else FSInputFile(path=img.file_id)
                 )
+
+                try:
+                    msg = await bot.send_photo(
+                        chat_id=callback_message.chat.id,
+                        photo=photo_input,
+                        caption=text,
+                        reply_markup=keyboard,
+                    )
+                except TelegramBadRequest:
+                    # Cache might be invalid/expired, retry with local file
+                    photo_input = FSInputFile(path=img.file_id)
+                    msg = await bot.send_photo(
+                        chat_id=callback_message.chat.id,
+                        photo=photo_input,
+                        caption=text,
+                        reply_markup=keyboard,
+                    )
+
+                # Update cache if we uploaded a fresh file
+                if isinstance(photo_input, FSInputFile) and session:
+                    new_file_id = msg.photo[-1].file_id
+                    await crud.update_product_image_telegram_id(
+                        session, img.id, new_file_id
+                    )
+
                 await callback_message.delete()
                 return
             else:
                 # Multiple images: send as media group
                 media_group = []
-                for img in images:
-                    media = InputMediaPhoto(media=FSInputFile(path=img.file_id))
+                images_to_update = []  # Track images that need DB update
+
+                # First attempt: Use cached IDs where available
+                for i, img in enumerate(images):
+                    if img.telegram_file_id:
+                        media = InputMediaPhoto(media=img.telegram_file_id)
+                    else:
+                        media = InputMediaPhoto(media=FSInputFile(path=img.file_id))
+                        images_to_update.append((i, img.id))
                     media_group.append(media)
 
-                msgs = await bot.send_media_group(
-                    chat_id=callback_message.chat.id, media=media_group
-                )
+                try:
+                    msgs = await bot.send_media_group(
+                        chat_id=callback_message.chat.id, media=media_group
+                    )
+                except TelegramBadRequest:
+                    # Fallback: One of the cached IDs failed. Re-upload ALL from disk.
+                    media_group = []
+                    images_to_update = []
+                    for i, img in enumerate(images):
+                        media = InputMediaPhoto(media=FSInputFile(path=img.file_id))
+                        images_to_update.append((i, img.id))
+                        media_group.append(media)
+
+                    msgs = await bot.send_media_group(
+                        chat_id=callback_message.chat.id, media=media_group
+                    )
+
+                # Update DB for any images that were uploaded from disk
+                if images_to_update and session:
+                    for idx, img_id in images_to_update:
+                        # msgs list corresponds to media_group list order
+                        new_file_id = msgs[idx].photo[-1].file_id
+                        await crud.update_product_image_telegram_id(
+                            session, img_id, new_file_id
+                        )
+
                 if state:
                     await state.update_data(
                         media_group_ids=[m.message_id for m in msgs]
@@ -112,21 +172,6 @@ async def send_product_with_photo(
                 return
         except Exception as e:
             log.warning(f"Failed to send images for product {product.id}: {e}")
-
-    # Fallback/Legacy: Check for single image_url
-    elif getattr(product, "image_url", None):
-        try:
-            photo_file = FSInputFile(path=product.image_url)
-            await bot.send_photo(
-                chat_id=callback_message.chat.id,
-                photo=photo_file,
-                caption=text,
-                reply_markup=keyboard,
-            )
-            await callback_message.delete()
-            return
-        except Exception as e:
-            log.warning(f"Failed to send image for product {product.id}: {e}")
 
     # Fallback to text message
     await callback_message.edit_text(text, reply_markup=keyboard)

@@ -272,6 +272,19 @@ async def add_product_image(
     return new_image
 
 
+async def update_product_image_telegram_id(
+    session: AsyncSession, image_id: int, telegram_file_id: str
+) -> None:
+    """Updates the cached telegram_file_id of a product image."""
+    stmt = (
+        update(ProductImage)
+        .where(ProductImage.id == image_id)
+        .values(telegram_file_id=telegram_file_id)
+    )
+    await session.execute(stmt)
+    await session.flush()
+
+
 async def delete_product_image(session: AsyncSession, image_id: int) -> bool:
     """Deletes a product image."""
     image = await session.get(ProductImage, image_id)

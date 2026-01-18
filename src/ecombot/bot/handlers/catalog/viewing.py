@@ -71,5 +71,5 @@ async def view_product_handler(
         await query.answer(error_message, show_alert=True)
         return
 
-    await send_product_with_photo(callback_message, bot, product, state)
+    await send_product_with_photo(callback_message, bot, product, state, session)
     await query.answer()

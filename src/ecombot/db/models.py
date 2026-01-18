@@ -139,7 +139,8 @@ class ProductImage(Base, TimestampMixin):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
-    file_id: Mapped[str] = mapped_column(String(500))  # Telegram file_id or URL
+    file_id: Mapped[str] = mapped_column(String(500))  # Local file path
+    telegram_file_id: Mapped[str | None] = mapped_column(String(500), nullable=True)
     is_main: Mapped[bool] = mapped_column(Boolean, default=False)
 
     product: Mapped["Product"] = relationship(back_populates="images")

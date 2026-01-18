@@ -28,6 +28,7 @@ from .catalog import restore_category
 from .catalog import restore_product
 from .catalog import soft_delete_category
 from .catalog import update_product
+from .catalog import update_product_image_telegram_id
 from .orders import create_order_with_items
 from .orders import get_order
 from .orders import get_orders_by_status
@@ -65,6 +66,7 @@ __all__ = [
     "restore_product",
     "soft_delete_category",
     "update_product",
+    "update_product_image_telegram_id",
     # Order functions
     "create_order_with_items",
     "get_order",
