@@ -13,7 +13,7 @@ done
 echo "PostgreSQL started"
 
 # Check if pyproject.toml exists
-if [ -f "pyproject.toml" ]; then
+if [ -f "pyproject.toml" ] && [ "$SKIP_INSTALL" != "true" ]; then
     # Install poetry if not found
     if ! command -v poetry > /dev/null 2>&1; then
         echo "Poetry not found. Installing..."

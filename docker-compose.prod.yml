@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${PGUSER}
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+      POSTGRES_DB: ${PGDATABASE}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER} -d ${PGDATABASE}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    restart: always
+    volumes:
+      - redis_data:/data
+
+  bot:
+    # Replace with your actual Docker Hub image (e.g., username/repo:tag)
+    image: ${DOCKER_IMAGE:-dmvaled/ecombot:latest}
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      - DEBUG=False
+      - LOG_LEVEL=INFO
+      - PGUSER=${PGUSER}
+      - PGPASSWORD=${PGPASSWORD}
+      - PGHOST=db
+      - PGPORT=5432
+      - PGDATABASE=${PGDATABASE}
+      - REDIS_HOST=redis
+      - BOT_TOKEN=${BOT_TOKEN}
+      # Signal entrypoint to skip 'poetry install' since deps are in the image
+      - SKIP_INSTALL=true
+    volumes:
+      # Only persist the static directory (uploaded images), not the whole code
+      - static_data:/app/src/ecombot/static
+
+volumes:
+  postgres_data:
+  redis_data:
+  static_data:
