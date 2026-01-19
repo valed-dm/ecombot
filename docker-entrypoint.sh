@@ -22,6 +22,8 @@ if [ -f "pyproject.toml" ]; then
 
     # Ensure dependencies are up to date
     echo "Installing dependencies..."
+    # Force system install to avoid overwriting local .venv with container paths
+    export POETRY_VIRTUALENVS_CREATE=false
     poetry install --no-interaction
 else
     echo "Skipping dependency installation (Production mode)"
