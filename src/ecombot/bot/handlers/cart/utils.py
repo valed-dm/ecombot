@@ -38,7 +38,7 @@ def format_cart_text(cart_dto: CartDTO) -> str:
         item_lines.append(line)
 
     lines.extend(item_lines)
-    lines.append("-" * 50)  # separator
+    lines.append("-" * 27)
     total_line = manager.get_message("cart", "cart_total", total=cart_dto.total_price)
     lines.append(total_line)
 
