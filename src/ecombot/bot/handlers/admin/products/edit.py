@@ -1,5 +1,6 @@
 """Edit product workflow handlers."""
 
+import contextlib
 import decimal
 from decimal import Decimal
 from pathlib import Path
@@ -425,10 +426,8 @@ async def edit_product_finish_images(
         log.error(f"Failed to update product image {product_id}: {e}", exc_info=True)
         # Cleanup
         for img_path in images:
-            try:
+            with contextlib.suppress(Exception):
                 Path(img_path).unlink()
-            except Exception:
-                pass
 
         await message.answer(
             manager.get_message("admin_products", "edit_product_image_error"),

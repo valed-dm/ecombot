@@ -60,7 +60,8 @@ class AdminProductsMessageManager(BaseMessageManager):
             ),
             "add_product_image_prompt": (
                 "Excellent. Now, please upload photos for the product.\n"
-                "Send them one by one or as a group. Type /done when finished (or /skip)."
+                "Send them one by one or as a group. "
+                "Type /done when finished (or /skip)."
             ),
             "add_product_image_saved_count": (
                 "✅ Photo {count} saved. Send more or type /done."
@@ -242,7 +243,8 @@ class AdminProductsMessageManager(BaseMessageManager):
             ),
             "add_product_image_prompt": (
                 "Excelente. Ahora, por favor sube las fotos del producto.\n"
-                "Envíalas una por una o como grupo. Escribe /done cuando termines (o /skip)."
+                "Envíalas una por una o como grupo. "
+                "Escribe /done cuando termines (o /skip)."
             ),
             "add_product_image_saved_count": (
                 "✅ Foto {count} guardada. Envía más o escribe /done."
@@ -435,7 +437,8 @@ class AdminProductsMessageManager(BaseMessageManager):
             ),
             "add_product_image_prompt": (
                 "Отлично. Теперь загрузите фото товара.\n"
-                "Отправляйте их по одному или группой. Напишите /done, когда закончите (или /skip)."
+                "Отправляйте их по одному или группой. "
+                "Напишите /done, когда закончите (или /skip)."
             ),
             "add_product_image_saved_count": (
                 "✅ Фото {count} сохранено. Отправьте еще или напишите /done."

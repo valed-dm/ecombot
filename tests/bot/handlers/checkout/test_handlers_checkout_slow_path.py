@@ -202,7 +202,11 @@ async def test_slow_path_confirm_handler_success(
     db_user = MagicMock(spec=User)
     db_user.id = 1
 
-    state.get_data.return_value = {"phone": "123", "address": "Street", "is_pickup": False}
+    state.get_data.return_value = {
+        "phone": "123",
+        "address": "Street",
+        "is_pickup": False,
+    }
 
     # Mock user service calls
     mock_user_service.update_profile_details = AsyncMock()
@@ -245,7 +249,11 @@ async def test_slow_path_confirm_handler_placement_error(
     db_user = MagicMock(spec=User)
     db_user.id = 1
 
-    state.get_data.return_value = {"phone": "123", "address": "Street", "is_pickup": False}
+    state.get_data.return_value = {
+        "phone": "123",
+        "address": "Street",
+        "is_pickup": False,
+    }
 
     # Setup mocks to pass until place_order
     mock_user_service.add_new_address = AsyncMock(return_value=MagicMock(id=1))
