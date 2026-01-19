@@ -27,6 +27,7 @@ from ecombot.config import settings
 from ecombot.core.manager import central_manager as manager
 from ecombot.logging_setup import log
 from ecombot.services import catalog_service
+from ecombot.utils import compress_image
 
 from .states import AddProduct
 
@@ -221,6 +222,9 @@ async def add_product_handle_photo(
     destination = settings.PRODUCT_IMAGE_DIR / unique_filename
     await bot.download(file=photo.file_id, destination=destination)
     image_path = str(destination)
+
+    # Compress the image in a background thread
+    await compress_image(image_path)
 
     data = await state.get_data()
     images = data.get("images", [])
