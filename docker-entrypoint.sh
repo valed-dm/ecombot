@@ -12,6 +12,21 @@ done
 
 echo "PostgreSQL started"
 
+# Check if pyproject.toml exists
+if [ -f "pyproject.toml" ]; then
+    # Install poetry if not found
+    if ! command -v poetry > /dev/null 2>&1; then
+        echo "Poetry not found. Installing..."
+        pip install poetry
+    fi
+
+    # Ensure dependencies are up to date
+    echo "Installing dependencies..."
+    poetry install --no-interaction
+else
+    echo "Skipping dependency installation (Production mode)"
+fi
+
 # Run database migrations
 echo "Running database migrations..."
 alembic upgrade head

@@ -14,16 +14,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     netcat-openbsd \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install poetry
+RUN pip install poetry
+
+COPY pyproject.toml poetry.lock ./
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-root --only main --no-interaction --no-ansi
 
 COPY . .
 
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x docker-entrypoint.sh
 
 EXPOSE 8000
 
 # Set the entrypoint
-ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["uvicorn", "ecombot.main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENTRYPOINT ["sh", "./docker-entrypoint.sh"]
+CMD ["python", "-m", "ecombot.main"]
