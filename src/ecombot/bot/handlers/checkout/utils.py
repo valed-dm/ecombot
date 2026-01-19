@@ -94,7 +94,7 @@ def generate_fast_path_confirmation_text(
             "checkout",
             "pickup_fast_confirm",
             phone=escape(user.phone or "Not set"),
-            pickup_point=escape(pp_text),
+            address=escape(pp_text),
         )
 
     return msg + f"\n\n<b>Total Price: {currency}{cart.total_price:.2f}</b>"
@@ -119,7 +119,7 @@ def generate_slow_path_confirmation_text(
             "pickup_slow_confirm",
             name=escape(user_data.get("name", "")),
             phone=escape(user_data.get("phone", "")),
-            pickup_point=escape(pp_name),
+            address=escape(pp_name),
         )
 
     return (

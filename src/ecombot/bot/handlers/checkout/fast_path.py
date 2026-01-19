@@ -52,7 +52,12 @@ async def fast_path_pickup_selected(
         )
         return
 
-    await state.update_data(pickup_point_id=pp_id)
+    pickup_address = f"{pickup_point.name} ({pickup_point.address})"
+    await state.update_data(
+        pickup_point_id=pp_id,
+        pickup_point_name=pickup_address,
+        address=pickup_address,
+    )
 
     # Generate confirmation
     cart = await cart_service.get_user_cart(session, db_user.telegram_id)

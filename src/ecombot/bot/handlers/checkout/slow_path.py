@@ -99,8 +99,11 @@ async def get_phone_handler(
             await state.set_state(CheckoutFSM.choosing_pickup_slow)
         elif len(pickup_points) == 1:
             pp = pickup_points[0]
+            pickup_address = f"{pp.name} ({pp.address})"
             await state.update_data(
-                pickup_point_id=pp.id, pickup_point_name=f"{pp.name} ({pp.address})"
+                pickup_point_id=pp.id,
+                pickup_point_name=pickup_address,
+                address=pickup_address,
             )
             user_data = await state.get_data()
             cart_data = await cart_service.get_user_cart(session, db_user.telegram_id)
@@ -137,9 +140,11 @@ async def slow_path_pickup_selected(
         )
         return
 
+    pickup_address = f"{pickup_point.name} ({pickup_point.address})"
     await state.update_data(
         pickup_point_id=pp_id,
-        pickup_point_name=f"{pickup_point.name} ({pickup_point.address})",
+        pickup_point_name=pickup_address,
+        address=pickup_address,
     )
 
     user_data = await state.get_data()

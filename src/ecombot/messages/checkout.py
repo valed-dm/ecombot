@@ -54,11 +54,11 @@ class CheckoutMessageManager(BaseMessageManager):
             "pickup_slow_confirm": (
                 "<b>Please confirm your details:</b>\n\n"
                 "<b>Contact:</b> {name}, {phone}\n"
-                "<b>Method:</b> Pickup"
+                "<b>Pickup Point:</b> {address}"
             ),
             "pickup_fast_confirm": (
                 "Ready to place your order?\n\n"
-                "<b>Method:</b> Pickup\n"
+                "<b>Pickup Point:</b> {address}\n"
                 "<b>Phone:</b> {phone}\n\n"
                 "Confirm to proceed."
             ),
@@ -133,11 +133,11 @@ class CheckoutMessageManager(BaseMessageManager):
             "pickup_slow_confirm": (
                 "<b>Por favor confirma tus detalles:</b>\n\n"
                 "<b>Contacto:</b> {name}, {phone}\n"
-                "<b>Método:</b> Recogida"
+                "<b>Punto de Recogida:</b> {address}"
             ),
             "pickup_fast_confirm": (
                 "¿Listo para realizar tu pedido?\n\n"
-                "<b>Método:</b> Recogida\n"
+                "<b>Punto de Recogida:</b> {address}\n"
                 "<b>Teléfono:</b> {phone}\n\n"
                 "Confirma para proceder."
             ),
@@ -210,11 +210,11 @@ class CheckoutMessageManager(BaseMessageManager):
             "pickup_slow_confirm": (
                 "<b>Пожалуйста, подтвердите ваши данные:</b>\n\n"
                 "<b>Контакт:</b> {name}, {phone}\n"
-                "<b>Способ:</b> Самовывоз"
+                "<b>Самовывоз:</b> {address}"
             ),
             "pickup_fast_confirm": (
                 "Готовы оформить заказ?\n\n"
-                "<b>Способ:</b> Самовывоз\n"
+                "<b>Самовывоз:</b> {address}\n"
                 "<b>Телефон:</b> {phone}\n\n"
                 "Подтвердите для продолжения."
             ),
